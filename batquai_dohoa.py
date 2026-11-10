@@ -319,7 +319,7 @@ if st.session_state.initialized:
         document.getElementById("status-text").innerText = "✨ Đã định vị xong Khí số Bát Trạch!";
     }, 3000);
     </script>
-    """
+    
     
     # Hiển thị component hiệu ứng quay trong 3.5 giây
     placeholder = st.empty()
