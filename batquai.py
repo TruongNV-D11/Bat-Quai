@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime, time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v3.0",
+    page_title="Professional Feng Shui Master Bagua Engine v4.0",
     layout="wide"
 )
 
@@ -25,7 +25,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("☸️ PROFESSIONAL FENG SHUI MASTER BAGUA ENGINE")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Bát Trạch Cát Hung và Định vị La Kinh chuẩn thực địa.")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Bát Trạch Cát Hung đa tầng và Định vị La Kinh chuẩn thực địa.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT LỤC THẬP HOA GIÁP & 24 SƠN HƯỚNG ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -99,14 +99,14 @@ def compute_master_cung_phi(solar_date, solar_time, has_time, sex):
     quai_num = normalize_val(val_nam if sex == "Nam" else val_nu, sex)
     
     bagua_map = {
-        1: {"name": "Khảm", "element": "Thủy", "dir": "Chính Bắc", "angle": 0, "trigram": "☵", "palace": "Khảm Quái", "group": "Đông Tứ Mệnh"},
-        8: {"name": "Cấn", "element": "Thổ", "dir": "Đông Bắc", "angle": 45, "trigram": "☶", "palace": "Cấn Quái", "group": "Tây Tứ Mệnh"},
-        3: {"name": "Chấn", "element": "Mộc", "dir": "Chính Đông", "angle": 90, "trigram": "☳", "palace": "Chấn Quái", "group": "Đông Tứ Mệnh"},
-        4: {"name": "Tốn", "element": "Mộc", "dir": "Đông Nam", "angle": 135, "trigram": "☴", "palace": "Tốn Quái", "group": "Đông Tứ Mệnh"},
-        9: {"name": "Ly", "element": "Hỏa", "dir": "Chính Nam", "angle": 180, "trigram": "☲", "palace": "Ly Quái", "group": "Đông Tứ Mệnh"},
-        2: {"name": "Khôn", "element": "Thổ", "dir": "Tây Nam", "angle": 225, "trigram": "☷", "palace": "Khôn Quái", "group": "Tây Tứ Mệnh"},
-        7: {"name": "Đoài", "element": "Kim", "dir": "Chính Tây", "angle": 270, "trigram": "☱", "palace": "Đoài Quái", "group": "Tây Tứ Mệnh"},
-        6: {"name": "Càn", "element": "Kim", "dir": "Tây Bắc", "angle": 315, "trigram": "☰", "palace": "Càn Quái", "group": "Tây Tứ Mệnh"}
+        1: {"name": "KHẢM", "element": "Thủy", "dir": "CHÍNH BẮC", "angle": 0, "trigram": "☵", "palace": "Khảm Quái", "group": "Đông Tứ Mệnh", "color": "#1f6feb"},
+        8: {"name": "CẤN", "element": "Thổ", "dir": "ĐÔNG BẮC", "angle": 45, "trigram": "☶", "palace": "Cấn Quái", "group": "Tây Tứ Mệnh", "color": "#d29922"},
+        3: {"name": "CHẤN", "element": "Mộc", "dir": "CHÍNH ĐÔNG", "angle": 90, "trigram": "☳", "palace": "Chấn Quái", "group": "Đông Tứ Mệnh", "color": "#238636"},
+        4: {"name": "TỐN", "element": "Mộc", "dir": "ĐÔNG NAM", "angle": 135, "trigram": "☴", "palace": "Tốn Quái", "group": "Đông Tứ Mệnh", "color": "#2ea043"},
+        9: {"name": "LY", "element": "Hỏa", "dir": "CHÍNH NAM", "angle": 180, "trigram": "☲", "palace": "Ly Quái", "group": "Đông Tứ Mệnh", "color": "#da3633"},
+        2: {"name": "KHÔN", "element": "Thổ", "dir": "TÂY NAM", "angle": 225, "trigram": "☷", "palace": "Khôn Quái", "group": "Tây Tứ Mệnh", "color": "#9e6a03"},
+        7: {"name": "ĐOÀI", "element": "Kim", "dir": "CHÍNH TÂY", "angle": 270, "trigram": "☱", "palace": "Đoài Quái", "group": "Tây Tứ Mệnh", "color": "#8957e5"},
+        6: {"name": "CÀN", "element": "Kim", "dir": "TÂY BẮC", "angle": 315, "trigram": "☰", "palace": "Càn Quái", "group": "Tây Tứ Mệnh", "color": "#6e7681"}
     }
     return can, chi, eff_year, quai_num, bagua_map
 
@@ -138,81 +138,82 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v3.0</i>
+            <i>System: Master Bagua Engine v4.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH CHUYÊN SÂU GIỐNG MẪU THỰC TẾ ---
+# --- 3. HÀM VẼ LA KINH ĐA TẦNG ĐẦY ĐỦ KHỐI MÀU & HỌA TIẾT BÁT TRẠCH ---
 def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
     fig = go.Figure()
-    
-    # 1. Vòng ngoài cùng: 24 Sơn Hướng (Degree & Mountain labels)
+
+    # A. VẼ CÁC KHỐI QUÁI VỊ BÁT QUÁI (8 HƯỚNG NỀN MÀU)
+    angles = [0, 45, 90, 135, 180, 225, 270, 315]
+    for q_id, info in data_map.items():
+        deg = info["angle"]
+        rad_mid = np.radians(90 - deg)
+        
+        # Tọa độ nhãn tên hướng và quẻ
+        x_lbl = 0.85 * np.cos(rad_mid)
+        y_lbl = 0.85 * np.sin(rad_mid)
+        
+        is_active = (q_id == active_num)
+        bg_color = info["color"] if not is_active else "#f85149"
+        
+        # Vẽ khối quái vị bọc màu nền
+        fig.add_trace(go.Scatter(
+            x=[x_lbl], y=[y_lbl], mode="text+markers",
+            marker=dict(size=45 if is_active else 30, color=bg_color, opacity=0.85, line=dict(width=2, color="white")),
+            text=[f"<b>{info['trigram']}</b><br>{info['name']}"],
+            textfont=dict(color="white", size=10),
+            hoverinfo="text",
+            hovertext=f"Quái: {info['palace']} | Hướng: {info['dir']} | Ngũ hành: {info['element']}"
+        ))
+
+    # B. VÒNG TRUNG GIAN: 24 SƠN HƯỚNG NGOẠI VI
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
             
         rad = np.radians(90 - mid_deg)
-        x = 1.45 * np.cos(rad)
-        y = 1.45 * np.sin(rad)
+        x = 1.3 * np.cos(rad)
+        y = 1.3 * np.sin(rad)
         
-        # Vẽ nhãn tên Sơn
         fig.add_trace(go.Scatter(
             x=[x], y=[y], mode="text",
             text=[f"<b>{son['name']}</b>"],
-            textfont=dict(color="#f0f6fc", size=10),
+            textfont=dict(color="#f0f6fc", size=11),
             hoverinfo="text",
             hovertext=f"Sơn: {son['name']} | Phương vị: {son['sector']} | Góc: {son['deg_start']}° - {son['deg_end']}°"
         ))
-        
-        # Hiển thị số đo góc mốc chính
-        if mid_deg % 45 == 0:
-            x_deg = 1.65 * np.cos(rad)
-            y_deg = 1.65 * np.sin(rad)
-            fig.add_trace(go.Scatter(
-                x=[x_deg], y=[y_deg], mode="text",
-                text=[f"{mid_deg}°"],
-                textfont=dict(color="#8b949e", size=9)
-            ))
 
-    # 2. Vòng trung gian: 8 Quái vị Bát Trạch (Cát / Hung mapping theo mẫu thực tế)
-    # Định nghĩa màu nền cho từng cung (Cát: Xanh lá/Đỏ nổi bật, Hung: Xám đậm/Đỏ sậm)
-    for q_id, info in data_map.items():
-        rad = np.radians(90 - info["angle"])
-        x_palace = 1.15 * np.cos(rad)
-        y_palace = 1.15 * np.sin(rad)
-        
-        is_active = (q_id == active_num)
-        
-        # Vẽ khối quái vị chi tiết
-        fig.add_trace(go.Scatter(
-            x=[x_palace], y=[y_palace], mode="text",
-            text=[f"<b>{info['name']}</b><br>({info['element']})"],
-            textfont=dict(color="#ffffff" if is_active else "#c9d1d9", size=11),
-            hoverinfo="text",
-            hovertext=f"Cung: {info['palace']} | Hướng: {info['dir']} | Ngũ hành: {info['element']}"
-        ))
+    # C. CÁC ĐƯỜNG KINH TUYẾN & VÒNG TRÒN ĐỒNG TÂM LA KINH
+    for deg in angles:
+        rad = np.radians(90 - deg)
+        fig.add_shape(type="line", x0=0, y0=0, x1=1.45*np.cos(rad), y1=1.45*np.sin(rad),
+                      line=dict(color="#30363d", width=1.5, dash="dot"))
 
-    # 3. Vòng trong: Cửu cung bát quái và tâm Trung Cung
-    fig.add_shape(type="circle", x0=-1.3, y0=-1.3, x1=1.3, y1=1.3,
-                  line=dict(color="#30363d", width=2), fillcolor="#0d1117")
-    fig.add_shape(type="circle", x0=-0.5, y0=-0.5, x1=0.5, y1=0.5,
-                  line=dict(color="#ff7b72", width=2), fillcolor="#161b22")
+    fig.add_shape(type="circle", x0=-1.5, y0=-1.5, x1=1.5, y1=1.5,
+                  line=dict(color="#8b949e", width=2.5), fillcolor="#0d1117")
+    fig.add_shape(type="circle", x0=-1.1, y0=-1.1, x1=1.1, y1=1.1,
+                  line=dict(color="#30363d", width=1.5), fillcolor="#161b22")
+    fig.add_shape(type="circle", x0=-0.45, y0=-0.45, x1=0.45, y1=0.45,
+                  line=dict(color="#ff7b72", width=2), fillcolor="#0d1117")
 
-    # Nội dung Trung Cung (Chủ nhà, Quẻ, Mệnh)
+    # D. TRUNG CUNG (THÔNG TIN MỆNH CHỦ)
     active_info = data_map[active_num]
-    center_text = f"<b>TRUNG CUNG</b><br>{gender_str} - {eff_year_val}<br>Quẻ: {active_info['name']}<br>({active_info['group']})"
+    center_html = f"<b>TRUNG CUNG</b><br>{gender_str} ({eff_year_val})<br>Quẻ: {active_info['name']}<br>({active_info['group']})"
     
     fig.add_trace(go.Scatter(
         x=[0], y=[0], mode="text",
-        text=[center_text],
-        textfont=dict(color="#ff7b72", size=11)
+        text=[center_html],
+        textfont=dict(color="#ff7b72", size=12)
     ))
 
     fig.update_layout(
         showlegend=False,
-        xaxis=dict(range=[-1.8, 1.8], showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(range=[-1.8, 1.8], showgrid=False, zeroline=False, showticklabels=False),
+        xaxis=dict(range=[-1.7, 1.7], showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(range=[-1.7, 1.7], showgrid=False, zeroline=False, showticklabels=False),
         plot_bgcolor="#0b0f19", paper_bgcolor="#0b0f19",
         width=700, height=700, margin=dict(l=10, r=10, t=10, b=10)
     )
@@ -237,10 +238,10 @@ if run_master:
         st.metric("Nhóm Mệnh", target_data['group'])
         st.metric("Vận tinh áp dụng", current_yun)
         
-        st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ hiển thị đầy đủ vòng 24 sơn hướng ngoại vi, góc độ độ số la bàn và chi tiết cung vị trung cung.")
+        st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ hiển thị đầy đủ vòng 24 sơn hướng, khối màu phong thủy Bát Trạch trực quan và tọa độ Trung Cung.")
 
     with col_right:
-        st.subheader("🧭 Đồ họa La Kinh Chuẩn Thực Địa")
+        st.subheader("🧭 Đồ họa La Kinh Màu Sắc Đa Tầng")
         fig_master = render_master_lakinh(quai_num, bagua_dict, gender, eff_year)
         st.plotly_chart(fig_master, use_container_width=True)
 else:
