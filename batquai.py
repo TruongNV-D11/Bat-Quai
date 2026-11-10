@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime, time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine",
+    page_title="Professional Feng Shui Master Bagua Engine v3.0",
     layout="wide"
 )
 
@@ -25,9 +25,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("☸️ PROFESSIONAL FENG SHUI MASTER BAGUA ENGINE")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Tiết Khí Lập Xuân chuẩn xác và Định vị La Kinh.")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Bát Trạch Cát Hung và Định vị La Kinh chuẩn thực địa.")
 
-# --- 1. DỮ LIỆU CHUẨN HỌC THUẬT LỤC THẬP HOA GIÁP & 24 SƠN HƯỚNG ---
+# --- 1. DỮ LIỆU HỌC THUẬT LỤC THẬP HOA GIÁP & 24 SƠN HƯỚNG ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
@@ -99,14 +99,14 @@ def compute_master_cung_phi(solar_date, solar_time, has_time, sex):
     quai_num = normalize_val(val_nam if sex == "Nam" else val_nu, sex)
     
     bagua_map = {
-        1: {"name": "Khảm", "element": "Thủy", "dir": "Bắc", "angle": 0, "trigram": "☵", "palace": "Khảm Quái"},
-        8: {"name": "Cấn", "element": "Thổ", "dir": "Đông Bắc", "angle": 45, "trigram": "☶", "palace": "Cấn Quái"},
-        3: {"name": "Chấn", "element": "Mộc", "dir": "Đông", "angle": 90, "trigram": "☳", "palace": "Chấn Quái"},
-        4: {"name": "Tốn", "element": "Mộc", "dir": "Đông Nam", "angle": 135, "trigram": "☴", "palace": "Tốn Quái"},
-        9: {"name": "Ly", "element": "Hỏa", "dir": "Nam", "angle": 180, "trigram": "☲", "palace": "Ly Quái"},
-        2: {"name": "Khôn", "element": "Thổ", "dir": "Tây Nam", "angle": 225, "trigram": "☷", "palace": "Khôn Quái"},
-        7: {"name": "Đoài", "element": "Kim", "dir": "Tây", "angle": 270, "trigram": "☱", "palace": "Đoài Quái"},
-        6: {"name": "Càn", "element": "Kim", "dir": "Tây Bắc", "angle": 315, "trigram": "☰", "palace": "Càn Quái"}
+        1: {"name": "Khảm", "element": "Thủy", "dir": "Chính Bắc", "angle": 0, "trigram": "☵", "palace": "Khảm Quái", "group": "Đông Tứ Mệnh"},
+        8: {"name": "Cấn", "element": "Thổ", "dir": "Đông Bắc", "angle": 45, "trigram": "☶", "palace": "Cấn Quái", "group": "Tây Tứ Mệnh"},
+        3: {"name": "Chấn", "element": "Mộc", "dir": "Chính Đông", "angle": 90, "trigram": "☳", "palace": "Chấn Quái", "group": "Đông Tứ Mệnh"},
+        4: {"name": "Tốn", "element": "Mộc", "dir": "Đông Nam", "angle": 135, "trigram": "☴", "palace": "Tốn Quái", "group": "Đông Tứ Mệnh"},
+        9: {"name": "Ly", "element": "Hỏa", "dir": "Chính Nam", "angle": 180, "trigram": "☲", "palace": "Ly Quái", "group": "Đông Tứ Mệnh"},
+        2: {"name": "Khôn", "element": "Thổ", "dir": "Tây Nam", "angle": 225, "trigram": "☷", "palace": "Khôn Quái", "group": "Tây Tứ Mệnh"},
+        7: {"name": "Đoài", "element": "Kim", "dir": "Chính Tây", "angle": 270, "trigram": "☱", "palace": "Đoài Quái", "group": "Tây Tứ Mệnh"},
+        6: {"name": "Càn", "element": "Kim", "dir": "Tây Bắc", "angle": 315, "trigram": "☰", "palace": "Càn Quái", "group": "Tây Tứ Mệnh"}
     }
     return can, chi, eff_year, quai_num, bagua_map
 
@@ -138,76 +138,87 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v2.6</i>
+            <i>System: Master Bagua Engine v3.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH 24 SƠN HƯỚNG & BÁT QUÁI (PLOTLY) ĐẦY ĐỦ THÔNG TIN ---
-def render_master_lakinh(active_num, data_map):
+# --- 3. HÀM VẼ LA KINH CHUYÊN SÂU GIỐNG MẪU THỰC TẾ ---
+def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
     fig = go.Figure()
     
+    # 1. Vòng ngoài cùng: 24 Sơn Hướng (Degree & Mountain labels)
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
             
         rad = np.radians(90 - mid_deg)
-        x = 1.35 * np.cos(rad)
-        y = 1.35 * np.sin(rad)
+        x = 1.45 * np.cos(rad)
+        y = 1.45 * np.sin(rad)
         
+        # Vẽ nhãn tên Sơn
         fig.add_trace(go.Scatter(
             x=[x], y=[y], mode="text",
             text=[f"<b>{son['name']}</b>"],
-            textfont=dict(color="#c9d1d9", size=10),
+            textfont=dict(color="#f0f6fc", size=10),
             hoverinfo="text",
             hovertext=f"Sơn: {son['name']} | Phương vị: {son['sector']} | Góc: {son['deg_start']}° - {son['deg_end']}°"
         ))
+        
+        # Hiển thị số đo góc mốc chính
+        if mid_deg % 45 == 0:
+            x_deg = 1.65 * np.cos(rad)
+            y_deg = 1.65 * np.sin(rad)
+            fig.add_trace(go.Scatter(
+                x=[x_deg], y=[y_deg], mode="text",
+                text=[f"{mid_deg}°"],
+                textfont=dict(color="#8b949e", size=9)
+            ))
 
-    fig.add_shape(type="circle", x0=-1.6, y0=-1.6, x1=1.6, y1=1.6,
-                  line=dict(color="#30363d", width=2), fillcolor="#0d1117")
-    fig.add_shape(type="circle", x0=-1.15, y0=-1.15, x1=1.15, y1=1.15,
-                  line=dict(color="#21262d", width=1), fillcolor="#161b22")
-    fig.add_shape(type="circle", x0=-0.45, y0=-0.45, x1=0.45, y1=0.45,
-                  line=dict(color="#58a6ff", width=2), fillcolor="#0d1117")
-
+    # 2. Vòng trung gian: 8 Quái vị Bát Trạch (Cát / Hung mapping theo mẫu thực tế)
+    # Định nghĩa màu nền cho từng cung (Cát: Xanh lá/Đỏ nổi bật, Hung: Xám đậm/Đỏ sậm)
     for q_id, info in data_map.items():
         rad = np.radians(90 - info["angle"])
-        x = 0.85 * np.cos(rad)
-        y = 0.85 * np.sin(rad)
+        x_palace = 1.15 * np.cos(rad)
+        y_palace = 1.15 * np.sin(rad)
         
         is_active = (q_id == active_num)
-        color = "#f85149" if is_active else "#8b949e"
-        size = 40 if is_active else 24
         
+        # Vẽ khối quái vị chi tiết
         fig.add_trace(go.Scatter(
-            x=[x], y=[y], mode="text+markers",
-            marker=dict(size=size, color=color, line=dict(width=2, color="#ffffff" if is_active else "#30363d")),
-            text=[f"{info['trigram']}<br>{info['name']}"],
-            textfont=dict(color="white" if is_active else "#c9d1d9", size=12 if is_active else 10),
+            x=[x_palace], y=[y_palace], mode="text",
+            text=[f"<b>{info['name']}</b><br>({info['element']})"],
+            textfont=dict(color="#ffffff" if is_active else "#c9d1d9", size=11),
             hoverinfo="text",
-            hovertext=f"Quái: {info['palace']} | Hướng: {info['dir']} | Ngũ hành: {info['element']}"
+            hovertext=f"Cung: {info['palace']} | Hướng: {info['dir']} | Ngũ hành: {info['element']}"
         ))
-        
-        fig.add_shape(type="line", x0=0, y0=0, x1=x*0.75, y1=y*0.75,
-                      line=dict(color="#f85149" if is_active else "#30363d", width=2 if is_active else 1, dash="dot"))
 
+    # 3. Vòng trong: Cửu cung bát quái và tâm Trung Cung
+    fig.add_shape(type="circle", x0=-1.3, y0=-1.3, x1=1.3, y1=1.3,
+                  line=dict(color="#30363d", width=2), fillcolor="#0d1117")
+    fig.add_shape(type="circle", x0=-0.5, y0=-0.5, x1=0.5, y1=0.5,
+                  line=dict(color="#ff7b72", width=2), fillcolor="#161b22")
+
+    # Nội dung Trung Cung (Chủ nhà, Quẻ, Mệnh)
     active_info = data_map[active_num]
+    center_text = f"<b>TRUNG CUNG</b><br>{gender_str} - {eff_year_val}<br>Quẻ: {active_info['name']}<br>({active_info['group']})"
+    
     fig.add_trace(go.Scatter(
         x=[0], y=[0], mode="text",
-        text=[f"<b>TRUNG CUNG</b><br>{active_info['name']}<br>({active_info['element']})"],
-        textfont=dict(color="#f85149", size=13)
+        text=[center_text],
+        textfont=dict(color="#ff7b72", size=11)
     ))
 
     fig.update_layout(
         showlegend=False,
-        xaxis=dict(range=[-1.7, 1.7], showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(range=[-1.7, 1.7], showgrid=False, zeroline=False, showticklabels=False),
+        xaxis=dict(range=[-1.8, 1.8], showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(range=[-1.8, 1.8], showgrid=False, zeroline=False, showticklabels=False),
         plot_bgcolor="#0b0f19", paper_bgcolor="#0b0f19",
-        width=650, height=650, margin=dict(l=10, r=10, t=10, b=10)
+        width=700, height=700, margin=dict(l=10, r=10, t=10, b=10)
     )
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ KHI BẤM NÚT KHỞI TẠO ---
+# --- 4. HIỂN THỊ KẾT QUẢ KHI BẤM NÚT ---
 if run_master:
     can, chi, eff_year, quai_num, bagua_dict = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     target_data = bagua_dict[quai_num]
@@ -223,13 +234,14 @@ if run_master:
         st.metric("Cung Mệnh (Bát Trạch)", f"{target_data['palace']} - {target_data['name']}")
         st.metric("Ngũ Hành Bản Mệnh", target_data['element'])
         st.metric("Phương vị Chủ đạo", target_data['dir'])
+        st.metric("Nhóm Mệnh", target_data['group'])
         st.metric("Vận tinh áp dụng", current_yun)
         
-        st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ tích hợp đầy đủ hệ tọa độ 24 sơn hướng ngoại vi, phục vụ định hướng la kinh ngoại vi và đồng bộ hóa khí vận.")
+        st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ hiển thị đầy đủ vòng 24 sơn hướng ngoại vi, góc độ độ số la bàn và chi tiết cung vị trung cung.")
 
     with col_right:
-        st.subheader("🧭 Đồ họa La Kinh & Trục Khí Số")
-        fig_master = render_master_lakinh(quai_num, bagua_dict)
+        st.subheader("🧭 Đồ họa La Kinh Chuẩn Thực Địa")
+        fig_master = render_master_lakinh(quai_num, bagua_dict, gender, eff_year)
         st.plotly_chart(fig_master, use_container_width=True)
 else:
-    st.info("👈 **Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo kết quả hiển thị.**")
+    st.info("👈 **Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo đồ họa hiển thị.**")
