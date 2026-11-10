@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime, time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v4.1",
+    page_title="Professional Feng Shui Master Bagua Engine v4.3",
     layout="wide"
 )
 
@@ -110,7 +110,7 @@ def compute_master_cung_phi(solar_date, solar_time, has_time, sex):
     }
     return can, chi, eff_year, quai_num, bagua_map
 
-# --- 2. GIAO DIỆN NHẬP LIỆU CHUYÊN SÂU & SESSION STATE ---
+# --- 2. GIAO DIỆN NHẬP LIỆU & SESSION STATE ---
 if "initialized" not in st.session_state:
     st.session_state.initialized = False
 
@@ -142,86 +142,108 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v4.1</i>
+            <i>System: Master Bagua Engine v4.3</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH ĐA TẦNG ĐẦY ĐỦ KHỐI MÀU ---
+# --- 3. HÀM VẼ LA KINH CHUẨN XÁC TỌA ĐỘ V4.3 ---
 def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
     fig = go.Figure()
 
-    # A. VẼ CÁC KHỐI QUÁI VỊ BÁT QUÁI (8 HƯỚNG NỀN MÀU)
-    angles = [0, 45, 90, 135, 180, 225, 270, 315]
+    # 1. Vẽ 8 khối quái vị trung tâm
+    x_markers, y_markers, marker_colors, marker_texts = [], [], [], []
     for q_id, info in data_map.items():
         deg = info["angle"]
         rad_mid = np.radians(90 - deg)
         
-        x_lbl = 0.85 * np.cos(rad_mid)
-        y_lbl = 0.85 * np.sin(rad_mid)
+        x_lbl = 0.75 * np.cos(rad_mid)
+        y_lbl = 0.75 * np.sin(rad_mid)
+        
+        x_markers.append(x_lbl)
+        y_markers.append(y_lbl)
         
         is_active = (q_id == active_num)
-        bg_color = info["color"] if not is_active else "#f85149"
-        
-        fig.add_trace(go.Scatter(
-            x=[x_lbl], y=[y_lbl], mode="text+markers",
-            marker=dict(size=45 if is_active else 30, color=bg_color, opacity=0.9, line=dict(width=2, color="white")),
-            text=[f"<b>{info['trigram']}</b><br>{info['name']}"],
-            textfont=dict(color="white", size=11),
-            hoverinfo="text",
-            hovertext=f"Quái: {info['palace']} | Hướng: {info['dir']} | Ngũ hành: {info['element']}"
-        ))
+        marker_colors.append("#f85149" if is_active else info["color"])
+        marker_texts.append(f"<b>{info['trigram']}</b><br>{info['name']}")
 
-    # B. VÒNG TRUNG GIAN: 24 SƠN HƯỚNG NGOẠI VI
+    fig.add_trace(go.Scatter(
+        x=x_markers, y=y_markers, mode="markers+text",
+        marker=dict(size=60, color=marker_colors, opacity=0.9, line=dict(width=2, color="white")),
+        text=marker_texts,
+        textfont=dict(color="white", size=12, family="Arial Black"),
+        textposition="middle center",
+        hoverinfo="skip"
+    ))
+
+    # 2. Vòng 24 Sơn Hướng ngoại vi
+    x_sons, y_sons, son_texts = [], [], []
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
             
         rad = np.radians(90 - mid_deg)
-        x = 1.3 * np.cos(rad)
-        y = 1.3 * np.sin(rad)
-        
-        fig.add_trace(go.Scatter(
-            x=[x], y=[y], mode="text",
-            text=[f"<b>{son['name']}</b>"],
-            textfont=dict(color="#f0f6fc", size=11),
-            hoverinfo="text",
-            hovertext=f"Sơn: {son['name']} | Phương vị: {son['sector']} | Góc: {son['deg_start']}° - {son['deg_end']}°"
-        ))
+        x_sons.append(1.25 * np.cos(rad))
+        y_sons.append(1.25 * np.sin(rad))
+        son_texts.append(f"<b>{son['name']}</b>")
 
-    # C. CÁC ĐƯỜNG KINH TUYẾN & VÒNG TRÒN ĐỒNG TÂM
-    for deg in angles:
+    fig.add_trace(go.Scatter(
+        x=x_sons, y=y_sons, mode="text",
+        text=son_texts,
+        textfont=dict(color="#f0f6fc", size=13, family="Arial"),
+        hoverinfo="skip"
+    ))
+
+    # 3. Vòng độ số góc (Degree markers)
+    deg_texts, x_deg_list, y_deg_list = [], [], []
+    for deg in [0, 45, 90, 135, 180, 225, 270, 315]:
         rad = np.radians(90 - deg)
-        fig.add_shape(type="line", x0=0, y0=0, x1=1.45*np.cos(rad), y1=1.45*np.sin(rad),
+        x_deg_list.append(1.65 * np.cos(rad))
+        y_deg_list.append(1.65 * np.sin(rad))
+        deg_texts.append(f"{deg}°")
+
+    fig.add_trace(go.Scatter(
+        x=x_deg_list, y=y_deg_list, mode="text",
+        text=deg_texts,
+        textfont=dict(color="#8b949e", size=11),
+        hoverinfo="skip"
+    ))
+
+    # 4. Các đường trục & vòng tròn đồng tâm
+    for deg in [0, 45, 90, 135, 180, 225, 270, 315]:
+        rad = np.radians(90 - deg)
+        fig.add_shape(type="line", x0=0, y0=0, x1=1.55*np.cos(rad), y1=1.55*np.sin(rad),
                       line=dict(color="#30363d", width=1.5, dash="dot"))
 
-    fig.add_shape(type="circle", x0=-1.5, y0=-1.5, x1=1.5, y1=1.5,
+    fig.add_shape(type="circle", x0=-1.8, y0=-1.8, x1=1.8, y1=1.8,
                   line=dict(color="#8b949e", width=2.5), fillcolor="#0d1117")
-    fig.add_shape(type="circle", x0=-1.1, y0=-1.1, x1=1.1, y1=1.1,
+    fig.add_shape(type="circle", x0=-1.0, y0=-1.0, x1=1.0, y1=1.0,
                   line=dict(color="#30363d", width=1.5), fillcolor="#161b22")
-    fig.add_shape(type="circle", x0=-0.45, y0=-0.45, x1=0.45, y1=0.45,
+    fig.add_shape(type="circle", x0=-0.4, y0=-0.4, x1=0.4, y1=0.4,
                   line=dict(color="#ff7b72", width=2), fillcolor="#0d1117")
 
-    # D. TRUNG CUNG
+    # 5. Trung Cung
     active_info = data_map[active_num]
     center_html = f"<b>TRUNG CUNG</b><br>{gender_str} ({eff_year_val})<br>Quẻ: {active_info['name']}<br>({active_info['group']})"
     
     fig.add_trace(go.Scatter(
         x=[0], y=[0], mode="text",
         text=[center_html],
-        textfont=dict(color="#ff7b72", size=12)
+        textfont=dict(color="#ff7b72", size=11),
+        hoverinfo="skip"
     ))
 
+    # Mở rộng biên độ khung hình để không bị cắt xén nhãn
     fig.update_layout(
         showlegend=False,
-        xaxis=dict(range=[-1.7, 1.7], showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(range=[-1.7, 1.7], showgrid=False, zeroline=False, showticklabels=False),
+        xaxis=dict(range=[-2.0, 2.0], showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(range=[-2.0, 2.0], showgrid=False, zeroline=False, showticklabels=False),
         plot_bgcolor="#0b0f19", paper_bgcolor="#0b0f19",
         width=700, height=700, margin=dict(l=10, r=10, t=10, b=10)
     )
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ DỰA TRÊN TRẠNG THÁI SESSION_STATE ---
+# --- 4. HIỂN THỊ KẾT QUẢ ---
 if st.session_state.initialized:
     can, chi, eff_year, quai_num, bagua_dict = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     target_data = bagua_dict[quai_num]
