@@ -6,7 +6,7 @@ import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v10.0",
+    page_title="Professional Feng Shui Master Bagua Engine v11.0",
     layout="wide"
 )
 
@@ -33,14 +33,14 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v10.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 4 Tầng La Kinh Đa Vòng, 24 Sơn Hướng, Nạp Âm Ngũ Hành và Định Hướng Thực Địa.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v11.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuẩn thực chiến: Ma trận Bát Trạch Động theo Cung Phi, 24 Sơn Hướng Chuẩn Ngũ Hành và Thiên Trì Đa Tầng.")
 
-# --- 1. DỮ LIỆU HỌC THUẬT CHI TIẾT ---
+# --- 1. DỮ LIỆU HỌC THUẬT CHUẨN XÁC 24 SƠN HƯỚNG & NGŨ HÀNH NẠP ÂM ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
-# 24 Sơn Hướng kèm Ngũ Hành Nạp Âm chuẩn học thuật
+# 24 Sơn Hướng chuẩn phong thủy địa bàn chính châm (Phân bổ Ngũ hành chính xác theo phương vị)
 SON_HUONG_24 = [
     {"name": "Nhâm", "deg_start": 337.5, "deg_end": 352.5, "elem": "Thủy"},
     {"name": "Tý", "deg_start": 352.5, "deg_end": 7.5, "elem": "Thủy"},
@@ -68,6 +68,7 @@ SON_HUONG_24 = [
     {"name": "Hợi", "deg_start": 322.5, "deg_end": 337.5, "elem": "Thủy"},
 ]
 
+# Ma trận Bát Trạch chuẩn xác tuyệt đối cho từng Quẻ Mệnh (1 đến 9)
 BAT_TRACH_MAPPING = {
     1: {  # Khảm
         "Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☵", "name": "KHẢM", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."},
@@ -79,7 +80,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☱", "name": "ĐOÀI", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."},
         "Tây Bắc": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☰", "name": "CÀN", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."}
     },
-    9: {  # Ly
+    9: {  # Ly (Chuẩn xác: Bắc Thiên Y, Nam Phục Vị, Đông Sinh Khí, Đông Nam Diên Niên...)
         "Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☵", "name": "KHẢM", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
         "Đông Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☶", "name": "CẤN", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."},
         "Đông": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☳", "name": "CHẤN", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."},
@@ -207,7 +208,7 @@ with st.sidebar:
     
     d_input = st.date_input(
         "Ngày sinh (Dương lịch)", 
-        value=datetime(1990, 5, 15),
+        value=datetime(1974, 2, 2),
         min_value=datetime(1900, 1, 1),
         max_value=datetime(2100, 12, 31),
         format="DD/MM/YYYY"
@@ -236,12 +237,12 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v10.0</i>
+            <i>System: Master Bagua Engine v11.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH 4 TẦNG ĐA VÒNG CHUYÊN SÂU ---
-def render_matplotlib_lakinh(quai_num, survey_direction):
+# --- 3. HÀM VẼ LA KINH 4 TẦNG & THIÊN TRÌ CHUẨN XÁC ---
+def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year):
     fig, ax = plt.subplots(figsize=(7.5, 7.5), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
     ax.set_facecolor('#0b0f19')
@@ -251,65 +252,68 @@ def render_matplotlib_lakinh(quai_num, survey_direction):
 
     mapping = BAT_TRACH_MAPPING[quai_num]
 
-    # TẦNG 1: 8 hướng Bát Trạch Cát/Hung (Bán kính 0.35 -> 0.60)
+    # TẦNG 1: 8 hướng Bát Trạch Cát/Hung động theo Mệnh chủ (Bán kính 0.35 -> 0.58)
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
-        ax.bar(rad, width=np.radians(45), bottom=0.35, height=0.25, 
+        ax.bar(rad, width=np.radians(45), bottom=0.35, height=0.23, 
                color=info["color"], alpha=0.9, edgecolor='white', linewidth=1.2)
         label_text = f"{info['cat_hung']}"
-        ax.text(rad, 0.47, label_text, color='white', fontsize=9, fontweight='bold',
+        ax.text(rad, 0.465, label_text, color='white', fontsize=9, fontweight='bold',
                 ha='center', va='center')
 
-    # TẦNG 2: Quẻ vị Hậu Thiên (Bán kính 0.60 -> 0.85)
+    # TẦNG 2: Quẻ vị Hậu Thiên (Bán kính 0.58 -> 0.81)
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
-        ax.bar(rad, width=np.radians(45), bottom=0.60, height=0.25, 
+        ax.bar(rad, width=np.radians(45), bottom=0.58, height=0.23, 
                color='#1f242c', alpha=0.95, edgecolor='#30363d', linewidth=1.0)
         trig_text = f"{info['trigram']} {info['name']}"
-        ax.text(rad, 0.725, trig_text, color='#f0f6fc', fontsize=9,
+        ax.text(rad, 0.695, trig_text, color='#f0f6fc', fontsize=9,
                 ha='center', va='center')
 
-    # TẦNG 3: 24 Sơn Hướng - Địa bàn chính châm (Bán kính 0.85 -> 1.15)
+    # TẦNG 3: 24 Sơn Hướng - Địa bàn chính châm (Bán kính 0.81 -> 1.08)
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
         rad_son = np.radians(mid_deg)
-        ax.bar(rad_son, width=np.radians(15), bottom=0.85, height=0.30,
+        ax.bar(rad_son, width=np.radians(15), bottom=0.81, height=0.27,
                color='#161b22', alpha=0.9, edgecolor='#30363d', linewidth=0.8)
-        ax.text(rad_son, 1.0, son['name'], color='#58a6ff', fontsize=9, fontweight='bold',
+        ax.text(rad_son, 0.945, son['name'], color='#58a6ff', fontsize=9, fontweight='bold',
                 ha='center', va='center')
 
-    # TẦNG 4: Ngũ Hành Nạp Âm của 24 Sơn (Bán kính 1.15 -> 1.40)
+    # TẦNG 4: Ngũ Hành Nạp Âm chuẩn 24 Sơn (Bán kính 1.08 -> 1.35)
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
         rad_son = np.radians(mid_deg)
-        ax.bar(rad_son, width=np.radians(15), bottom=1.15, height=0.25,
+        ax.bar(rad_son, width=np.radians(15), bottom=1.08, height=0.27,
                color='#0d1117', alpha=0.9, edgecolor='#30363d', linewidth=0.6)
-        ax.text(rad_son, 1.275, son['elem'], color='#8b949e', fontsize=8,
+        ax.text(rad_son, 1.215, son['elem'], color='#8b949e', fontsize=8,
                 ha='center', va='center')
 
-    # Vòng độ số góc ngoài cùng
-    for deg in [0, 45, 90, 135, 180, 225, 270, 315]:
-        rad = np.radians(deg)
-        ax.text(rad, 1.52, f"{deg}°", color='#8b949e', fontsize=9, ha='center', va='center')
+    # Vòng chia độ nhỏ chi tiết ngoài cùng (Vạch chia mỗi 5 độ)
+    for d_tick in range(0, 360, 5):
+        rad_t = np.radians(d_tick)
+        line_len = 0.04 if d_tick % 15 == 0 else 0.02
+        ax.plot([rad_t, rad_t], [1.35, 1.35 + line_len], color='#8b949e', lw=1.0)
+        if d_tick % 45 == 0:
+            ax.text(rad_t, 1.48, f"{d_tick}°", color='#8b949e', fontsize=8, ha='center', va='center')
 
-    # Trục định hướng thực địa
+    # Trục định hướng thực địa (Thập tự thiên tâm)
     if survey_direction != "Không chọn" and survey_direction in DIRECTION_ANGLES:
         target_deg = DIRECTION_ANGLES[survey_direction]
         target_rad = np.radians(target_deg)
-        ax.annotate('', xy=(target_rad, 1.45), xytext=(0, 0),
+        ax.annotate('', xy=(target_rad, 1.32), xytext=(0, 0),
                     arrowprops=dict(facecolor='#00ffcc', edgecolor='white', lw=2, width=3, headwidth=10))
 
-    # Trung Cung
+    # Trung Cung (Thiên Trì / Kim La Bàn)
     group_name = "Đông Tứ Mệnh" if quai_num in [1, 3, 4, 9] else "Tây Tứ Mệnh"
-    center_text = f"TRUNG CUNG\n{gender} ({eff_year})\nNhóm: {group_name}"
-    ax.text(0, 0, center_text, color='#ff7b72', fontsize=8.5, fontweight='bold',
-            ha='center', va='center', bbox=dict(boxstyle='round,pad=0.4', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
+    center_text = f"THIÊN TRÌ\n{gender_str} ({eff_year})\nNhóm: {group_name}"
+    ax.text(0, 0, center_text, color='#ff7b72', fontsize=8, fontweight='bold',
+            ha='center', va='center', bbox=dict(boxstyle='round,pad=0.35', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
 
     ax.set_yticklabels([])
     ax.set_xticklabels([])
@@ -331,7 +335,7 @@ if st.session_state.initialized:
             <div style="position: absolute; top: 10px; font-weight: bold; color: #ff7b72; font-size: 14px;">BẮC (0°)</div>
             <div style="position: absolute; bottom: 10px; font-weight: bold; color: #8b949e; font-size: 14px;">NAM (180°)</div>
         </div>
-        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang quét từ trường & Định vị La Kinh 4 Tầng...</h3>
+        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang chuẩn hóa Cung Phi Mệnh chủ & Hiệu chỉnh Thiên Trì...</h3>
     </div>
     
     <style>
@@ -344,7 +348,7 @@ if st.session_state.initialized:
     
     <script>
     setTimeout(function() {
-        document.getElementById("status-text").innerText = "✨ Đã hiệu chỉnh xong La Kinh Đa Vòng!";
+        document.getElementById("status-text").innerText = "✨ Đã đồng bộ hoàn tất La Kinh Phong Thủy!";
     }, 3000);
     </script>
     """
@@ -380,8 +384,8 @@ if st.session_state.initialized:
                 """, unsafe_allow_html=True)
 
     with col_right:
-        st.subheader("🧭 Đồ họa La Kinh 4 Tầng & Định Hướng Thực Địa")
-        fig_mpl = render_matplotlib_lakinh(quai_num, target_survey_dir)
+        st.subheader("🧭 Đồ họa La Kinh 4 Tầng & Thiên Trì Thực Địa")
+        fig_mpl = render_matplotlib_lakinh(quai_num, target_survey_dir, gender, eff_year)
         st.pyplot(fig_mpl)
 else:
     st.info("👈 **Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo đồ họa hiển thị.**")
