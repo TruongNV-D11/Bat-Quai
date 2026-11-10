@@ -5,7 +5,7 @@ import time as ptime
 from datetime import datetime, time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v7.0 (Ultimate)",
+    page_title="Professional Feng Shui Master Bagua Engine v8.0",
     layout="wide"
 )
 
@@ -32,8 +32,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SHUI MASTER BAGUA ENGINE v7.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Ma trận Bát Trạch Động và Định hướng Công năng thực chiến.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v8.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Ma trận Bát Trạch Động và Hiệu ứng La Kinh Xoay Chuyên Sâu.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT LỤC THẬP HOA GIÁP & 24 SƠN HƯỚNG ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -219,18 +219,28 @@ with st.sidebar:
     gender = st.selectbox("Giới tính gia chủ", ["Nam", "Nữ"])
     current_yun = st.selectbox("Tam Nguyên Cửu Vận (Vận tinh)", ["Vận 9 (2024-2043)", "Vận 8 (2004-2023)"], index=0)
     
-    # Hướng thực địa của công trình cần khảo sát
     target_survey_dir = st.selectbox(
         "🧭 Hướng Khảo Sát Thực Địa (Nhà/Cửa/Bàn Thờ)", 
         ["Không chọn", "Bắc", "Đông Bắc", "Đông", "Đông Nam", "Nam", "Tây Nam", "Tây", "Tây Bắc"]
     )
     
     if st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True):
-        with st.spinner("Đang hiệu chỉnh từ trường, xoay định vị La Kinh và lập quẻ Bát Trạch..."):
+        # Hiệu ứng Delay kéo dài ~10 giây với tiến trình giả lập la bàn xoay góc động
+        with st.spinner("Đang hiệu chỉnh từ trường địa bàn, quét trường khí và xoay định vị La Kinh chuyên sâu..."):
             progress_bar = st.progress(0)
-            for i in range(100):
-                ptime.sleep(0.02)
-                progress_bar.progress(i + 1)
+            status_text = st.empty()
+            
+            steps = 50
+            for i in range(steps):
+                ptime.sleep(0.2)  # Tổng thời gian ~10 giây
+                progress_val = int((i + 1) * (100 / steps))
+                progress_bar.progress(progress_val)
+                
+                # Hiệu ứng chữ chạy trạng thái xoay la bàn
+                rot_deg = (i * 36) % 360
+                status_text.text(f"Đang xoay La Kinh... Góc dịch chuyển từ trường: {rot_deg}° (Tiến độ: {progress_val}%)")
+                
+            status_text.empty()
             progress_bar.empty()
         st.session_state.initialized = True
 
@@ -240,12 +250,12 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v7.0</i>
+            <i>System: Master Bagua Engine v8.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH TÍCH HỢP TRỤC ĐỊNH HƯỚNG THỰC ĐỊA ---
-def render_matplotlib_lakinh(quai_num, survey_direction):
+# --- 3. HÀM VẼ LA KINH TÍCH HỢP XOAY CHUYỂN TOÀN BỘ CHỮ/SỐ ---
+def render_matplotlib_lakinh(quai_num, survey_direction, rotation_offset_deg=0):
     fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
     ax.set_facecolor('#0b0f19')
@@ -254,25 +264,26 @@ def render_matplotlib_lakinh(quai_num, survey_direction):
     ax.set_theta_direction(-1)
 
     mapping = BAT_TRACH_MAPPING[quai_num]
+    offset_rad = np.radians(rotation_offset_deg)
 
-    # 1. Vẽ vòng 8 hướng Cát - Hung động
+    # 1. Vẽ vòng 8 hướng Cát - Hung động có xoay chuyển góc
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
-        rad = np.radians(angle)
+        rad = np.radians(angle) + offset_rad
 
         ax.bar(rad, width=np.radians(45), bottom=0.35, height=0.55, 
                color=info["color"], alpha=0.9, edgecolor='white', linewidth=1.2)
 
         label_text = f"{info['cat_hung']}\n{info['trigram']} {info['name']}"
         ax.text(rad, 0.62, label_text, color='white', fontsize=10, fontweight='bold',
-                ha='center', va='center')
+                ha='center', va='center', rotation=rotation_offset_deg)
 
-    # 2. Vẽ vòng 24 Sơn Hướng ngoại vi
+    # 2. Vẽ vòng 24 Sơn Hướng ngoại vi xoay chuyển theo góc
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
-        rad_son = np.radians(mid_deg)
+        rad_son = np.radians(mid_deg) + offset_rad
 
         ax.bar(rad_son, width=np.radians(15), bottom=0.9, height=0.4,
                color='#161b22', alpha=0.85, edgecolor='#30363d', linewidth=0.8)
@@ -280,18 +291,23 @@ def render_matplotlib_lakinh(quai_num, survey_direction):
         ax.text(rad_son, 1.12, son['name'], color='#f0f6fc', fontsize=9,
                 ha='center', va='center')
 
-    # 3. Vòng độ số góc
+    # 3. Vòng độ số góc xoay chuyển
     for deg in [0, 45, 90, 135, 180, 225, 270, 315]:
-        rad = np.radians(deg)
+        rad = np.radians(deg) + offset_rad
         ax.text(rad, 1.42, f"{deg}°", color='#8b949e', fontsize=9, ha='center', va='center')
 
-    # 4. Trục Kim chỉ nam định hướng thực địa (Nếu người dùng chọn)
+    # 4. Trục Kim chỉ nam định hướng thực địa
     if survey_direction != "Không chọn" and survey_direction in DIRECTION_ANGLES:
         target_deg = DIRECTION_ANGLES[survey_direction]
-        target_rad = np.radians(target_deg)
-        # Vẽ mũi tên chỉ hướng thực địa từ tâm ra ngoài
+        target_rad = np.radians(target_deg) + offset_rad
         ax.annotate('', xy=(target_rad, 1.35), xytext=(0, 0),
                     arrowprops=dict(facecolor='#00ffcc', edgecolor='white', lw=2, width=3, headwidth=10))
+
+    # 5. Trung Cung cố định tâm
+    group_name = "Đông Tứ Mệnh" if quai_num in [1, 3, 4, 9] else "Tây Tứ Mệnh"
+    center_text = f"TRUNG CUNG\n{gender} ({eff_year})\nNhóm: {group_name}"
+    ax.text(0, 0, center_text, color='#ff7b72', fontsize=9, fontweight='bold',
+            ha='center', va='center', bbox=dict(boxstyle='round,pad=0.4', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
 
     ax.set_yticklabels([])
     ax.set_xticklabels([])
@@ -331,8 +347,8 @@ if st.session_state.initialized:
                 """, unsafe_allow_html=True)
 
     with col_right:
-        st.subheader("🧭 Đồ họa La Kinh Bát Trạch & Định Hướng Thực Địa")
-        fig_mpl = render_matplotlib_lakinh(quai_num, target_survey_dir)
+        st.subheader("🧭 Đồ họa La Kinh Bát Trạch & Xoay Định Hướng")
+        fig_mpl = render_matplotlib_lakinh(quai_num, target_survey_dir, rotation_offset_deg=0)
         st.pyplot(fig_mpl)
 else:
     st.info("👈 **Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo đồ họa hiển thị.**")
