@@ -4,7 +4,7 @@ import numpy as np
 from datetime import datetime, time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v4.0",
+    page_title="Professional Feng Shui Master Bagua Engine v4.1",
     layout="wide"
 )
 
@@ -110,7 +110,10 @@ def compute_master_cung_phi(solar_date, solar_time, has_time, sex):
     }
     return can, chi, eff_year, quai_num, bagua_map
 
-# --- 2. GIAO DIỆN NHẬP LIỆU CHUYÊN SÂU ---
+# --- 2. GIAO DIỆN NHẬP LIỆU CHUYÊN SÂU & SESSION STATE ---
+if "initialized" not in st.session_state:
+    st.session_state.initialized = False
+
 with st.sidebar:
     st.header("🛠️ THAM SỐ LẬP QUẺ (MASTER)")
     
@@ -130,7 +133,8 @@ with st.sidebar:
     gender = st.selectbox("Giới tính gia chủ", ["Nam", "Nữ"])
     current_yun = st.selectbox("Tam Nguyên Cửu Vận (Vận tinh)", ["Vận 9 (2024-2043)", "Vận 8 (2004-2023)"], index=0)
     
-    run_master = st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True)
+    if st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True):
+        st.session_state.initialized = True
 
     st.markdown("""
         <div class="signature-box">
@@ -138,11 +142,11 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v4.0</i>
+            <i>System: Master Bagua Engine v4.1</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH ĐA TẦNG ĐẦY ĐỦ KHỐI MÀU & HỌA TIẾT BÁT TRẠCH ---
+# --- 3. HÀM VẼ LA KINH ĐA TẦNG ĐẦY ĐỦ KHỐI MÀU ---
 def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
     fig = go.Figure()
 
@@ -152,19 +156,17 @@ def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
         deg = info["angle"]
         rad_mid = np.radians(90 - deg)
         
-        # Tọa độ nhãn tên hướng và quẻ
         x_lbl = 0.85 * np.cos(rad_mid)
         y_lbl = 0.85 * np.sin(rad_mid)
         
         is_active = (q_id == active_num)
         bg_color = info["color"] if not is_active else "#f85149"
         
-        # Vẽ khối quái vị bọc màu nền
         fig.add_trace(go.Scatter(
             x=[x_lbl], y=[y_lbl], mode="text+markers",
-            marker=dict(size=45 if is_active else 30, color=bg_color, opacity=0.85, line=dict(width=2, color="white")),
+            marker=dict(size=45 if is_active else 30, color=bg_color, opacity=0.9, line=dict(width=2, color="white")),
             text=[f"<b>{info['trigram']}</b><br>{info['name']}"],
-            textfont=dict(color="white", size=10),
+            textfont=dict(color="white", size=11),
             hoverinfo="text",
             hovertext=f"Quái: {info['palace']} | Hướng: {info['dir']} | Ngũ hành: {info['element']}"
         ))
@@ -187,7 +189,7 @@ def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
             hovertext=f"Sơn: {son['name']} | Phương vị: {son['sector']} | Góc: {son['deg_start']}° - {son['deg_end']}°"
         ))
 
-    # C. CÁC ĐƯỜNG KINH TUYẾN & VÒNG TRÒN ĐỒNG TÂM LA KINH
+    # C. CÁC ĐƯỜNG KINH TUYẾN & VÒNG TRÒN ĐỒNG TÂM
     for deg in angles:
         rad = np.radians(90 - deg)
         fig.add_shape(type="line", x0=0, y0=0, x1=1.45*np.cos(rad), y1=1.45*np.sin(rad),
@@ -200,7 +202,7 @@ def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
     fig.add_shape(type="circle", x0=-0.45, y0=-0.45, x1=0.45, y1=0.45,
                   line=dict(color="#ff7b72", width=2), fillcolor="#0d1117")
 
-    # D. TRUNG CUNG (THÔNG TIN MỆNH CHỦ)
+    # D. TRUNG CUNG
     active_info = data_map[active_num]
     center_html = f"<b>TRUNG CUNG</b><br>{gender_str} ({eff_year_val})<br>Quẻ: {active_info['name']}<br>({active_info['group']})"
     
@@ -219,8 +221,8 @@ def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
     )
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ KHI BẤM NÚT ---
-if run_master:
+# --- 4. HIỂN THỊ KẾT QUẢ DỰA TRÊN TRẠNG THÁI SESSION_STATE ---
+if st.session_state.initialized:
     can, chi, eff_year, quai_num, bagua_dict = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     target_data = bagua_dict[quai_num]
 
