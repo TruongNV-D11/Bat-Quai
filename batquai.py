@@ -12,6 +12,15 @@ st.markdown("""
     <style>
     .main { background-color: #0b0f19; color: #f0f6fc; }
     .stMetric { background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; }
+    .signature-box { 
+        background-color: #161b22; 
+        border: 1px solid #30363d; 
+        padding: 10px; 
+        border-radius: 6px; 
+        font-size: 12px; 
+        color: #8b949e; 
+        margin-top: 20px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -22,8 +31,6 @@ st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hư�
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
-# Danh sách 24 Sơn Hướng (Bắt đầu từ Bắc 0° theo chiều kim đồng hồ)
-# Mỗi sơn chiếm 15 độ
 SON_HUONG_24 = [
     {"name": "Nhâm", "deg_start": 337.5, "deg_end": 352.5, "sector": "Bắc"},
     {"name": "Tý", "deg_start": 352.5, "deg_end": 7.5, "sector": "Bắc"},
@@ -56,7 +63,6 @@ def get_can_chi_academic(solar_date, solar_time, has_time):
     month = solar_date.month
     day = solar_date.day
     
-    # Tiết Lập Xuân chuẩn hóa (mốc 4/2 lúc 04:14 sáng)
     effective_year = year
     if month < 2 or (month == 2 and day < 4):
         effective_year -= 1
@@ -119,6 +125,17 @@ with st.sidebar:
     
     run_master = st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True)
 
+    # Chữ ký số cá nhân
+    st.markdown("""
+        <div class="signature-box">
+            <b>DIGITAL SIGNATURE</b><br>
+            <b>Engineer:</b> TruongfNV<br>
+            <b>Email:</b> truongnv.d11@gmail.com<br>
+            <b>Hotline:</b> 0919855966<br>
+            <i>System: Master Bagua Engine v2.6</i>
+        </div>
+    """, unsafe_allow_html=True)
+
 can, chi, eff_year, quai_num, bagua_dict = compute_master_cung_phi(d_input, t_input, enable_time, gender)
 target_data = bagua_dict[quai_num]
 
@@ -126,10 +143,9 @@ target_data = bagua_dict[quai_num]
 def render_master_lakinh(active_num, data_map):
     fig = go.Figure()
     
-    # Vòng ngoài: 24 Sơn Hướng (La Kinh Layer)
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
-        if son["deg_start"] > son["deg_end"]: # Xử lý qua mốc 360 độ
+        if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
             
         rad = np.radians(90 - mid_deg)
@@ -144,7 +160,6 @@ def render_master_lakinh(active_num, data_map):
             hovertext=f"Sơn: {son['name']} | Phương vị: {son['sector']} | Góc: {son['deg_start']}° - {son['deg_end']}°"
         ))
 
-    # Vòng trong: 8 Quái Vị chính
     fig.add_shape(type="circle", x0=-1.6, y0=-1.6, x1=1.6, y1=1.6,
                   line=dict(color="#30363d", width=2), fillcolor="#0d1117")
     fig.add_shape(type="circle", x0=-1.1, y0=-1.1, x1=1.1, y1=1.1,
@@ -173,7 +188,6 @@ def render_master_lakinh(active_num, data_map):
         fig.add_shape(type="line", x0=0, y0=0, x1=x*0.75, y1=y*0.75,
                       line=dict(color="#f85149" if is_active else "#30363d", width=2 if is_active else 1, dash="dot"))
 
-    # Trung Cung
     active_info = data_map[active_num]
     fig.add_trace(go.Scatter(
         x=[0], y=[0], mode="text",
@@ -190,7 +204,7 @@ def render_master_lakinh(active_num, data_map):
     )
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ CHUYÊN SÂU CHO THẦY PHONG THỦY ---
+# --- 4. HIỂN THỊ KẾT QUẢ CHUYÊN SÂU ---
 col_left, col_right = st.columns([1.3, 1.7])
 
 with col_left:
@@ -203,16 +217,9 @@ with col_left:
     st.metric("Phương vị Chủ đạo", target_data['dir'])
     st.metric("Vận tinh áp dụng", current_yun)
     
-    st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ đã tích hợp hệ tọa độ 24 sơn hướng ngoại vi, cho phép định hướng chính xác kinh tuyến la bàn và đồng bộ hóa với khí vận hiện tại.")
+    st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ tích hợp hệ tọa độ 24 sơn hướng, phục vụ định hướng la kinh ngoại vi và đồng bộ hóa khí vận.")
 
 with col_right:
     st.subheader("🧭 Đồ họa La Kinh & Trục Khí Số")
     fig_master = render_master_lakinh(quai_num, bagua_dict)
     st.plotly_chart(fig_master, use_container_width=True)
-
----
-
-<ElicitationsGroup message="Để phục vụ công tác thực địa và phân tích chuyên sâu hơn nữa:">
-  <Elicitation label="Tính toán chi tiết 8 hướng Cát - Hung (Sinh Khí, Ngũ Quỷ...)" query="Xuất bảng chi tiết 4 hướng Cát và 4 hướng Hung kèm theo luận giải sơn hướng cụ thể cho gia chủ."/>
-  <Elicitation label="Tích hợp Phi Tinh Huyền Không (Trạch Quái)" query="Xây dựng ma trận Phi Tinh 9 ô (Sơn tinh, Hướng tinh, Vận tinh) dựa trên tọa hướng công trình và vận tinh hiện tại."/>
-</ElicitationsGroup>
