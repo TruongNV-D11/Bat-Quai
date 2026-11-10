@@ -1,10 +1,11 @@
 import streamlit as st
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import numpy as np
 from datetime import datetime, time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v4.3",
+    page_title="Professional Feng Shui Master Bagua Engine v5.0",
     layout="wide"
 )
 
@@ -32,30 +33,30 @@ CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâ
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
 SON_HUONG_24 = [
-    {"name": "Nhâm", "deg_start": 337.5, "deg_end": 352.5, "sector": "Bắc"},
-    {"name": "Tý", "deg_start": 352.5, "deg_end": 7.5, "sector": "Bắc"},
-    {"name": "Quý", "deg_start": 7.5, "deg_end": 22.5, "sector": "Bắc"},
-    {"name": "Cấn", "deg_start": 22.5, "deg_end": 37.5, "sector": "Đông Bắc"},
-    {"name": "Sửu", "deg_start": 37.5, "deg_end": 52.5, "sector": "Đông Bắc"},
-    {"name": "Dần", "deg_start": 52.5, "deg_end": 67.5, "sector": "Đông Bắc"},
-    {"name": "Giáp", "deg_start": 67.5, "deg_end": 82.5, "sector": "Đông"},
-    {"name": "Mão", "deg_start": 82.5, "deg_end": 97.5, "sector": "Đông"},
-    {"name": "Ất", "deg_start": 97.5, "deg_end": 112.5, "sector": "Đông"},
-    {"name": "Tốn", "deg_start": 112.5, "deg_end": 127.5, "sector": "Đông Nam"},
-    {"name": "Thìn", "deg_start": 127.5, "deg_end": 142.5, "sector": "Đông Nam"},
-    {"name": "Tỵ", "deg_start": 142.5, "deg_end": 157.5, "sector": "Đông Nam"},
-    {"name": "Bính", "deg_start": 157.5, "deg_end": 172.5, "sector": "Nam"},
-    {"name": "Ngọ", "deg_start": 172.5, "deg_end": 187.5, "sector": "Nam"},
-    {"name": "Đinh", "deg_start": 187.5, "deg_end": 202.5, "sector": "Nam"},
-    {"name": "Khôn", "deg_start": 202.5, "deg_end": 217.5, "sector": "Tây Nam"},
-    {"name": "Mùi", "deg_start": 217.5, "deg_end": 232.5, "sector": "Tây Nam"},
-    {"name": "Thân", "deg_start": 232.5, "deg_end": 247.5, "sector": "Tây Nam"},
-    {"name": "Canh", "deg_start": 247.5, "deg_end": 262.5, "sector": "Tây"},
-    {"name": "Dậu", "deg_start": 262.5, "deg_end": 277.5, "sector": "Tây"},
-    {"name": "Tân", "deg_start": 277.5, "deg_end": 292.5, "sector": "Tây"},
-    {"name": "Càn", "deg_start": 292.5, "deg_end": 307.5, "sector": "Tây Bắc"},
-    {"name": "Tuất", "deg_start": 307.5, "deg_end": 322.5, "sector": "Tây Bắc"},
-    {"name": "Hợi", "deg_start": 322.5, "deg_end": 337.5, "sector": "Tây Bắc"},
+    {"name": "Nhâm", "deg_start": 337.5, "deg_end": 352.5},
+    {"name": "Tý", "deg_start": 352.5, "deg_end": 7.5},
+    {"name": "Quý", "deg_start": 7.5, "deg_end": 22.5},
+    {"name": "Cấn", "deg_start": 22.5, "deg_end": 37.5},
+    {"name": "Sửu", "deg_start": 37.5, "deg_end": 52.5},
+    {"name": "Dần", "deg_start": 52.5, "deg_end": 67.5},
+    {"name": "Giáp", "deg_start": 67.5, "deg_end": 82.5},
+    {"name": "Mão", "deg_start": 82.5, "deg_end": 97.5},
+    {"name": "Ất", "deg_start": 97.5, "deg_end": 112.5},
+    {"name": "Tốn", "deg_start": 112.5, "deg_end": 127.5},
+    {"name": "Thìn", "deg_start": 127.5, "deg_end": 142.5},
+    {"name": "Tỵ", "deg_start": 142.5, "deg_end": 157.5},
+    {"name": "Bính", "deg_start": 157.5, "deg_end": 172.5},
+    {"name": "Ngọ", "deg_start": 172.5, "deg_end": 187.5},
+    {"name": "Đinh", "deg_start": 187.5, "deg_end": 202.5},
+    {"name": "Khôn", "deg_start": 202.5, "deg_end": 217.5},
+    {"name": "Mùi", "deg_start": 217.5, "deg_end": 232.5},
+    {"name": "Thân", "deg_start": 232.5, "deg_end": 247.5},
+    {"name": "Canh", "deg_start": 247.5, "deg_end": 262.5},
+    {"name": "Dậu", "deg_start": 262.5, "deg_end": 277.5},
+    {"name": "Tân", "deg_start": 277.5, "deg_end": 292.5},
+    {"name": "Càn", "deg_start": 292.5, "deg_end": 307.5},
+    {"name": "Tuất", "deg_start": 307.5, "deg_end": 322.5},
+    {"name": "Hợi", "deg_start": 322.5, "deg_end": 337.5},
 ]
 
 def get_can_chi_academic(solar_date, solar_time, has_time):
@@ -142,105 +143,68 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v4.3</i>
+            <i>System: Master Bagua Engine v5.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH CHUẨN XÁC TỌA ĐỘ V4.3 ---
-def render_master_lakinh(active_num, data_map, gender_str, eff_year_val):
-    fig = go.Figure()
+# --- 3. HÀM VẼ LA KINH BẰNG MATPLOTLIB (CHẮC CHẮN HIỂN THỊ) ---
+def render_matplotlib_lakinh(active_num, data_map, gender_str, eff_year_val):
+    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+    fig.patch.set_facecolor('#0b0f19')
+    ax.set_facecolor('#0b0f19')
 
-    # 1. Vẽ 8 khối quái vị trung tâm
-    x_markers, y_markers, marker_colors, marker_texts = [], [], [], []
+    # Thiết lập hướng Bắc lên trên (0 độ) và chiều kim đồng hồ
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+
+    # 1. Vẽ vòng 8 cung Quái vị (bán kính từ 0.4 đến 0.9)
+    angles_bagua = [0, 45, 90, 135, 180, 225, 270, 315]
     for q_id, info in data_map.items():
         deg = info["angle"]
-        rad_mid = np.radians(90 - deg)
-        
-        x_lbl = 0.75 * np.cos(rad_mid)
-        y_lbl = 0.75 * np.sin(rad_mid)
-        
-        x_markers.append(x_lbl)
-        y_markers.append(y_lbl)
-        
+        rad = np.radians(deg)
         is_active = (q_id == active_num)
-        marker_colors.append("#f85149" if is_active else info["color"])
-        marker_texts.append(f"<b>{info['trigram']}</b><br>{info['name']}")
+        color = "#f85149" if is_active else info["color"]
 
-    fig.add_trace(go.Scatter(
-        x=x_markers, y=y_markers, mode="markers+text",
-        marker=dict(size=60, color=marker_colors, opacity=0.9, line=dict(width=2, color="white")),
-        text=marker_texts,
-        textfont=dict(color="white", size=12, family="Arial Black"),
-        textposition="middle center",
-        hoverinfo="skip"
-    ))
+        # Vẽ ô màu sector cho quái vị
+        ax.bar(rad, width=np.radians(45), bottom=0.35, height=0.55, 
+               color=color, alpha=0.9, edgecolor='white', linewidth=1.5)
 
-    # 2. Vòng 24 Sơn Hướng ngoại vi
-    x_sons, y_sons, son_texts = [], [], []
+        # Đặt chữ quái vị
+        text_label = f"{info['trigram']}\n{info['name']}"
+        ax.text(rad, 0.62, text_label, color='white', fontsize=11, fontweight='bold',
+                ha='center', va='center')
+
+    # 2. Vẽ vòng 24 Sơn Hướng ngoài cùng (bán kính từ 0.9 đến 1.3)
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
-            
-        rad = np.radians(90 - mid_deg)
-        x_sons.append(1.25 * np.cos(rad))
-        y_sons.append(1.25 * np.sin(rad))
-        son_texts.append(f"<b>{son['name']}</b>")
+        rad_son = np.radians(mid_deg)
 
-    fig.add_trace(go.Scatter(
-        x=x_sons, y=y_sons, mode="text",
-        text=son_texts,
-        textfont=dict(color="#f0f6fc", size=13, family="Arial"),
-        hoverinfo="skip"
-    ))
+        ax.bar(rad_son, width=np.radians(15), bottom=0.9, height=0.4,
+               color='#161b22', alpha=0.8, edgecolor='#30363d', linewidth=0.8)
+        
+        ax.text(rad_son, 1.12, son['name'], color='#f0f6fc', fontsize=10,
+                ha='center', va='center')
 
-    # 3. Vòng độ số góc (Degree markers)
-    deg_texts, x_deg_list, y_deg_list = [], [], []
+    # 3. Vòng độ số góc (Degree markers ngoài cùng)
     for deg in [0, 45, 90, 135, 180, 225, 270, 315]:
-        rad = np.radians(90 - deg)
-        x_deg_list.append(1.65 * np.cos(rad))
-        y_deg_list.append(1.65 * np.sin(rad))
-        deg_texts.append(f"{deg}°")
+        rad = np.radians(deg)
+        ax.text(rad, 1.42, f"{deg}°", color='#8b949e', fontsize=9, ha='center', va='center')
 
-    fig.add_trace(go.Scatter(
-        x=x_deg_list, y=y_deg_list, mode="text",
-        text=deg_texts,
-        textfont=dict(color="#8b949e", size=11),
-        hoverinfo="skip"
-    ))
-
-    # 4. Các đường trục & vòng tròn đồng tâm
-    for deg in [0, 45, 90, 135, 180, 225, 270, 315]:
-        rad = np.radians(90 - deg)
-        fig.add_shape(type="line", x0=0, y0=0, x1=1.55*np.cos(rad), y1=1.55*np.sin(rad),
-                      line=dict(color="#30363d", width=1.5, dash="dot"))
-
-    fig.add_shape(type="circle", x0=-1.8, y0=-1.8, x1=1.8, y1=1.8,
-                  line=dict(color="#8b949e", width=2.5), fillcolor="#0d1117")
-    fig.add_shape(type="circle", x0=-1.0, y0=-1.0, x1=1.0, y1=1.0,
-                  line=dict(color="#30363d", width=1.5), fillcolor="#161b22")
-    fig.add_shape(type="circle", x0=-0.4, y0=-0.4, x1=0.4, y1=0.4,
-                  line=dict(color="#ff7b72", width=2), fillcolor="#0d1117")
-
-    # 5. Trung Cung
+    # 4. Trung Cung (Tâm)
     active_info = data_map[active_num]
-    center_html = f"<b>TRUNG CUNG</b><br>{gender_str} ({eff_year_val})<br>Quẻ: {active_info['name']}<br>({active_info['group']})"
-    
-    fig.add_trace(go.Scatter(
-        x=[0], y=[0], mode="text",
-        text=[center_html],
-        textfont=dict(color="#ff7b72", size=11),
-        hoverinfo="skip"
-    ))
+    center_text = f"TRUNG CUNG\n{gender_str} ({eff_year_val})\nQuẻ: {active_info['name']}\n({active_info['group']})"
+    ax.text(0, 0, center_text, color='#ff7b72', fontsize=9, fontweight='bold',
+            ha='center', va='center', bbox=dict(boxstyle='round,pad=0.4', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
 
-    # Mở rộng biên độ khung hình để không bị cắt xén nhãn
-    fig.update_layout(
-        showlegend=False,
-        xaxis=dict(range=[-2.0, 2.0], showgrid=False, zeroline=False, showticklabels=False),
-        yaxis=dict(range=[-2.0, 2.0], showgrid=False, zeroline=False, showticklabels=False),
-        plot_bgcolor="#0b0f19", paper_bgcolor="#0b0f19",
-        width=700, height=700, margin=dict(l=10, r=10, t=10, b=10)
-    )
+    # Tinh chỉnh giao diện trục polar
+    ax.set_yticklabels([])
+    ax.set_xticklabels([])
+    ax.grid(color='#30363d', linestyle='--', linewidth=1)
+    ax.spines['polar'].set_color('#8b949e')
+
+    plt.tight_layout()
     return fig
 
 # --- 4. HIỂN THỊ KẾT QUẢ ---
@@ -266,7 +230,7 @@ if st.session_state.initialized:
 
     with col_right:
         st.subheader("🧭 Đồ họa La Kinh Màu Sắc Đa Tầng")
-        fig_master = render_master_lakinh(quai_num, bagua_dict, gender, eff_year)
-        st.plotly_chart(fig_master, use_container_width=True)
+        fig_mpl = render_matplotlib_lakinh(quai_num, bagua_dict, gender, eff_year)
+        st.pyplot(fig_mpl)
 else:
     st.info("👈 **Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo đồ họa hiển thị.**")
