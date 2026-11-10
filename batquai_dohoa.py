@@ -2,10 +2,11 @@ import streamlit as st
 import streamlit.components.v1 as components
 import matplotlib.pyplot as plt
 import numpy as np
-from datetime import datetime, time
+import time as time_mod
+from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v9.0",
+    page_title="Professional Feng Shui Master Bagua Engine v9.1",
     layout="wide"
 )
 
@@ -32,7 +33,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v9.0")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v9.1")
 st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Ma trận Bát Trạch Động và Hiệu ứng La Kinh Xoay Thực Tế.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT ---
@@ -163,7 +164,7 @@ def get_can_chi_academic(solar_date, solar_time, has_time):
     if month < 2 or (month == 2 and day < 4):
         effective_year -= 1
     elif month == 2 and day == 4 and has_time and solar_time:
-        if solar_time < time(4, 14):
+        if solar_time < dt_time(4, 14):
             effective_year -= 1
 
     offset = (effective_year - 1984) % 60
@@ -214,7 +215,7 @@ with st.sidebar:
     enable_time = st.checkbox("Kích hoạt Giờ sinh chính xác", value=True)
     t_input = None
     if enable_time:
-        t_input = st.time_input("Giờ:Phút sinh", value=time(8, 30))
+        t_input = st.time_input("Giờ:Phút sinh", value=dt_time(8, 30))
         
     gender = st.selectbox("Giới tính gia chủ", ["Nam", "Nữ"])
     current_yun = st.selectbox("Tam Nguyên Cửu Vận (Vận tinh)", ["Vận 9 (2024-2043)", "Vận 8 (2004-2023)"], index=0)
@@ -234,7 +235,7 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v9.0</i>
+            <i>System: Master Bagua Engine v9.1</i>
         </div>
     """, unsafe_allow_html=True)
 
@@ -295,7 +296,6 @@ if st.session_state.initialized:
     can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     mapping = BAT_TRACH_MAPPING[quai_num]
 
-    # Hiệu ứng quay La Kinh mượt mà bằng CSS/JS component trực tiếp trước khi render kết quả
     spin_html = """
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 450px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
         <div id="compass-container" style="position: relative; width: 260px; height: 260px; border: 4px solid #58a6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle, #161b22 0%, #0d1117 100%); box-shadow: 0 0 25px rgba(88, 166, 255, 0.4); animation: spinCompass 3.5s cubic-bezier(0.15, 0.85, 0.15, 1.0) forwards;">
@@ -321,14 +321,12 @@ if st.session_state.initialized:
     </script>
     """
     
-    # Hiển thị component hiệu ứng quay trong 3.5 giây
     placeholder = st.empty()
     with placeholder.container():
         components.html(spin_html, height=500)
-        ptime.sleep(3.5)
+        time_mod.sleep(3.5)
     placeholder.empty()
 
-    # Sau khi hiệu ứng quay xong, hiển thị giao diện báo cáo chuyên nghiệp
     col_left, col_right = st.columns([1.3, 1.7])
 
     with col_left:
