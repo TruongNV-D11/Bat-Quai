@@ -113,7 +113,14 @@ def compute_master_cung_phi(solar_date, solar_time, has_time, sex):
 # --- 2. GIAO DIỆN NHẬP LIỆU CHUYÊN SÂU ---
 with st.sidebar:
     st.header("🛠️ THAM SỐ LẬP QUẺ (MASTER)")
-    d_input = st.date_input("Ngày sinh (Dương lịch)", value=datetime(1990, 5, 15))
+    
+    d_input = st.date_input(
+        "Ngày sinh (Dương lịch)", 
+        value=datetime(1990, 5, 15),
+        min_value=datetime(1900, 1, 1),
+        max_value=datetime(2100, 12, 31),
+        format="DD/MM/YYYY"
+    )
     
     enable_time = st.checkbox("Kích hoạt Giờ sinh chính xác", value=True)
     t_input = None
@@ -125,7 +132,6 @@ with st.sidebar:
     
     run_master = st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True)
 
-    # Chữ ký số cá nhân
     st.markdown("""
         <div class="signature-box">
             <b>DIGITAL SIGNATURE</b><br>
@@ -136,10 +142,7 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-can, chi, eff_year, quai_num, bagua_dict = compute_master_cung_phi(d_input, t_input, enable_time, gender)
-target_data = bagua_dict[quai_num]
-
-# --- 3. HÀM VẼ LA KINH 24 SƠN HƯỚNG & BÁT QUÁI (PLOTLY) ---
+# --- 3. HÀM VẼ LA KINH 24 SƠN HƯỚNG & BÁT QUÁI (PLOTLY) ĐẦY ĐỦ THÔNG TIN ---
 def render_master_lakinh(active_num, data_map):
     fig = go.Figure()
     
@@ -149,20 +152,20 @@ def render_master_lakinh(active_num, data_map):
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
             
         rad = np.radians(90 - mid_deg)
-        x = 1.3 * np.cos(rad)
-        y = 1.3 * np.sin(rad)
+        x = 1.35 * np.cos(rad)
+        y = 1.35 * np.sin(rad)
         
         fig.add_trace(go.Scatter(
             x=[x], y=[y], mode="text",
             text=[f"<b>{son['name']}</b>"],
-            textfont=dict(color="#8b949e", size=9),
+            textfont=dict(color="#c9d1d9", size=10),
             hoverinfo="text",
             hovertext=f"Sơn: {son['name']} | Phương vị: {son['sector']} | Góc: {son['deg_start']}° - {son['deg_end']}°"
         ))
 
     fig.add_shape(type="circle", x0=-1.6, y0=-1.6, x1=1.6, y1=1.6,
                   line=dict(color="#30363d", width=2), fillcolor="#0d1117")
-    fig.add_shape(type="circle", x0=-1.1, y0=-1.1, x1=1.1, y1=1.1,
+    fig.add_shape(type="circle", x0=-1.15, y0=-1.15, x1=1.15, y1=1.15,
                   line=dict(color="#21262d", width=1), fillcolor="#161b22")
     fig.add_shape(type="circle", x0=-0.45, y0=-0.45, x1=0.45, y1=0.45,
                   line=dict(color="#58a6ff", width=2), fillcolor="#0d1117")
@@ -174,13 +177,13 @@ def render_master_lakinh(active_num, data_map):
         
         is_active = (q_id == active_num)
         color = "#f85149" if is_active else "#8b949e"
-        size = 38 if is_active else 22
+        size = 40 if is_active else 24
         
         fig.add_trace(go.Scatter(
             x=[x], y=[y], mode="text+markers",
             marker=dict(size=size, color=color, line=dict(width=2, color="#ffffff" if is_active else "#30363d")),
             text=[f"{info['trigram']}<br>{info['name']}"],
-            textfont=dict(color="white" if is_active else "#c9d1d9", size=11 if is_active else 9),
+            textfont=dict(color="white" if is_active else "#c9d1d9", size=12 if is_active else 10),
             hoverinfo="text",
             hovertext=f"Quái: {info['palace']} | Hướng: {info['dir']} | Ngũ hành: {info['element']}"
         ))
@@ -204,22 +207,29 @@ def render_master_lakinh(active_num, data_map):
     )
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ CHUYÊN SÂU ---
-col_left, col_right = st.columns([1.3, 1.7])
+# --- 4. HIỂN THỊ KẾT QUẢ KHI BẤM NÚT KHỞI TẠO ---
+if run_master:
+    can, chi, eff_year, quai_num, bagua_dict = compute_master_cung_phi(d_input, t_input, enable_time, gender)
+    target_data = bagua_dict[quai_num]
 
-with col_left:
-    st.subheader("📋 Báo cáo Khí số Chuyên môn")
-    st.metric("Can Chi Niên Mệnh", f"Năm {can} {chi} ({eff_year})")
-    if enable_time and t_input:
-        st.metric("Thời khắc Lập xuân / Giờ sinh", t_input.strftime("%H:%M"))
-    st.metric("Cung Mệnh (Bát Trạch)", f"{target_data['palace']} - {target_data['name']}")
-    st.metric("Ngũ Hành Bản Mệnh", target_data['element'])
-    st.metric("Phương vị Chủ đạo", target_data['dir'])
-    st.metric("Vận tinh áp dụng", current_yun)
-    
-    st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ tích hợp hệ tọa độ 24 sơn hướng, phục vụ định hướng la kinh ngoại vi và đồng bộ hóa khí vận.")
+    col_left, col_right = st.columns([1.3, 1.7])
 
-with col_right:
-    st.subheader("🧭 Đồ họa La Kinh & Trục Khí Số")
-    fig_master = render_master_lakinh(quai_num, bagua_dict)
-    st.plotly_chart(fig_master, use_container_width=True)
+    with col_left:
+        st.subheader("📋 Báo cáo Khí số Chuyên môn")
+        st.metric("Ngày sinh ghi nhận", d_input.strftime("%d/%m/%Y"))
+        st.metric("Can Chi Niên Mệnh", f"Năm {can} {chi} ({eff_year})")
+        if enable_time and t_input:
+            st.metric("Thời khắc Lập xuân / Giờ sinh", t_input.strftime("%H:%M"))
+        st.metric("Cung Mệnh (Bát Trạch)", f"{target_data['palace']} - {target_data['name']}")
+        st.metric("Ngũ Hành Bản Mệnh", target_data['element'])
+        st.metric("Phương vị Chủ đạo", target_data['dir'])
+        st.metric("Vận tinh áp dụng", current_yun)
+        
+        st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ tích hợp đầy đủ hệ tọa độ 24 sơn hướng ngoại vi, phục vụ định hướng la kinh ngoại vi và đồng bộ hóa khí vận.")
+
+    with col_right:
+        st.subheader("🧭 Đồ họa La Kinh & Trục Khí Số")
+        fig_master = render_master_lakinh(quai_num, bagua_dict)
+        st.plotly_chart(fig_master, use_container_width=True)
+else:
+    st.info("👈 **Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo kết quả hiển thị.**")
