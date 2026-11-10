@@ -6,7 +6,7 @@ import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v9.1",
+    page_title="Professional Feng Shui Master Bagua Engine v10.0",
     layout="wide"
 )
 
@@ -33,38 +33,39 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v9.1")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Ma trận Bát Trạch Động và Hiệu ứng La Kinh Xoay Thực Tế.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v10.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 4 Tầng La Kinh Đa Vòng, 24 Sơn Hướng, Nạp Âm Ngũ Hành và Định Hướng Thực Địa.")
 
-# --- 1. DỮ LIỆU HỌC THUẬT ---
+# --- 1. DỮ LIỆU HỌC THUẬT CHI TIẾT ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
+# 24 Sơn Hướng kèm Ngũ Hành Nạp Âm chuẩn học thuật
 SON_HUONG_24 = [
-    {"name": "Nhâm", "deg_start": 337.5, "deg_end": 352.5},
-    {"name": "Tý", "deg_start": 352.5, "deg_end": 7.5},
-    {"name": "Quý", "deg_start": 7.5, "deg_end": 22.5},
-    {"name": "Cấn", "deg_start": 22.5, "deg_end": 37.5},
-    {"name": "Sửu", "deg_start": 37.5, "deg_end": 52.5},
-    {"name": "Dần", "deg_start": 52.5, "deg_end": 67.5},
-    {"name": "Giáp", "deg_start": 67.5, "deg_end": 82.5},
-    {"name": "Mão", "deg_start": 82.5, "deg_end": 97.5},
-    {"name": "Ất", "deg_start": 97.5, "deg_end": 112.5},
-    {"name": "Tốn", "deg_start": 112.5, "deg_end": 127.5},
-    {"name": "Thìn", "deg_start": 127.5, "deg_end": 142.5},
-    {"name": "Tỵ", "deg_start": 142.5, "deg_end": 157.5},
-    {"name": "Bính", "deg_start": 157.5, "deg_end": 172.5},
-    {"name": "Ngọ", "deg_start": 172.5, "deg_end": 187.5},
-    {"name": "Đinh", "deg_start": 187.5, "deg_end": 202.5},
-    {"name": "Khôn", "deg_start": 202.5, "deg_end": 217.5},
-    {"name": "Mùi", "deg_start": 217.5, "deg_end": 232.5},
-    {"name": "Thân", "deg_start": 232.5, "deg_end": 247.5},
-    {"name": "Canh", "deg_start": 247.5, "deg_end": 262.5},
-    {"name": "Dậu", "deg_start": 262.5, "deg_end": 277.5},
-    {"name": "Tân", "deg_start": 277.5, "deg_end": 292.5},
-    {"name": "Càn", "deg_start": 292.5, "deg_end": 307.5},
-    {"name": "Tuất", "deg_start": 307.5, "deg_end": 322.5},
-    {"name": "Hợi", "deg_start": 322.5, "deg_end": 337.5},
+    {"name": "Nhâm", "deg_start": 337.5, "deg_end": 352.5, "elem": "Thủy"},
+    {"name": "Tý", "deg_start": 352.5, "deg_end": 7.5, "elem": "Thủy"},
+    {"name": "Quý", "deg_start": 7.5, "deg_end": 22.5, "elem": "Thủy"},
+    {"name": "Cấn", "deg_start": 22.5, "deg_end": 37.5, "elem": "Thổ"},
+    {"name": "Sửu", "deg_start": 37.5, "deg_end": 52.5, "elem": "Thổ"},
+    {"name": "Dần", "deg_start": 52.5, "deg_end": 67.5, "elem": "Mộc"},
+    {"name": "Giáp", "deg_start": 67.5, "deg_end": 82.5, "elem": "Mộc"},
+    {"name": "Mão", "deg_start": 82.5, "deg_end": 97.5, "elem": "Mộc"},
+    {"name": "Ất", "deg_start": 97.5, "deg_end": 112.5, "elem": "Mộc"},
+    {"name": "Tốn", "deg_start": 112.5, "deg_end": 127.5, "elem": "Mộc"},
+    {"name": "Thìn", "deg_start": 127.5, "deg_end": 142.5, "elem": "Thổ"},
+    {"name": "Tỵ", "deg_start": 142.5, "deg_end": 157.5, "elem": "Hỏa"},
+    {"name": "Bính", "deg_start": 157.5, "deg_end": 172.5, "elem": "Hỏa"},
+    {"name": "Ngọ", "deg_start": 172.5, "deg_end": 187.5, "elem": "Hỏa"},
+    {"name": "Đinh", "deg_start": 187.5, "deg_end": 202.5, "elem": "Hỏa"},
+    {"name": "Khôn", "deg_start": 202.5, "deg_end": 217.5, "elem": "Thổ"},
+    {"name": "Mùi", "deg_start": 217.5, "deg_end": 232.5, "elem": "Thổ"},
+    {"name": "Thân", "deg_start": 232.5, "deg_end": 247.5, "elem": "Kim"},
+    {"name": "Canh", "deg_start": 247.5, "deg_end": 262.5, "elem": "Kim"},
+    {"name": "Dậu", "deg_start": 262.5, "deg_end": 277.5, "elem": "Kim"},
+    {"name": "Tân", "deg_start": 277.5, "deg_end": 292.5, "elem": "Kim"},
+    {"name": "Càn", "deg_start": 292.5, "deg_end": 307.5, "elem": "Kim"},
+    {"name": "Tuất", "deg_start": 307.5, "deg_end": 322.5, "elem": "Thổ"},
+    {"name": "Hợi", "deg_start": 322.5, "deg_end": 337.5, "elem": "Thủy"},
 ]
 
 BAT_TRACH_MAPPING = {
@@ -235,13 +236,13 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v9.1</i>
+            <i>System: Master Bagua Engine v10.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH MATPLOTLIB ---
+# --- 3. HÀM VẼ LA KINH 4 TẦNG ĐA VÒNG CHUYÊN SÂU ---
 def render_matplotlib_lakinh(quai_num, survey_direction):
-    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(7.5, 7.5), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
     ax.set_facecolor('#0b0f19')
 
@@ -250,38 +251,65 @@ def render_matplotlib_lakinh(quai_num, survey_direction):
 
     mapping = BAT_TRACH_MAPPING[quai_num]
 
+    # TẦNG 1: 8 hướng Bát Trạch Cát/Hung (Bán kính 0.35 -> 0.60)
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
-
-        ax.bar(rad, width=np.radians(45), bottom=0.35, height=0.55, 
+        ax.bar(rad, width=np.radians(45), bottom=0.35, height=0.25, 
                color=info["color"], alpha=0.9, edgecolor='white', linewidth=1.2)
-
-        label_text = f"{info['cat_hung']}\n{info['trigram']} {info['name']}"
-        ax.text(rad, 0.62, label_text, color='white', fontsize=10, fontweight='bold',
+        label_text = f"{info['cat_hung']}"
+        ax.text(rad, 0.47, label_text, color='white', fontsize=9, fontweight='bold',
                 ha='center', va='center')
 
+    # TẦNG 2: Quẻ vị Hậu Thiên (Bán kính 0.60 -> 0.85)
+    for dir_name, angle in DIRECTION_ANGLES.items():
+        info = mapping[dir_name]
+        rad = np.radians(angle)
+        ax.bar(rad, width=np.radians(45), bottom=0.60, height=0.25, 
+               color='#1f242c', alpha=0.95, edgecolor='#30363d', linewidth=1.0)
+        trig_text = f"{info['trigram']} {info['name']}"
+        ax.text(rad, 0.725, trig_text, color='#f0f6fc', fontsize=9,
+                ha='center', va='center')
+
+    # TẦNG 3: 24 Sơn Hướng - Địa bàn chính châm (Bán kính 0.85 -> 1.15)
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
         rad_son = np.radians(mid_deg)
-
-        ax.bar(rad_son, width=np.radians(15), bottom=0.9, height=0.4,
-               color='#161b22', alpha=0.85, edgecolor='#30363d', linewidth=0.8)
-        
-        ax.text(rad_son, 1.12, son['name'], color='#f0f6fc', fontsize=9,
+        ax.bar(rad_son, width=np.radians(15), bottom=0.85, height=0.30,
+               color='#161b22', alpha=0.9, edgecolor='#30363d', linewidth=0.8)
+        ax.text(rad_son, 1.0, son['name'], color='#58a6ff', fontsize=9, fontweight='bold',
                 ha='center', va='center')
 
+    # TẦNG 4: Ngũ Hành Nạp Âm của 24 Sơn (Bán kính 1.15 -> 1.40)
+    for son in SON_HUONG_24:
+        mid_deg = (son["deg_start"] + son["deg_end"]) / 2
+        if son["deg_start"] > son["deg_end"]:
+            mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
+        rad_son = np.radians(mid_deg)
+        ax.bar(rad_son, width=np.radians(15), bottom=1.15, height=0.25,
+               color='#0d1117', alpha=0.9, edgecolor='#30363d', linewidth=0.6)
+        ax.text(rad_son, 1.275, son['elem'], color='#8b949e', fontsize=8,
+                ha='center', va='center')
+
+    # Vòng độ số góc ngoài cùng
     for deg in [0, 45, 90, 135, 180, 225, 270, 315]:
         rad = np.radians(deg)
-        ax.text(rad, 1.42, f"{deg}°", color='#8b949e', fontsize=9, ha='center', va='center')
+        ax.text(rad, 1.52, f"{deg}°", color='#8b949e', fontsize=9, ha='center', va='center')
 
+    # Trục định hướng thực địa
     if survey_direction != "Không chọn" and survey_direction in DIRECTION_ANGLES:
         target_deg = DIRECTION_ANGLES[survey_direction]
         target_rad = np.radians(target_deg)
-        ax.annotate('', xy=(target_rad, 1.35), xytext=(0, 0),
+        ax.annotate('', xy=(target_rad, 1.45), xytext=(0, 0),
                     arrowprops=dict(facecolor='#00ffcc', edgecolor='white', lw=2, width=3, headwidth=10))
+
+    # Trung Cung
+    group_name = "Đông Tứ Mệnh" if quai_num in [1, 3, 4, 9] else "Tây Tứ Mệnh"
+    center_text = f"TRUNG CUNG\n{gender} ({eff_year})\nNhóm: {group_name}"
+    ax.text(0, 0, center_text, color='#ff7b72', fontsize=8.5, fontweight='bold',
+            ha='center', va='center', bbox=dict(boxstyle='round,pad=0.4', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
 
     ax.set_yticklabels([])
     ax.set_xticklabels([])
@@ -291,7 +319,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction):
     plt.tight_layout()
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ KÈM HIỆU ỨNG XOAY LA KINH THỰC TẾ ---
+# --- 4. HIỂN THỊ KẾT QUẢ KÈM HIỆU ỨNG ---
 if st.session_state.initialized:
     can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     mapping = BAT_TRACH_MAPPING[quai_num]
@@ -303,7 +331,7 @@ if st.session_state.initialized:
             <div style="position: absolute; top: 10px; font-weight: bold; color: #ff7b72; font-size: 14px;">BẮC (0°)</div>
             <div style="position: absolute; bottom: 10px; font-weight: bold; color: #8b949e; font-size: 14px;">NAM (180°)</div>
         </div>
-        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang quét từ trường & Định vị La Kinh...</h3>
+        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang quét từ trường & Định vị La Kinh 4 Tầng...</h3>
     </div>
     
     <style>
@@ -316,7 +344,7 @@ if st.session_state.initialized:
     
     <script>
     setTimeout(function() {
-        document.getElementById("status-text").innerText = "✨ Đã định vị xong Khí số Bát Trạch!";
+        document.getElementById("status-text").innerText = "✨ Đã hiệu chỉnh xong La Kinh Đa Vòng!";
     }, 3000);
     </script>
     """
@@ -352,7 +380,7 @@ if st.session_state.initialized:
                 """, unsafe_allow_html=True)
 
     with col_right:
-        st.subheader("🧭 Đồ họa La Kinh Bát Trạch & Định Hướng Thực Địa")
+        st.subheader("🧭 Đồ họa La Kinh 4 Tầng & Định Hướng Thực Địa")
         fig_mpl = render_matplotlib_lakinh(quai_num, target_survey_dir)
         st.pyplot(fig_mpl)
 else:
