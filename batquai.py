@@ -1,10 +1,11 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
+import time as ptime
 from datetime import datetime, time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v6.0",
+    page_title="Professional Feng Shui Master Bagua Engine v7.0 (Ultimate)",
     layout="wide"
 )
 
@@ -21,11 +22,18 @@ st.markdown("""
         color: #8b949e; 
         margin-top: 20px;
     }
+    .advice-box {
+        background-color: #161b22;
+        border-left: 4px solid #58a6ff;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SHUI MASTER BAGUA ENGINE")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Ma trận Bát Trạch Cát - Hung động theo Mệnh chủ.")
+st.title("☸️ PROFESSIONAL FENG SHUI MASTER BAGUA ENGINE v7.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: 24 Sơn Hướng, Ma trận Bát Trạch Động và Định hướng Công năng thực chiến.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT LỤC THẬP HOA GIÁP & 24 SƠN HƯỚNG ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -58,87 +66,86 @@ SON_HUONG_24 = [
     {"name": "Hợi", "deg_start": 322.5, "deg_end": 337.5},
 ]
 
-# Ma trận Bát Trạch chuẩn học thuật cho 8 quẻ mệnh (1, 2, 3, 4, 6, 7, 8, 9)
 BAT_TRACH_MAPPING = {
     1: {  # Khảm
-        "Bắc": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Họa Hải", "color": "#9e6a03", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☵", "name": "KHẢM", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."},
+        "Đông Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☶", "name": "CẤN", "desc": "Họa hỏa tai, khẩu thiệt. Nên đặt nhà vệ sinh trấn giữ."},
+        "Đông": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☳", "name": "CHẤN", "desc": "Tốt cho quan hệ gia đình, tài lộc ổn định."},
+        "Đông Nam": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☴", "name": "TỐN", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."},
+        "Nam": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☲", "name": "LY", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
+        "Tây Nam": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☷", "name": "KHÔN", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."},
+        "Tây": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☱", "name": "ĐOÀI", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."},
+        "Tây Bắc": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☰", "name": "CÀN", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."}
     },
     9: {  # Ly
-        "Bắc": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Họa Hải", "color": "#9e6a03", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☵", "name": "KHẢM", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
+        "Đông Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☶", "name": "CẤN", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."},
+        "Đông": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☳", "name": "CHẤN", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."},
+        "Đông Nam": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☴", "name": "TỐN", "desc": "Tốt cho quan hệ gia đình, tài lộc ổn định."},
+        "Nam": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☲", "name": "LY", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."},
+        "Tây Nam": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☷", "name": "KHÔN", "desc": "Họa hỏa tai, khẩu thiệt. Nên đặt nhà vệ sinh trấn giữ."},
+        "Tây": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☱", "name": "ĐOÀI", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."},
+        "Tây Bắc": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☰", "name": "CÀN", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."}
     },
     3: {  # Chấn
-        "Bắc": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Họa Hải", "color": "#9e6a03", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☵", "name": "KHẢM", "desc": "Tốt cho quan hệ gia đình, tài lộc ổn định."},
+        "Đông Bắc": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☶", "name": "CẤN", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."},
+        "Đông": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☳", "name": "CHẤN", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."},
+        "Đông Nam": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☴", "name": "TỐN", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
+        "Nam": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☲", "name": "LY", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."},
+        "Tây Nam": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☷", "name": "KHÔN", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."},
+        "Tây": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☱", "name": "ĐOÀI", "desc": "Họa hỏa tai, khẩu thiệt. Nên đặt nhà vệ sinh trấn giữ."},
+        "Tây Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☰", "name": "CÀN", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."}
     },
     4: {  # Tốn
-        "Bắc": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Họa Hải", "color": "#9e6a03", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☵", "name": "KHẢM", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."},
+        "Đông Bắc": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☶", "name": "CẤN", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."},
+        "Đông": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☳", "name": "CHẤN", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
+        "Đông Nam": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☴", "name": "TỐN", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."},
+        "Nam": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☲", "name": "LY", "desc": "Tốt cho quan hệ gia đình, tài lộc ổn định."},
+        "Tây Nam": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☷", "name": "KHÔN", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."},
+        "Tây": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☱", "name": "ĐOÀI", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."},
+        "Tây Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☰", "name": "CÀN", "desc": "Họa hỏa tai, khẩu thiệt. Nên đặt nhà vệ sinh trấn giữ."}
     },
     6: {  # Càn
-        "Bắc": {"cat_hung": "Họa Hải", "color": "#9e6a03", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☵", "name": "KHẢM", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."},
+        "Đông Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☶", "name": "CẤN", "desc": "Tốt cho quan hệ gia đình, tài lộc ổn định."},
+        "Đông": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☳", "name": "CHẤN", "desc": "Họa hỏa tai, khẩu thiệt. Nên đặt nhà vệ sinh trấn giữ."},
+        "Đông Nam": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☴", "name": "TỐN", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."},
+        "Nam": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☲", "name": "LY", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."},
+        "Tây Nam": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☷", "name": "KHÔN", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
+        "Tây": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☱", "name": "ĐOÀI", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."},
+        "Tây Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☰", "name": "CÀN", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."}
     },
     2: {  # Khôn
-        "Bắc": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Họa Hải", "color": "#9e6a03", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☵", "name": "KHẢM", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."},
+        "Đông Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☶", "name": "CẤN", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."},
+        "Đông": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☳", "name": "CHẤN", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."},
+        "Đông Nam": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☴", "name": "TỐN", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."},
+        "Nam": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☲", "name": "LY", "desc": "Họa hỏa tai, khẩu thiệt. Nên đặt nhà vệ sinh trấn giữ."},
+        "Tây Nam": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☷", "name": "KHÔN", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."},
+        "Tây": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☱", "name": "ĐOÀI", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
+        "Tây Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☰", "name": "CÀN", "desc": "Tốt cho quan hệ gia đình, tài lộc ổn định."}
     },
     7: {  # Đoài
-        "Bắc": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Họa Hải", "color": "#9e6a03", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☵", "name": "KHẢM", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."},
+        "Đông Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☶", "name": "CẤN", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
+        "Đông": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☳", "name": "CHẤN", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."},
+        "Đông Nam": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☴", "name": "TỐN", "desc": "Họa hỏa tai, khẩu thiệt. Nên đặt nhà vệ sinh trấn giữ."},
+        "Nam": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☲", "name": "LY", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."},
+        "Tây Nam": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☷", "name": "KHÔN", "desc": "Tốt cho quan hệ gia đình, tài lộc ổn định."},
+        "Tây": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☱", "name": "ĐOÀI", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."},
+        "Tây Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☰", "name": "CÀN", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."}
     },
     8: {  # Cấn
-        "Bắc": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Họa Hải", "color": "#9e6a03", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☵", "name": "KHẢM", "desc": "Họa hỏa tai, khẩu thiệt. Nên đặt nhà vệ sinh trấn giữ."},
+        "Đông Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☶", "name": "CẤN", "desc": "Tốt cho bàn thờ, tăng cường sức mạnh tinh thần."},
+        "Đông": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☳", "name": "CHẤN", "desc": "Hướng xấu nhất. Trấn bếp hoặc nhà vệ sinh."},
+        "Đông Nam": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☴", "name": "TỐN", "desc": "Gây thị phi, kiện tụng, tổn tài thất thoát."},
+        "Nam": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☲", "name": "LY", "desc": "Dễ kiện tụng, tiểu nhân quấy phá."},
+        "Tây Nam": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☷", "name": "KHÔN", "desc": "Hướng đại cát cho Cửa chính và Phòng khách."},
+        "Tây": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☱", "name": "ĐOÀI", "desc": "Tốt cho sức khỏe, trường thọ, đặt phòng ngủ."},
+        "Tây Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☰", "name": "CÀN", "desc": "Tốt cho quan hệ gia đình, tài lộc ổn định."}
     }
 }
 
@@ -212,7 +219,19 @@ with st.sidebar:
     gender = st.selectbox("Giới tính gia chủ", ["Nam", "Nữ"])
     current_yun = st.selectbox("Tam Nguyên Cửu Vận (Vận tinh)", ["Vận 9 (2024-2043)", "Vận 8 (2004-2023)"], index=0)
     
+    # Hướng thực địa của công trình cần khảo sát
+    target_survey_dir = st.selectbox(
+        "🧭 Hướng Khảo Sát Thực Địa (Nhà/Cửa/Bàn Thờ)", 
+        ["Không chọn", "Bắc", "Đông Bắc", "Đông", "Đông Nam", "Nam", "Tây Nam", "Tây", "Tây Bắc"]
+    )
+    
     if st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True):
+        with st.spinner("Đang hiệu chỉnh từ trường, xoay định vị La Kinh và lập quẻ Bát Trạch..."):
+            progress_bar = st.progress(0)
+            for i in range(100):
+                ptime.sleep(0.02)
+                progress_bar.progress(i + 1)
+            progress_bar.empty()
         st.session_state.initialized = True
 
     st.markdown("""
@@ -221,12 +240,12 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v6.0</i>
+            <i>System: Master Bagua Engine v7.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH TÍCH HỢP MA TRẬN BÁT TRẠCH CÁT - HUNG ---
-def render_matplotlib_lakinh(quai_num, gender_str, eff_year_val):
+# --- 3. HÀM VẼ LA KINH TÍCH HỢP TRỤC ĐỊNH HƯỚNG THỰC ĐỊA ---
+def render_matplotlib_lakinh(quai_num, survey_direction):
     fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
     ax.set_facecolor('#0b0f19')
@@ -236,21 +255,19 @@ def render_matplotlib_lakinh(quai_num, gender_str, eff_year_val):
 
     mapping = BAT_TRACH_MAPPING[quai_num]
 
-    # 1. Vẽ vòng 8 hướng Cát - Hung động theo Mệnh chủ
+    # 1. Vẽ vòng 8 hướng Cát - Hung động
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
 
-        # Vẽ sector màu
         ax.bar(rad, width=np.radians(45), bottom=0.35, height=0.55, 
                color=info["color"], alpha=0.9, edgecolor='white', linewidth=1.2)
 
-        # Hiển thị tên Cát/Hung và Quẻ tương ứng trên hướng
         label_text = f"{info['cat_hung']}\n{info['trigram']} {info['name']}"
         ax.text(rad, 0.62, label_text, color='white', fontsize=10, fontweight='bold',
                 ha='center', va='center')
 
-    # 2. Vẽ vòng 24 Sơn Hướng ngoại vi (Cố định địa lý)
+    # 2. Vẽ vòng 24 Sơn Hướng ngoại vi
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
@@ -268,11 +285,13 @@ def render_matplotlib_lakinh(quai_num, gender_str, eff_year_val):
         rad = np.radians(deg)
         ax.text(rad, 1.42, f"{deg}°", color='#8b949e', fontsize=9, ha='center', va='center')
 
-    # 4. Trung Cung (Thông tin Mệnh chủ)
-    group_name = "Đông Tứ Mệnh" if quai_num in [1, 3, 4, 9] else "Tây Tứ Mệnh"
-    center_text = f"TRUNG CUNG\n{gender_str} ({eff_year_val})\nNhóm: {group_name}"
-    ax.text(0, 0, center_text, color='#ff7b72', fontsize=9, fontweight='bold',
-            ha='center', va='center', bbox=dict(boxstyle='round,pad=0.4', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
+    # 4. Trục Kim chỉ nam định hướng thực địa (Nếu người dùng chọn)
+    if survey_direction != "Không chọn" and survey_direction in DIRECTION_ANGLES:
+        target_deg = DIRECTION_ANGLES[survey_direction]
+        target_rad = np.radians(target_deg)
+        # Vẽ mũi tên chỉ hướng thực địa từ tâm ra ngoài
+        ax.annotate('', xy=(target_rad, 1.35), xytext=(0, 0),
+                    arrowprops=dict(facecolor='#00ffcc', edgecolor='white', lw=2, width=3, headwidth=10))
 
     ax.set_yticklabels([])
     ax.set_xticklabels([])
@@ -282,7 +301,7 @@ def render_matplotlib_lakinh(quai_num, gender_str, eff_year_val):
     plt.tight_layout()
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ ---
+# --- 4. HIỂN THỊ KẾT QUẢ VÀ TƯ VẤN CÔNG NĂNG ---
 if st.session_state.initialized:
     can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     mapping = BAT_TRACH_MAPPING[quai_num]
@@ -298,11 +317,22 @@ if st.session_state.initialized:
         st.metric("Nhóm Mệnh", group_name)
         st.metric("Vận tinh áp dụng", current_yun)
         
-        st.info("🎯 **Chuẩn học thuật Thầy pháp:** Bản đồ tích hợp đầy đủ ma trận Cát - Hung Bát Trạch phân bổ theo đúng tọa độ mệnh chủ thực tế.")
+        if target_survey_dir != "Không chọn":
+            survey_info = mapping[target_survey_dir]
+            st.success(f"📌 **Khảo sát hướng {target_survey_dir}:** Thuộc sao **{survey_info['cat_hung']}** ({survey_info['type']}). {survey_info['desc']}")
+
+        st.markdown("### 🏛️ Gợi ý Bố trí Công năng Thực chiến")
+        for d_key, info in mapping.items():
+            if info["type"] == "Cát":
+                st.markdown(f"""
+                    <div class="advice-box">
+                        <b>{d_key} ({info['cat_hung']} - Cát):</b> Thích hợp đặt {('Cửa chính / Phòng khách' if info['cat_hung']=='Sinh Khí' else ('Phòng ngủ / Giường ngủ' if info['cat_hung']=='Thiên Y' else 'Bàn thờ / Văn phòng'))}.
+                    </div>
+                """, unsafe_allow_html=True)
 
     with col_right:
-        st.subheader("🧭 Đồ họa La Kinh Bát Trạch Động")
-        fig_mpl = render_matplotlib_lakinh(quai_num, gender, eff_year)
+        st.subheader("🧭 Đồ họa La Kinh Bát Trạch & Định Hướng Thực Địa")
+        fig_mpl = render_matplotlib_lakinh(quai_num, target_survey_dir)
         st.pyplot(fig_mpl)
 else:
     st.info("👈 **Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo đồ họa hiển thị.**")
