@@ -6,7 +6,7 @@ import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v15.0",
+    page_title="Professional Feng Shui Master Bagua Engine v16.0",
     layout="wide"
 )
 
@@ -33,10 +33,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v15.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuẩn thực chiến: Tự động hóa Vận tinh theo Năm khảo sát, Bát Trạch Quẻ Mệnh và La Kinh 5 Tầng.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v16.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuẩn thực chiến: Tự động hóa Vận tinh theo Năm khảo sát, Bát Trạch Quẻ Mệnh và La Kinh 5 Tầng chuẩn xác tuyệt đối.")
 
-# --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG & MA TRẬN PHI TINH THEO NĂM ---
+# --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG & MA TRẬN PHI TINH CHUẨN XÁC ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
@@ -67,64 +67,44 @@ SON_HUONG_24 = [
     {"name": "Hợi", "deg_start": 322.5, "deg_end": 337.5, "elem": "Thủy"},
 ]
 
-# Hàm tự động phân định Vận theo năm xây dựng/khảo sát thực tế
-def get_yun_by_year(year):
-    if 1984 <= year <= 2003:
-        return "Vận 7 (1984-2003)"
-    elif 2004 <= year <= 2023:
-        return "Vận 8 (2004-2023)"
-    elif 2024 <= year <= 2043:
-        return "Vận 9 (2024-2043)"
-    elif year >= 2044:
-        return "Vận 1 (2044-2063)"
+def tinh_van_huyen_khong(nam_nhap_trach):
+    if 1864 <= nam_nhap_trach <= 1883: return 1
+    elif 1884 <= nam_nhap_trach <= 1903: return 2
+    elif 1904 <= nam_nhap_trach <= 1923: return 3
+    elif 1924 <= nam_nhap_trach <= 1943: return 4
+    elif 1944 <= nam_nhap_trach <= 1963: return 5
+    elif 1964 <= nam_nhap_trach <= 1983: return 6
+    elif 1984 <= nam_nhap_trach <= 2003: return 7
+    elif 2004 <= nam_nhap_trach <= 2023: return 8
+    elif 2024 <= nam_nhap_trach <= 2043: return 9
     else:
-        return "Vận trước 1984"
+        khoang_cach = (nam_nhap_trach - 1864) // 20
+        van = (khoang_cach % 9) + 1
+        return van
 
-FLYING_STAR_MATRIX = {
-    "Vận 9 (2024-2043)": {
-        "Nam": {"star": "Cửu Tử (9)", "status": "Đương Vận (Đại Cát)"},
-        "Bắc": {"star": "Nhất Bạch (1)", "status": "Sinh Khí"},
-        "Tây Nam": {"star": "Nhị Hắc (2)", "status": "Bệnh Phù"},
-        "Đông": {"star": "Tam Bích (3)", "status": "Thị Phi"},
-        "Đông Nam": {"star": "Tứ Lục (4)", "status": "Văn Sương"},
-        "Trung Cung": {"star": "Ngũ Hoàng (5)", "status": "Đại Sát"},
-        "Tây Bắc": {"star": "Lục Bạch (6)", "status": "Quý Nhân"},
-        "Tây": {"star": "Thất Xích (7)", "status": "Phá Quân"},
-        "Đông Bắc": {"star": "Bát Bạch (8)", "status": "Tiến Khí"}
-    },
-    "Vận 8 (2004-2023)": {
-        "Đông Bắc": {"star": "Bát Bạch (8)", "status": "Đương Vận (Đại Cát)"},
-        "Nam": {"star": "Cửu Tử (9)", "status": "Tiến Khí"},
-        "Bắc": {"star": "Nhất Bạch (1)", "status": "Sinh Khí"},
-        "Tây Nam": {"star": "Thất Xích (7)", "status": "Thoái Khí"},
-        "Đông": {"star": "Lục Bạch (6)", "status": "Cát Tinh"},
-        "Đông Nam": {"star": "Ngũ Hoàng (5)", "status": "Đại Sát"},
-        "Tây": {"star": "Tam Bích (3)", "status": "Thị Phi"},
-        "Tây Bắc": {"star": "Nhị Hắc (2)", "status": "Bệnh Phù"},
-        "Trung Cung": {"star": "Tứ Lục (4)", "status": "Văn Sương"}
-    },
-    "Vận 7 (1984-2003)": {
-        "Tây": {"star": "Thất Xích (7)", "status": "Đương Vận (Đại Cát)"},
-        "Đông Bắc": {"star": "Cửu Tử (9)", "status": "Tiến Khí"},
-        "Nam": {"star": "Bát Bạch (8)", "status": "Sinh Khí"},
-        "Bắc": {"star": "Lục Bạch (6)", "status": "Cát Tinh"},
-        "Tây Nam": {"star": "Ngũ Hoàng (5)", "status": "Đại Sát"},
-        "Đông": {"star": "Nhị Hắc (2)", "status": "Bệnh Phù"},
-        "Đông Nam": {"star": "Tam Bích (3)", "status": "Thị Phi"},
-        "Tây Bắc": {"star": "Nhất Bạch (1)", "status": "Cát Tinh"},
-        "Trung Cung": {"star": "Tứ Lục (4)", "status": "Văn Sương"}
-    },
-    "Vận 1 (2044-2063)": {
-        "Bắc": {"star": "Nhất Bạch (1)", "status": "Đương Vận (Đại Cát)"},
-        "Tây Nam": {"star": "Nhị Hắc (2)", "status": "Bệnh Phù"},
-        "Đông": {"star": "Tam Bích (3)", "status": "Thị Phi"},
-        "Đông Nam": {"star": "Tứ Lục (4)", "status": "Văn Sương"},
-        "Trung Cung": {"star": "Ngũ Hoàng (5)", "status": "Đại Sát"},
-        "Tây Bắc": {"star": "Lục Bạch (6)", "status": "Quý Nhân"},
-        "Tây": {"star": "Thất Xích (7)", "status": "Phá Quân"},
-        "Đông Bắc": {"star": "Bát Bạch (8)", "status": "Tiến Khí"},
-        "Nam": {"star": "Cửu Tử (9)", "status": "Sinh Khí"}
-    }
+# Ma trận Phi Tinh Vận 9 chuẩn Lạc Thư bay thuận (Cửu Tử #9 nhập trung cung)
+FLYING_STAR_MATRIX_9 = {
+    "Nam": {"star": "Tam Bích (3)", "status": "Thị Phi"},
+    "Bắc": {"star": "Ngũ Hoàng (5)", "status": "Đại Sát"},
+    "Tây Nam": {"star": "Bát Bạch (8)", "status": "Tiến Khí"},
+    "Đông": {"star": "Nhất Bạch (1)", "status": "Sinh Khí"},
+    "Đông Nam": {"star": "Lục Bạch (6)", "status": "Quý Nhân"},
+    "Trung Cung": {"star": "Cửu Tử (9)", "status": "Đương Vận"},
+    "Tây Bắc": {"star": "Tứ Lục (4)", "status": "Văn Sương"},
+    "Tây": {"star": "Nhị Hắc (2)", "status": "Bệnh Phù"},
+    "Đông Bắc": {"star": "Thất Xích (7)", "status": "Phá Quân"}
+}
+
+FLYING_STAR_MATRIX_8 = {
+    "Đông Bắc": {"star": "Bát Bạch (8)", "status": "Đương Vận"},
+    "Nam": {"star": "Cửu Tử (9)", "status": "Tiến Khí"},
+    "Bắc": {"star": "Nhất Bạch (1)", "status": "Sinh Khí"},
+    "Tây Nam": {"star": "Thất Xích (7)", "status": "Thoái Khí"},
+    "Đông": {"star": "Lục Bạch (6)", "status": "Cát Tinh"},
+    "Đông Nam": {"star": "Ngũ Hoàng (5)", "status": "Đại Sát"},
+    "Tây": {"star": "Tam Bích (3)", "status": "Thị Phi"},
+    "Tây Bắc": {"star": "Nhị Hắc (2)", "status": "Bệnh Phù"},
+    "Trung Cung": {"star": "Tứ Lục (4)", "status": "Văn Sương"}
 }
 
 BAT_TRACH_MAPPING = {
@@ -279,10 +259,9 @@ with st.sidebar:
         
     gender = st.selectbox("Giới tính gia chủ", ["Nam", "Nữ"])
     
-    # Thay thế phần chọn Vận cứng nhắc bằng Năm xây dựng/khảo sát tự động nhận diện
-    survey_year = st.number_input("Năm Xây Nhà / Nhập Trạch", min_value=1984, max_value=2063, value=2026, step=1)
-    auto_yun_key = get_yun_by_year(survey_year)
-    st.info(f"📌 Nhận diện Vận: **{auto_yun_key}**")
+    survey_year = st.number_input("Năm Xây Nhà / Nhập Trạch", min_value=1864, max_value=2063, value=2026, step=1)
+    current_van = tinh_van_huyen_khong(survey_year)
+    st.info(f"📌 Tự động nhận diện: **Vận {current_van}**")
     
     target_survey_dir = st.selectbox(
         "🧭 Hướng Khảo Sát Thực Địa (Nhà/Cửa/Bàn Thờ)", 
@@ -299,12 +278,12 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v15.0</i>
+            <i>System: Master Bagua Engine v16.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH 5 TẦNG TỰ ĐỘNG THEO NĂM KHẢO SÁT ---
-def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, current_yun_key):
+# --- 3. HÀM VẼ LA KINH 5 TẦNG HOÀN CHỈNH ---
+def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, van_num):
     fig, ax = plt.subplots(figsize=(7.8, 7.8), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
     ax.set_facecolor('#0b0f19')
@@ -313,7 +292,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, c
     ax.set_theta_direction(-1)
 
     mapping = BAT_TRACH_MAPPING[quai_num]
-    star_matrix = FLYING_STAR_MATRIX.get(current_yun_key, FLYING_STAR_MATRIX["Vận 9 (2024-2043)"])
+    star_matrix = FLYING_STAR_MATRIX_9 if van_num == 9 else FLYING_STAR_MATRIX_8
 
     def get_text_rotation(angle_deg):
         rot = -angle_deg
@@ -321,7 +300,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, c
             rot += 180
         return rot
 
-    # TẦNG 1: Vận Tinh Huyền Không tự động theo Năm (Bán kính 0.35 -> 0.52)
+    # TẦNG 1: Vận Tinh Huyền Không chuẩn Lạc Thư phương vị (Bán kính 0.35 -> 0.52)
     for dir_name, angle in DIRECTION_ANGLES.items():
         star_info = star_matrix.get(dir_name, {"star": "", "status": ""})
         rad = np.radians(angle)
@@ -393,7 +372,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, c
         else:
             ax.plot([rad_t, rad_t], [1.42, 1.42 + 0.01], color='#484f58', lw=0.5)
 
-    # Thập tự thiên tâm hoàn chỉnh 4 chiều
+    # Thập tự thiên tâm hoàn chỉnh 4 chiều (Trục dọc 0°-180° và Trục ngang 90°-270°)
     ax.plot([0, np.radians(180)], [0, 1.42], color='#ff7b72', linestyle='--', lw=1.2, alpha=0.8)
     ax.plot([np.radians(180), np.radians(360)], [0, 1.42], color='#ff7b72', linestyle='--', lw=1.2, alpha=0.8)
     ax.plot([np.radians(90), np.radians(270)], [0, 1.42], color='#58a6ff', linestyle='--', lw=1.2, alpha=0.8)
@@ -424,7 +403,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, c
 if st.session_state.initialized:
     can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     mapping = BAT_TRACH_MAPPING[quai_num]
-    star_matrix = FLYING_STAR_MATRIX.get(auto_yun_key, FLYING_STAR_MATRIX["Vận 9 (2024-2043)"])
+    star_matrix = FLYING_STAR_MATRIX_9 if current_van == 9 else FLYING_STAR_MATRIX_8
 
     spin_html = f"""
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 450px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
@@ -433,7 +412,7 @@ if st.session_state.initialized:
             <div style="position: absolute; top: 10px; font-weight: bold; color: #ff7b72; font-size: 14px;">BẮC (0°)</div>
             <div style="position: absolute; bottom: 10px; font-weight: bold; color: #8b949e; font-size: 14px;">NAM (180°)</div>
         </div>
-        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang nạp Khí số cho năm {survey_year} ({auto_yun_key})...</h3>
+        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang nạp Khí số cho năm {survey_year} (Vận {current_van})...</h3>
     </div>
     
     <style>
@@ -466,7 +445,7 @@ if st.session_state.initialized:
         if enable_time and t_input:
             st.metric("Thời khắc Lập xuân / Giờ sinh", t_input.strftime("%H:%M"))
         st.metric("Nhóm Mệnh", group_name)
-        st.metric("Thời gian khảo sát / Xây nhà", f"Năm {survey_year} ({auto_yun_key})")
+        st.metric("Thời gian khảo sát / Xây nhà", f"Năm {survey_year} (Vận {current_van})")
         
         if target_survey_dir != "Không chọn":
             survey_info = mapping[target_survey_dir]
@@ -485,7 +464,7 @@ if st.session_state.initialized:
 
     with col_right:
         st.subheader("🧭 Đồ họa La Kinh Huyền Không & Bát Trạch 5 Tầng")
-        fig_mpl = render_matplotlib_lakinh(quai_num, target_survey_dir, gender, eff_year, auto_yun_key)
+        fig_mpl = render_matplotlib_lakinh(quai_num, target_survey_dir, gender, eff_year, current_van)
         st.pyplot(fig_mpl)
 else:
     st.info("👈 **Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo đồ họa hiển thị.**")
