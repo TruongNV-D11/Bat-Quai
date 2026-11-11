@@ -6,7 +6,7 @@ import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v16.0",
+    page_title="Professional Feng Shui Master Bagua Engine v17.0",
     layout="wide"
 )
 
@@ -33,10 +33,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v16.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuẩn thực chiến: Tự động hóa Vận tinh theo Năm khảo sát, Bát Trạch Quẻ Mệnh và La Kinh 5 Tầng chuẩn xác tuyệt đối.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v17.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: Tự động hóa Tam Nguyên Cửu Vận (Vận 1 - Vận 9), Bát Trạch Quẻ Mệnh và La Kinh 5 Tầng thực chiến.")
 
-# --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG & MA TRẬN PHI TINH CHUẨN XÁC ---
+# --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG & MA TRẬN 9 VẬN HUYỀN KHÔNG PHI TINH ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
@@ -67,45 +67,31 @@ SON_HUONG_24 = [
     {"name": "Hợi", "deg_start": 322.5, "deg_end": 337.5, "elem": "Thủy"},
 ]
 
+STAR_NAMES = {
+    1: "Nhất Bạch (1)", 2: "Nhị Hắc (2)", 3: "Tam Bích (3)", 
+    4: "Tứ Lục (4)", 5: "Ngũ Hoàng (5)", 6: "Lục Bạch (6)", 
+    7: "Thất Xích (7)", 8: "Bát Bạch (8)", 9: "Cửu Tử (9)"
+}
+
 def tinh_van_huyen_khong(nam_nhap_trach):
-    if 1864 <= nam_nhap_trach <= 1883: return 1
-    elif 1884 <= nam_nhap_trach <= 1903: return 2
-    elif 1904 <= nam_nhap_trach <= 1923: return 3
-    elif 1924 <= nam_nhap_trach <= 1943: return 4
-    elif 1944 <= nam_nhap_trach <= 1963: return 5
-    elif 1964 <= nam_nhap_trach <= 1983: return 6
-    elif 1984 <= nam_nhap_trach <= 2003: return 7
-    elif 2004 <= nam_nhap_trach <= 2023: return 8
-    elif 2024 <= nam_nhap_trach <= 2043: return 9
-    else:
-        khoang_cach = (nam_nhap_trach - 1864) // 20
-        van = (khoang_cach % 9) + 1
-        return van
+    khoang_cach = (nam_nhap_trach - 1864) // 20
+    van = (khoang_cach % 9) + 1
+    return van
 
-# Ma trận Phi Tinh Vận 9 chuẩn Lạc Thư bay thuận (Cửu Tử #9 nhập trung cung)
-FLYING_STAR_MATRIX_9 = {
-    "Nam": {"star": "Tam Bích (3)", "status": "Thị Phi"},
-    "Bắc": {"star": "Ngũ Hoàng (5)", "status": "Đại Sát"},
-    "Tây Nam": {"star": "Bát Bạch (8)", "status": "Tiến Khí"},
-    "Đông": {"star": "Nhất Bạch (1)", "status": "Sinh Khí"},
-    "Đông Nam": {"star": "Lục Bạch (6)", "status": "Quý Nhân"},
-    "Trung Cung": {"star": "Cửu Tử (9)", "status": "Đương Vận"},
-    "Tây Bắc": {"star": "Tứ Lục (4)", "status": "Văn Sương"},
-    "Tây": {"star": "Nhị Hắc (2)", "status": "Bệnh Phù"},
-    "Đông Bắc": {"star": "Thất Xích (7)", "status": "Phá Quân"}
-}
-
-FLYING_STAR_MATRIX_8 = {
-    "Đông Bắc": {"star": "Bát Bạch (8)", "status": "Đương Vận"},
-    "Nam": {"star": "Cửu Tử (9)", "status": "Tiến Khí"},
-    "Bắc": {"star": "Nhất Bạch (1)", "status": "Sinh Khí"},
-    "Tây Nam": {"star": "Thất Xích (7)", "status": "Thoái Khí"},
-    "Đông": {"star": "Lục Bạch (6)", "status": "Cát Tinh"},
-    "Đông Nam": {"star": "Ngũ Hoàng (5)", "status": "Đại Sát"},
-    "Tây": {"star": "Tam Bích (3)", "status": "Thị Phi"},
-    "Tây Bắc": {"star": "Nhị Hắc (2)", "status": "Bệnh Phù"},
-    "Trung Cung": {"star": "Tứ Lục (4)", "status": "Văn Sương"}
-}
+# Thuật toán sinh ma trận Phi Tinh thuận chuẩn Lạc Thư cho bất kỳ Vận nào từ 1 đến 9
+def get_fly_star_matrix(van_num):
+    # Tọa độ cơ bản Lạc Thư của 8 hướng + Trung Cung
+    base_map = {
+        "Bắc": 1, "Tây Nam": 2, "Đông": 3, "Đông Nam": 4, 
+        "Trung Cung": 5, "Tây Bắc": 6, "Tây": 7, "Đông Bắc": 8, "Nam": 9
+    }
+    matrix = {}
+    for dir_name, base_val in base_map.items():
+        # Công thức bay thuận: Star = ((base_val - 5 + van_num - 1) % 9) + 1
+        star_num = ((base_val - 5 + van_num - 1) % 9) + 1
+        status = "Đương Vận (Vượng)" if star_num == van_num else ("Sinh Khí" if star_num == (van_num % 9 + 1) else "Bình/Hung")
+        matrix[dir_name] = {"star": STAR_NAMES[star_num], "status": status, "num": star_num}
+    return matrix
 
 BAT_TRACH_MAPPING = {
     1: {  # Khảm
@@ -259,7 +245,7 @@ with st.sidebar:
         
     gender = st.selectbox("Giới tính gia chủ", ["Nam", "Nữ"])
     
-    survey_year = st.number_input("Năm Xây Nhà / Nhập Trạch", min_value=1864, max_value=2063, value=2026, step=1)
+    survey_year = st.number_input("Năm Xây Nhà / Nhập Trạch", min_value=1864, max_value=2100, value=2026, step=1)
     current_van = tinh_van_huyen_khong(survey_year)
     st.info(f"📌 Tự động nhận diện: **Vận {current_van}**")
     
@@ -278,11 +264,11 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v16.0</i>
+            <i>System: Master Bagua Engine v17.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH 5 TẦNG HOÀN CHỈNH ---
+# --- 3. HÀM VẼ LA KINH 5 TẦNG ĐỘNG THEO 9 VẬN ---
 def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, van_num):
     fig, ax = plt.subplots(figsize=(7.8, 7.8), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
@@ -292,7 +278,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
     ax.set_theta_direction(-1)
 
     mapping = BAT_TRACH_MAPPING[quai_num]
-    star_matrix = FLYING_STAR_MATRIX_9 if van_num == 9 else FLYING_STAR_MATRIX_8
+    star_matrix = get_fly_star_matrix(van_num)
 
     def get_text_rotation(angle_deg):
         rot = -angle_deg
@@ -300,7 +286,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
             rot += 180
         return rot
 
-    # TẦNG 1: Vận Tinh Huyền Không chuẩn Lạc Thư phương vị (Bán kính 0.35 -> 0.52)
+    # TẦNG 1: Vận Tinh Huyền Không động chuẩn xác cho mọi Vận 1-9 (Bán kính 0.35 -> 0.52)
     for dir_name, angle in DIRECTION_ANGLES.items():
         star_info = star_matrix.get(dir_name, {"star": "", "status": ""})
         rad = np.radians(angle)
@@ -387,7 +373,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
 
     # Trung Cung / Thiên Trì
     group_name = "Đông Tứ Mệnh" if quai_num in [1, 3, 4, 9] else "Tây Tứ Mệnh"
-    center_text = f"🧭 THIÊN TRÌ\n{gender_str} ({eff_year})\nNhóm: {group_name}"
+    center_text = f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str} ({eff_year})\nNhóm: {group_name}"
     ax.text(0, 0, center_text, color='#ff7b72', fontsize=7.5, fontweight='bold',
             ha='center', va='center', bbox=dict(boxstyle='round,pad=0.3', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
 
@@ -403,7 +389,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
 if st.session_state.initialized:
     can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     mapping = BAT_TRACH_MAPPING[quai_num]
-    star_matrix = FLYING_STAR_MATRIX_9 if current_van == 9 else FLYING_STAR_MATRIX_8
+    star_matrix = get_fly_star_matrix(current_van)
 
     spin_html = f"""
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 450px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
@@ -450,7 +436,7 @@ if st.session_state.initialized:
         if target_survey_dir != "Không chọn":
             survey_info = mapping[target_survey_dir]
             star_v = star_matrix.get(target_survey_dir, {})
-            st.success(f"📌 **Khảo sát hướng {target_survey_dir}:**\n- Bát Trạch: **{survey_info['cat_hung']}** ({survey_info['type']})\n- Vận Tinh: **{star_v.get('star')}** - *{star_v.get('status')}*")
+            st.success(f"📌 **Khảo sát hướng {target_survey_dir}:**\n- Bát Trạch: **{survey_info['cat_hung']}** ({survey_info['type']})\n- Vận Tinh (Vận {current_van}): **{star_v.get('star')}**")
 
         st.markdown("### 🏛️ Gợi ý Bố trí Công năng Thực chiến")
         for d_key, info in mapping.items():
@@ -458,7 +444,7 @@ if st.session_state.initialized:
                 star_v = star_matrix.get(d_key, {})
                 st.markdown(f"""
                     <div class="advice-box">
-                        <b>{d_key} ({info['cat_hung']} - Cát | V: {star_v.get('star')}):</b> Thích hợp đặt {('Cửa chính / Phòng khách' if info['cat_hung']=='Sinh Khí' else ('Phòng ngủ / Giường ngủ' if info['cat_hung']=='Thiên Y' else 'Bàn thờ / Văn phòng'))}.
+                        <b>{d_key} ({info['cat_hung']} - Cát | V{current_van}: {star_v.get('star')}):</b> Thích hợp đặt {('Cửa chính / Phòng khách' if info['cat_hung']=='Sinh Khí' else ('Phòng ngủ / Giường ngủ' if info['cat_hung']=='Thiên Y' else 'Bàn thờ / Văn phòng'))}.
                     </div>
                 """, unsafe_allow_html=True)
 
