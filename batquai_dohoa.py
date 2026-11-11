@@ -4,12 +4,13 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import io
 import time as time_mod
 from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v24.0",
+    page_title="Professional Feng Shui Master Bagua Engine v25.0",
     layout="wide"
 )
 
@@ -36,8 +37,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v24.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Lưu Niên/Nguyệt, Bát Trạch & 120 Phân Kim.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v25.0 (MASTER GRADE)")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Xuất Báo Cáo.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT & QUY TẮC MÀU NGŨ HÀNH CỬU TINH ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -201,6 +202,44 @@ def get_annual_monthly_charts(year_num, month_num):
     
     return annual_chart, monthly_chart
 
+# --- TÍNH TOÁN THẦN SÁT NIÊN HẠN (THÁI TUẾ, TUẾ PHÁ, TAM SÁT, NGŨ HOÀNG) ---
+def get_annual_shanshen(year_num):
+    # Xác định Chi của năm (0: Tý, 1: Sửu, ..., 11: Hợi)
+    chi_idx = (year_num - 1984) % 12
+    chi_names = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
+    year_chi = chi_names[chi_idx]
+    
+    # 1. Thái Tuế: Trùng với phương vị Địa Chi của năm
+    chi_to_dir = {
+        "Tý": "Bắc", "Ngọ": "Nam", "Mão": "Đông", "Dậu": "Tây",
+        "Thìn": "Đông Nam", "Tuất": "Tây Bắc", "Sửu": "Đông Bắc", "Mùi": "Tây Nam",
+        "Dần": "Đông Bắc", "Thân": "Tây Nam", "Tỵ": "Đông Nam", "Hợi": "Tây Bắc"
+    }
+    tai_sui_dir = chi_to_dir.get(year_chi, "Bắc")
+    
+    # 2. Tuế Phá: Đối diện Thái Tuế
+    opposite_dir = {
+        "Bắc": "Nam", "Nam": "Bắc", "Đông": "Tây", "Tây": "Đông",
+        "Đông Bắc": "Tây Nam", "Tây Nam": "Đông Bắc", "Đông Nam": "Tây Bắc", "Tây Bắc": "Đông Nam"
+    }
+    sui_po_dir = opposite_dir.get(tai_sui_dir, "Nam")
+    
+    # 3. Ngũ Hoàng niên hạn (Trung tâm bay đi đâu)
+    annual_center = ((11 - (year_num % 9)) % 9)
+    if annual_center == 0: annual_center = 9
+    ngu_hoang_dir = "Trung Cung"
+    for d_name, p_num in BASE_PALACE_MAP.items():
+        if p_num == annual_center:
+            ngu_hoang_dir = d_name
+            break
+            
+    return {
+        "year_chi": year_chi,
+        "tai_sui": tai_sui_dir,
+        "sui_po": sui_po_dir,
+        "ngu_hoang": ngu_hoang_dir
+    }
+
 def analyze_exact_degree(deg):
     deg = deg % 360.0
     matched_son = get_son_by_degree(deg)
@@ -217,9 +256,8 @@ def analyze_exact_degree(deg):
                 break
     return matched_son, warning
 
-# --- MA TRẬN BÁT TRẠCH CHUẨN XÁC CHO 8 QUẺ MỆNH ---
 BAT_TRACH_MAPPING = {
-    1: {  # Khảm (Đông Tứ Mệnh)
+    1: {  # Khảm
         "Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1d4ed8", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#b91c1c", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#15803d", "trigram": "☳", "name": "CHẤN"},
@@ -229,7 +267,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#4b5563", "trigram": "☱", "name": "ĐOÀI"},
         "Tây Bắc": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9a3412", "trigram": "☰", "name": "CÀN"}
     },
-    9: {  # Ly (Đông Tứ Mệnh)
+    9: {  # Ly
         "Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#15803d", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9a3412", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#16a34a", "trigram": "☳", "name": "CHẤN"},
@@ -239,7 +277,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#b91c1c", "trigram": "☱", "name": "ĐOÀI"},
         "Tây Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#7f1d1d", "trigram": "☰", "name": "CÀN"}
     },
-    3: {  # Chấn (Đông Tứ Mệnh)
+    3: {  # Chấn
         "Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#0284c7", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#7f1d1d", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1d4ed8", "trigram": "☳", "name": "CHẤN"},
@@ -249,7 +287,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#b91c1c", "trigram": "☱", "name": "ĐOÀI"},
         "Tây Bắc": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#4b5563", "trigram": "☰", "name": "CÀN"}
     },
-    4: {  # Tốn (Đông Tứ Mệnh)
+    4: {  # Tốn
         "Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#16a34a", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9a3412", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#15803d", "trigram": "☳", "name": "CHẤN"},
@@ -259,7 +297,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#4b5563", "trigram": "☱", "name": "ĐOÀI"},
         "Tây Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#b91c1c", "trigram": "☰", "name": "CÀN"}
     },
-    6: {  # Càn (Tây Tứ Mệnh)
+    6: {  # Càn
         "Bắc": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#4b5563", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#0284c7", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#b91c1c", "trigram": "☳", "name": "CHẤN"},
@@ -269,7 +307,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#16a34a", "trigram": "☱", "name": "ĐOÀI"},
         "Tây Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1d4ed8", "trigram": "☰", "name": "CÀN"}
     },
-    2: {  # Khôn (Tây Tứ Mệnh)
+    2: {  # Khôn
         "Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#7f1d1d", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#16a34a", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9a3412", "trigram": "☳", "name": "CHẤN"},
@@ -279,7 +317,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#0284c7", "trigram": "☱", "name": "ĐOÀI"},
         "Tây Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#15803d", "trigram": "☰", "name": "CÀN"}
     },
-    7: {  # Đoài (Tây Tứ Mệnh)
+    7: {  # Đoài
         "Bắc": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9a3412", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#15803d", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#7f1d1d", "trigram": "☳", "name": "CHẤN"},
@@ -289,7 +327,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1d4ed8", "trigram": "☱", "name": "ĐOÀI"},
         "Tây Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#16a34a", "trigram": "☰", "name": "CÀN"}
     },
-    8: {  # Cấn (Tây Tứ Mệnh)
+    8: {  # Cấn
         "Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#b91c1c", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1d4ed8", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9a3412", "trigram": "☳", "name": "CHẤN"},
@@ -384,14 +422,14 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v24.0
+        System: Master Bagua Engine v25.0
     </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH KÝ HIỆU HÓA GỌN GÀNG (CHUẨN THẦY PHONG THỦY) ---
-def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, alpha_bg=1.0):
+# --- 3. HÀM VẼ LA KINH MASTER GRADE (CÓ ĐÁNH DẤU THẦN SÁT NIÊN HẠN) ---
+def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
     plt.close('all')
-    fig, ax = plt.subplots(figsize=(9.8, 10.4), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(9.8, 10.6), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_theta_zero_location('N')
@@ -399,6 +437,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.set_ylim(0, 1.66)
     
     mapping = BAT_TRACH_MAPPING[quai_num]
+    shanshen = get_annual_shanshen(survey_yr)
     
     def get_text_rotation(angle_deg):
         rot = -angle_deg
@@ -418,9 +457,19 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.text(rad, 0.77, info['cat_hung'], color='#ffffff', fontsize=8.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
                 
+        # Hiển thị tên cung + Cờ Thần Sát năm nếu có (Thái Tuế / Tuế Phá / Ngũ Hoàng)
+        palace_label = f"{info['trigram']} {info['name']}"
+        if dir_name == shanshen["tai_sui"]:
+            palace_label += "\n🚩[Thái Tuế]"
+        elif dir_name == shanshen["sui_po"]:
+            palace_label += "\n⚡[Tuế Phá]"
+        elif dir_name == shanshen["ngu_hoang"]:
+            palace_label += "\n⚠️[Ngũ Hoàng]"
+            
         ax.bar(bar_start, width=np.radians(45), bottom=0.86, height=0.18, align='edge',
                color='#1f242c', alpha=0.92 * alpha_bg, edgecolor='#30363d', linewidth=1.0, zorder=2)
-        ax.text(rad, 0.95, f"{info['trigram']} {info['name']}", color='#f0f6fc', fontsize=8.2, fontweight='bold',
+        ax.text(rad, 0.95, palace_label, color='#fde047' if "Phá" in palace_label or "Hoàng" in palace_label or "Tuế" in palace_label else '#f0f6fc', 
+                fontsize=7.5 if "\n" in palace_label else 8.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
 
     # --- TẦNG 5 & 6: 24 SƠN HƯỚNG & NGŨ HÀNH (r: 1.04 -> 1.38) ---
@@ -458,27 +507,24 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         if d_tick % 45 == 0:
             ax.text(rad_t, 1.58, f"{d_tick}°", color='#f0f6fc', fontsize=8.0, fontweight='bold', ha='center', va='center', zorder=4)
 
-    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG): KÝ HIỆU SỐ GỌN GÀNG (S.H.V & N.T) ---
+    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG): KÝ HIỆU SỐ GỌN GÀNG ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
         rot_angle = get_text_rotation(angle)
         
-        # Vòng 2 (r: 0.48 -> 0.68): Lưu Niên & Lưu Nguyệt (Ký hiệu: N[sao] - T[sao])
+        # Vòng 2: Lưu Niên & Lưu Nguyệt
         y_star = annual_chart.get(dir_name, 1)
         m_star = monthly_chart.get(dir_name, 1)
         y_meta = STAR_META[y_star]
-        m_meta = STAR_META[m_star]
         
         ax.bar(bar_start, width=np.radians(45), bottom=0.48, height=0.20, align='edge',
                color=y_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#ffffff', linewidth=0.8, zorder=20)
-        
-        # Gọn gàng tuyệt đối: N:6 - T:4
         ym_label = f"N:{y_star} | T:{m_star}"
         ax.text(rad, 0.58, ym_label, color=y_meta["fg"], fontsize=8.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
-        # Vòng 1 (r: 0.24 -> 0.48): Tinh Bàn Huyền Không (Ký hiệu: S[s].H[h].[Vv])
+        # Vòng 1: Tinh Bàn Huyền Không
         p_info = xk_chart["palaces"].get(dir_name, {"son": 1, "huong": 1, "van": van_num})
         s_star = p_info['son']
         h_star = p_info['huong']
@@ -487,8 +533,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         
         ax.bar(bar_start, width=np.radians(45), bottom=0.24, height=0.24, align='edge',
                color=h_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#cbd5e1', linewidth=0.9, zorder=20)
-        
-        # Chuẩn định dạng Thầy Phong thủy: S:2 H:7 [V:9]
         xk_label = f"S:{s_star} H:{h_star}\n[V:{v_star}]"
         ax.text(rad, 0.36, xk_label, color=h_meta["fg"], fontsize=7.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
@@ -517,32 +561,32 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     
-    # --- BẢNG CHÚ GIẢI CHI TIẾT DƯỚI ĐÁY (ĐỂ THẦY DỄ TRA CỨU) ---
+    # --- BẢNG CHÚ GIẢI THẦN SÁT & KÝ HIỆU ---
     legend_text = (
-        "BẢNG CHÚ GIẢI KÝ HIỆU LA KINH CHUYÊN SÂU:\n"
-        "• Vòng 1 (Trong): S = Sơn Tinh (Quản Nhân Đinh/Sức khỏe) | H = Hướng Tinh (Quản Tài lộc) | [V] = Vận Tinh chủ quản\n"
-        "• Vòng 2 (Ngoài): N = Lưu Niên (Sao năm) | T = Lưu Nguyệt (Sao tháng)\n"
-        "• MÀU NỀN & NGŨ HÀNH:  ■ Hồng/Tím (9 Tử - Đại Cát)   ■ Xanh dương (1 Bạch - Cát)   ■ Vàng (8 Bạch - Tài lộc)   ■ Đỏ sẫm/Nâu (2 Hắc, 3 Bích, 5 Hoàng - Hung sát)"
+        f"NIÊN HẠN {survey_yr} ({shanshen['year_chi']}): 🚩 Thái Tuế: {shanshen['tai_sui']} | ⚡ Tuế Phá: {shanshen['sui_po']} | ⚠️ Ngũ Hoàng: {shanshen['ngu_hoang']}\n"
+        "• Vòng 1: S (Sơn Tinh) | H (Hướng Tinh) | [V] (Vận Tinh)  • Vòng 2: N (Lưu Niên) | T (Lưu Nguyệt)\n"
+        "• MÀU NỀN: ■ Hồng/Tím (9 Tử - Đại Cát) ■ Xanh dương (1 Bạch - Cát) ■ Vàng (8 Bạch - Tài) ■ Đỏ/Nâu (2H, 3B, 5H - Hung sát)"
     )
-    fig.text(0.5, 0.002, legend_text, ha='center', va='bottom', fontsize=7.5, color='#e2e8f0',
+    fig.text(0.5, 0.002, legend_text, ha='center', va='bottom', fontsize=7.2, color='#e2e8f0',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='#161b22', edgecolor='#30363d', lw=1))
     
-    plt.tight_layout(rect=[0, 0.07, 1, 1])
+    plt.tight_layout(rect=[0, 0.075, 1, 1])
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ ---
+# --- 4. HIỂN THỊ KẾT QUẢ & CÔNG CỤ NÂNG CAO ---
 if st.session_state.initialized:
     can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     mapping = BAT_TRACH_MAPPING[quai_num]
     xk_chart = compute_xuan_kong_chart(current_van, exact_deg)
     annual_chart, monthly_chart = get_annual_monthly_charts(survey_year, survey_month)
     son_info, khong_vong_msg = analyze_exact_degree(exact_deg)
+    shanshen_info = get_annual_shanshen(survey_year)
     
     if st.session_state.play_spin:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang lập Tinh Bàn & La Kinh Chuyên Sâu cho năm {survey_year} (Vận {current_van})...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v25.0 cho năm {survey_year}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -555,7 +599,7 @@ if st.session_state.initialized:
         placeholder = st.empty()
         with placeholder.container():
             components.html(spin_html, height=450)
-        time_mod.sleep(2.5)
+        time_mod.sleep(2.0)
         placeholder.empty()
         st.session_state.play_spin = False
 
@@ -574,6 +618,7 @@ if st.session_state.initialized:
             f"- Bát Trạch: {survey_info['cat_hung']} ({survey_info['type']})\n"
             f"- Tinh Bàn Hướng: Sơn {STAR_META[p_facing['son']]['name']} | Hướng {STAR_META[p_facing['huong']]['name']}\n"
             f"- Cách cục: {xk_chart['cuc_dien']}\n"
+            f"- Thần Sát năm {survey_year}: Thái Tuế ({shanshen_info['tai_sui']}), Ngũ Hoàng ({shanshen_info['ngu_hoang']})\n"
             f"- Phân Kim: {khong_vong_msg}"
         )
         
@@ -595,24 +640,50 @@ if st.session_state.initialized:
         with tab1:
             fig_mpl = render_matplotlib_lakinh(
                 quai_num, exact_deg, show_laser, gender, eff_year,
-                current_van, xk_chart, annual_chart, monthly_chart, alpha_bg=1.0
+                current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=1.0
             )
             st.pyplot(fig_mpl)
+            
+            # --- TÍNH NĂNG XUẤT ẢNH HIGH-RES ---
+            buf = io.BytesIO()
+            fig_mpl.savefig(buf, format="png", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none')
+            buf.seek(0)
+            st.download_button(
+                label="📥 Tải xuống Bản vẽ La Kinh chất lượng cao (PNG 300 DPI)",
+                data=buf,
+                file_name=f"LaKinh_Master_{survey_year}_{exact_deg}deg.png",
+                mime="image/png",
+                use_container_width=True
+            )
+            
         with tab2:
-            st.markdown("Tải lên hình ảnh sơ đồ mặt bằng nhà (PNG/JPG) để đặt La Kinh trong suốt vào tâm nhà:")
-            uploaded_plan = st.file_uploader("Chọn ảnh mặt bằng", type=["png", "jpg", "jpeg"])
+            st.markdown("### 🎛️ Công cụ Căn chỉnh Tâm & Xoay Bản vẽ Mặt bằng Thực tế")
+            uploaded_plan = st.file_uploader("Chọn ảnh mặt bằng nhà (PNG/JPG)", type=["png", "jpg", "jpeg"])
+            
             if uploaded_plan is not None:
-                opacity_val = st.slider("Độ mờ nền La Kinh (để nhìn rõ nét vẽ mặt bằng bên dưới)", 0.15, 0.85, 0.45, 0.05)
+                col_s1, col_s2 = st.columns(2)
+                with col_s1:
+                    opacity_val = st.slider("Độ trong suốt La Kinh", 0.15, 0.90, 0.45, 0.05)
+                    rotate_plan = st.slider("Góc xoay mặt bằng chỉnh lệch tâm (°)", -180, 180, 0, 1)
+                with col_s2:
+                    offset_x = st.slider("Dịch chuyển Ngang (X)", -200, 200, 0, 5)
+                    offset_y = st.slider("Dịch chuyển Dọc (Y)", -200, 200, 0, 5)
+                    
                 plan_img = Image.open(uploaded_plan)
+                if rotate_plan != 0:
+                    plan_img = plan_img.rotate(rotate_plan, expand=True)
+                    
                 fig_overlay = render_matplotlib_lakinh(
                     quai_num, exact_deg, show_laser, gender, eff_year,
-                    current_van, xk_chart, annual_chart, monthly_chart, alpha_bg=opacity_val
+                    current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=opacity_val
                 )
-                ax_img = fig_overlay.add_axes([0.08, 0.08, 0.84, 0.84], zorder=-1)
+                
+                # Tinh chỉnh vị trí offset trục X, Y của hình ảnh mặt bằng
+                ax_img = fig_overlay.add_axes([0.08 + (offset_x/1000.0), 0.08 + (offset_y/1000.0), 0.84, 0.84], zorder=-1)
                 ax_img.imshow(plan_img)
                 ax_img.axis('off')
                 st.pyplot(fig_overlay, transparent=True)
             else:
-                st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt tính năng soi cung vị trên kiến trúc thực tế.")
+                st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh tâm và góc xoay.")
 else:
     st.info("👈 Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo đồ họa hiển thị.")
