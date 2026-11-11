@@ -10,7 +10,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v25.0",
+    page_title="Professional Feng Shui Master Bagua Engine v26.0",
     layout="wide"
 )
 
@@ -37,8 +37,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v25.0 (MASTER GRADE)")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Xuất Báo Cáo.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v26.0 (MASTER GRADE)")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng Toàn Diện & Xuất Báo Cáo.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT & QUY TẮC MÀU NGŨ HÀNH CỬU TINH ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -202,14 +202,11 @@ def get_annual_monthly_charts(year_num, month_num):
     
     return annual_chart, monthly_chart
 
-# --- TÍNH TOÁN THẦN SÁT NIÊN HẠN (THÁI TUẾ, TUẾ PHÁ, TAM SÁT, NGŨ HOÀNG) ---
 def get_annual_shanshen(year_num):
-    # Xác định Chi của năm (0: Tý, 1: Sửu, ..., 11: Hợi)
     chi_idx = (year_num - 1984) % 12
     chi_names = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
     year_chi = chi_names[chi_idx]
     
-    # 1. Thái Tuế: Trùng với phương vị Địa Chi của năm
     chi_to_dir = {
         "Tý": "Bắc", "Ngọ": "Nam", "Mão": "Đông", "Dậu": "Tây",
         "Thìn": "Đông Nam", "Tuất": "Tây Bắc", "Sửu": "Đông Bắc", "Mùi": "Tây Nam",
@@ -217,14 +214,12 @@ def get_annual_shanshen(year_num):
     }
     tai_sui_dir = chi_to_dir.get(year_chi, "Bắc")
     
-    # 2. Tuế Phá: Đối diện Thái Tuế
     opposite_dir = {
         "Bắc": "Nam", "Nam": "Bắc", "Đông": "Tây", "Tây": "Đông",
         "Đông Bắc": "Tây Nam", "Tây Nam": "Đông Bắc", "Đông Nam": "Tây Bắc", "Tây Bắc": "Đông Nam"
     }
     sui_po_dir = opposite_dir.get(tai_sui_dir, "Nam")
     
-    # 3. Ngũ Hoàng niên hạn (Trung tâm bay đi đâu)
     annual_center = ((11 - (year_num % 9)) % 9)
     if annual_center == 0: annual_center = 9
     ngu_hoang_dir = "Trung Cung"
@@ -422,11 +417,11 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v25.0
+        System: Master Bagua Engine v26.0
     </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH MASTER GRADE (CÓ ĐÁNH DẤU THẦN SÁT NIÊN HẠN) ---
+# --- 3. HÀM VẼ LA KINH MASTER GRADE v26.0 ---
 def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
     plt.close('all')
     fig, ax = plt.subplots(figsize=(9.8, 10.6), subplot_kw=dict(polar=True))
@@ -457,7 +452,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.text(rad, 0.77, info['cat_hung'], color='#ffffff', fontsize=8.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
                 
-        # Hiển thị tên cung + Cờ Thần Sát năm nếu có (Thái Tuế / Tuế Phá / Ngũ Hoàng)
         palace_label = f"{info['trigram']} {info['name']}"
         if dir_name == shanshen["tai_sui"]:
             palace_label += "\n🚩[Thái Tuế]"
@@ -507,13 +501,12 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         if d_tick % 45 == 0:
             ax.text(rad_t, 1.58, f"{d_tick}°", color='#f0f6fc', fontsize=8.0, fontweight='bold', ha='center', va='center', zorder=4)
 
-    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG): KÝ HIỆU SỐ GỌN GÀNG ---
+    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG) ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
         rot_angle = get_text_rotation(angle)
         
-        # Vòng 2: Lưu Niên & Lưu Nguyệt
         y_star = annual_chart.get(dir_name, 1)
         m_star = monthly_chart.get(dir_name, 1)
         y_meta = STAR_META[y_star]
@@ -524,7 +517,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.text(rad, 0.58, ym_label, color=y_meta["fg"], fontsize=8.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
-        # Vòng 1: Tinh Bàn Huyền Không
         p_info = xk_chart["palaces"].get(dir_name, {"son": 1, "huong": 1, "van": van_num})
         s_star = p_info['son']
         h_star = p_info['huong']
@@ -586,7 +578,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v25.0 cho năm {survey_year}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v26.0 cho năm {survey_year}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -644,7 +636,6 @@ if st.session_state.initialized:
             )
             st.pyplot(fig_mpl)
             
-            # --- TÍNH NĂNG XUẤT ẢNH HIGH-RES ---
             buf = io.BytesIO()
             fig_mpl.savefig(buf, format="png", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none')
             buf.seek(0)
@@ -657,21 +648,30 @@ if st.session_state.initialized:
             )
             
         with tab2:
-            st.markdown("### 🎛️ Công cụ Căn chỉnh Tâm & Xoay Bản vẽ Mặt bằng Thực tế")
+            st.markdown("### 🎛️ Căn chỉnh Tâm, Góc Xoay & Thu Phóng Bản vẽ Mặt bằng")
             uploaded_plan = st.file_uploader("Chọn ảnh mặt bằng nhà (PNG/JPG)", type=["png", "jpg", "jpeg"])
             
             if uploaded_plan is not None:
-                col_s1, col_s2 = st.columns(2)
+                col_s1, col_s2, col_s3 = st.columns(3)
                 with col_s1:
                     opacity_val = st.slider("Độ trong suốt La Kinh", 0.15, 0.90, 0.45, 0.05)
-                    rotate_plan = st.slider("Góc xoay mặt bằng chỉnh lệch tâm (°)", -180, 180, 0, 1)
+                    rotate_plan = st.slider("Góc xoay mặt bằng (°)", -180, 180, 0, 1)
                 with col_s2:
-                    offset_x = st.slider("Dịch chuyển Ngang (X)", -200, 200, 0, 5)
-                    offset_y = st.slider("Dịch chuyển Dọc (Y)", -200, 200, 0, 5)
+                    offset_x = st.slider("Dịch ngang (X)", -200, 200, 0, 5)
+                    offset_y = st.slider("Dịch dọc (Y)", -200, 200, 0, 5)
+                with col_s3:
+                    zoom_scale = st.slider("Thu phóng bản vẽ (Zoom %)", 40, 200, 100, 5)
                     
                 plan_img = Image.open(uploaded_plan)
                 if rotate_plan != 0:
                     plan_img = plan_img.rotate(rotate_plan, expand=True)
+                    
+                # Xử lý zoom co giãn kích thước ảnh mặt bằng theo tỷ lệ %
+                if zoom_scale != 100:
+                    orig_w, orig_h = plan_img.size
+                    new_w = int(orig_w * (zoom_scale / 100.0))
+                    new_h = int(orig_h * (zoom_scale / 100.0))
+                    plan_img = plan_img.resize((max(10, new_w), max(10, new_h)), Image.Resampling.LANCZOS)
                     
                 fig_overlay = render_matplotlib_lakinh(
                     quai_num, exact_deg, show_laser, gender, eff_year,
@@ -683,7 +683,19 @@ if st.session_state.initialized:
                 ax_img.imshow(plan_img)
                 ax_img.axis('off')
                 st.pyplot(fig_overlay, transparent=True)
+                
+                # --- TÍNH NĂNG TẢI ẢNH MẶT BẰNG ÁP LA KINH ---
+                buf_overlay = io.BytesIO()
+                fig_overlay.savefig(buf_overlay, format="png", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none')
+                buf_overlay.seek(0)
+                st.download_button(
+                    label="📥 Tải xuống Bản vẽ Mặt bằng áp La Kinh (PNG 300 DPI)",
+                    data=buf_overlay,
+                    file_name=f"MatBang_LaKinh_{survey_year}_{exact_deg}deg.png",
+                    mime="image/png",
+                    use_container_width=True
+                )
             else:
-                st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh tâm và góc xoay.")
+                st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 else:
     st.info("👈 Vui lòng nhập thông số cá nhân ở thanh bên trái và bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo đồ họa hiển thị.")
