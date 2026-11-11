@@ -8,7 +8,7 @@ import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v21.5",
+    page_title="Professional Feng Shui Master Bagua Engine v21.6",
     layout="wide"
 )
 
@@ -19,7 +19,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v21.5")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v21.6")
 
 # --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -89,12 +89,13 @@ def compute_full_xuan_kong_chart(van_num, facing_deg):
     sitting_son = get_son_by_degree(sitting_deg)
     
     van_chart = phi_tinh_9_cung(van_num, direction=1)
+    
     son_center = van_chart[sitting_son["dir"]]
     son_dir = sitting_son["pol"] if son_center == 5 else (1 if sitting_son["yuan"] == 0 else -1)
     son_chart = phi_tinh_9_cung(son_center, direction=son_dir)
     
     huong_center = van_chart[facing_son["dir"]]
-    huong_dir = facing_son["pol"] if huong_center == 5 else (1 if huong_center["yuan"] == 0 else -1)
+    huong_dir = facing_son["pol"] if huong_center == 5 else (1 if facing_son["yuan"] == 0 else -1)
     huong_chart = phi_tinh_9_cung(huong_center, direction=huong_dir)
     
     full_palaces = {p_name: {"van": van_chart[p_name], "son": son_chart[p_name], "huong": huong_chart[p_name]} for p_name in LO_SHU_BASE.keys()}
@@ -273,7 +274,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.bar(bar_start, width=np.radians(45), bottom=0.85, height=0.17, color='#1f242c', alpha=0.95, edgecolor='#30363d', linewidth=1.0, zorder=2)
         ax.text(rad, 0.935, f"{info['trigram']} {info['name']}", color='#f0f6fc', fontsize=8.0, fontweight='bold', ha='center', va='center', rotation=get_text_rotation(angle), rotation_mode='anchor', zorder=3)
                 
-    # 2. 24 SƠN HƯỚNG & NẠP ÂM (ĐỒNG NHẤT GÓC BẮT ĐẦU)
+    # 2. 24 SƠN HƯỚNG & NẠP ÂM
     for son in SON_HUONG_24:
         mid_deg = ((son["deg_start"] + son["deg_end"]) / 2) % 360
         if son["deg_start"] > son["deg_end"]:
@@ -304,7 +305,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         if d_tick % 45 == 0:
             ax.text(rad_t, 1.58, f"{d_tick}°", color='#c9d1d9', fontsize=7.5, ha='center', va='center', zorder=3)
 
-    # 5. 2 VÒNG TRONG CÙNG (ĐỒNG NHẤT GÓC TÂM ±22.5°, KHỚP 100% CÁC CUNG BÊN NGOÀI)
+    # 5. 2 VÒNG TRONG CÙNG (ĐỒNG NHẤT GÓC TÂM ±22.5°)
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
@@ -355,7 +356,7 @@ if st.session_state.initialized:
         st.metric("Can Chi", f"{can} {chi} ({eff_year})")
         st.metric("Nhóm Mệnh", group_name)
     with col_right:
-        st.subheader("🧭 Đồ họa La Kinh v21.5")
+        st.subheader("🧭 Đồ họa La Kinh v21.6")
         fig_mpl = render_matplotlib_lakinh(quai_num, exact_deg, show_laser, gender, eff_year, current_van, xk_chart, annual_chart, monthly_chart)
         st.pyplot(fig_mpl)
 else:
