@@ -6,7 +6,7 @@ import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v19.0",
+    page_title="Professional Feng Shui Master Bagua Engine v20.0",
     layout="wide"
 )
 
@@ -33,8 +33,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v19.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên nghiệp: Tự động hóa Tam Nguyên Cửu Vận (Vận 1 - Vận 9), Bát Trạch chuẩn xác 8 Quẻ Mệnh và La Kinh 5 Tầng thực chiến.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v20.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên nghiệp thực chiến: Tự động hóa Tam Nguyên Cửu Vận, Bát Trạch 8 Quẻ Mệnh, La Kinh 5 Tầng và Vạch chia độ chuẩn xác.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG & MA TRẬN 9 VẬN HUYỀN KHÔNG PHI TINH ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -162,7 +162,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☱", "name": "ĐOÀI"},
         "Tây Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☰", "name": "CÀN"}
     },
-    8: {  # Cấn (Tây Tứ Mệnh) - ĐÃ CHUẨN XÁC TUYỆT ĐỐI
+    8: {  # Cấn (Tây Tứ Mệnh)
         "Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☵", "name": "KHẢM"},
         "Đông Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Họa Hải", "type": "Hung", "color": "#9e6a03", "trigram": "☳", "name": "CHẤN"},
@@ -262,11 +262,11 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v19.0</i>
+            <i>System: Master Bagua Engine v20.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH 5 TẦNG HOÀN CHỈNH, CHỐNG ĐÈ CHỮ ---
+# --- 3. HÀM VẼ LA KINH 5 TẦNG TỐI ƯU THỰC CHI CHIẾN ---
 def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, van_num):
     fig, ax = plt.subplots(figsize=(7.8, 7.8), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
@@ -284,7 +284,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
             rot += 180
         return rot
 
-    # TẦNG 1: Vận Tinh Huyền Không (Bán kính r = 0.44, font size = 7 để tách bạch hoàn toàn)
+    # TẦNG 1: Vận Tinh Huyền Không (Bán kính r = 0.42, font size = 7 chống đè chữ tuyệt đối)
     for dir_name, angle in DIRECTION_ANGLES.items():
         star_info = star_matrix.get(dir_name, {"star": "", "status": ""})
         rad = np.radians(angle)
@@ -296,7 +296,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
         ax.text(rad, 0.42, star_text, color='#38bdf8', fontsize=7, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
 
-    # TẦNG 2: 8 hướng Bát Trạch Cát/Hung (Bán kính r = 0.63)
+    # TẦNG 2: 8 hướng Bát Trạch Cát/Hung (Bán kính r = 0.62)
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
@@ -345,22 +345,35 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
         ax.text(rad_son, 1.30, son['elem'], color='#8b949e', fontsize=7,
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
 
-    # Vòng chia độ nhỏ chi tiết ngoài cùng (Vạch chia mỗi 1 độ và 5 độ)
-    for d_tick in range(0, 360):
+    # ---------------------------------------------------------
+    # VÒNG NGOÀI CÙNG: VẠCH CHIA ĐỘ CHI TIẾT (1° VÀ 5° ĐẾN 360°)
+    # ---------------------------------------------------------
+    for d_tick in range(360):
         rad_t = np.radians(d_tick)
-        if d_tick % 5 == 0:
-            line_len = 0.04 if d_tick % 15 == 0 else 0.025
-            ax.plot([rad_t, rad_t], [1.42, 1.42 + line_len], color='#8b949e', lw=1.0)
-            if d_tick % 45 == 0:
-                ax.text(rad_t, 1.55, f"{d_tick}°", color='#8b949e', fontsize=7.5, ha='center', va='center')
+        if d_tick % 15 == 0:
+            line_len = 0.05
+            lw = 1.2
+            col = '#FFD700'
+        elif d_tick % 5 == 0:
+            line_len = 0.03
+            lw = 0.8
+            col = 'white'
         else:
-            ax.plot([rad_t, rad_t], [1.42, 1.42 + 0.01], color='#484f58', lw=0.5)
+            line_len = 0.015
+            lw = 0.4
+            col = '#6e7681'
+            
+        ax.plot([rad_t, rad_t], [1.42, 1.42 + line_len], color=col, lw=lw)
+        if d_tick % 45 == 0:
+            ax.text(rad_t, 1.56, f"{d_tick}°", color='#8b949e', fontsize=7.5, ha='center', va='center')
 
-    # Thập tự thiên tâm hoàn chỉnh 4 chiều (Trục dọc 0°-180° và Trục ngang 90°-270°)
-    ax.plot([0, np.radians(180)], [0, 1.42], color='#ff7b72', linestyle='--', lw=1.2, alpha=0.8)
-    ax.plot([np.radians(180), np.radians(360)], [0, 1.42], color='#ff7b72', linestyle='--', lw=1.2, alpha=0.8)
-    ax.plot([np.radians(90), np.radians(270)], [0, 1.42], color='#58a6ff', linestyle='--', lw=1.2, alpha=0.8)
-    ax.plot([np.radians(270), np.radians(450)], [0, 1.42], color='#58a6ff', linestyle='--', lw=1.2, alpha=0.8)
+    # ---------------------------------------------------------
+    # THẬP TỰ THIÊN TÂM HOÀN CHỈNH 4 CHIỀU (DỌC & NGANG)
+    # ---------------------------------------------------------
+    ax.plot([0, np.radians(180)], [0, 1.42], color='#ff7b72', linestyle='--', lw=1.2, alpha=0.8, zorder=10)
+    ax.plot([np.radians(180), np.radians(360)], [0, 1.42], color='#ff7b72', linestyle='--', lw=1.2, alpha=0.8, zorder=10)
+    ax.plot([np.radians(90), np.radians(270)], [0, 1.42], color='#58a6ff', linestyle='--', lw=1.2, alpha=0.8, zorder=10)
+    ax.plot([np.radians(270), np.radians(450)], [0, 1.42], color='#58a6ff', linestyle='--', lw=1.2, alpha=0.8, zorder=10)
 
     # Trục định hướng thực địa
     if survey_direction != "Không chọn" and survey_direction in DIRECTION_ANGLES:
@@ -369,11 +382,19 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
         ax.annotate('', xy=(target_rad, 1.38), xytext=(0, 0),
                     arrowprops=dict(facecolor='#00ffcc', edgecolor='white', lw=2, width=3, headwidth=10))
 
-    # Trung Cung / Thiên Trì
+    # ---------------------------------------------------------
+    # TRUNG CUNG / THIÊN TRÌ & KIM LA BÀN CHÌM
+    # ---------------------------------------------------------
+    # Vẽ kim nam châm ẩn chìm tại nền trung cung (Mũi đỏ chỉ Bắc, mũi bạc chỉ Nam)
+    ax.fill([0, 0.15, np.pi, -0.15], [0.85, 0.12, 0, 0.12], color='#FF3333', alpha=0.4, zorder=4)
+    ax.fill([np.pi, np.pi - 0.15, 0, np.pi + 0.15], [0.85, 0.12, 0, 0.12], color='#E0E0E0', alpha=0.3, zorder=4)
+    ax.scatter([0], [0], color='#FFD700', s=20, zorder=12, edgecolors='black', linewidth=0.5)
+
     group_name = "Đông Tứ Mệnh" if quai_num in [1, 3, 4, 9] else "Tây Tứ Mệnh"
     center_text = f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str} ({eff_year})\nNhóm: {group_name}"
     ax.text(0, 0, center_text, color='#ff7b72', fontsize=7.5, fontweight='bold',
-            ha='center', va='center', bbox=dict(boxstyle='round,pad=0.3', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
+            ha='center', va='center', zorder=15,
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.5))
 
     ax.set_yticklabels([])
     ax.set_xticklabels([])
@@ -396,7 +417,7 @@ if st.session_state.initialized:
             <div style="position: absolute; top: 10px; font-weight: bold; color: #ff7b72; font-size: 14px;">BẮC (0°)</div>
             <div style="position: absolute; bottom: 10px; font-weight: bold; color: #8b949e; font-size: 14px;">NAM (180°)</div>
         </div>
-        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang khởi tạo La Kinh Pro v19.0 cho năm {survey_year} (Vận {current_van})...</h3>
+        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang khởi tạo La Kinh Pro v20.0 cho năm {survey_year} (Vận {current_van})...</h3>
     </div>
     
     <style>
@@ -409,7 +430,7 @@ if st.session_state.initialized:
     
     <script>
     setTimeout(function() {{
-        document.getElementById("status-text").innerText = "✨ Hoàn tất tối ưu hóa giao diện La Kinh!";
+        document.getElementById("status-text").innerText = "✨ Hoàn tất tối ưu hóa giao diện La Kinh Pro!";
     }}, 3000);
     </script>
     """
