@@ -6,7 +6,7 @@ import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v17.0",
+    page_title="Professional Feng Shui Master Bagua Engine v18.0",
     layout="wide"
 )
 
@@ -33,8 +33,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v17.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: Tự động hóa Tam Nguyên Cửu Vận (Vận 1 - Vận 9), Bát Trạch Quẻ Mệnh và La Kinh 5 Tầng thực chiến.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v18.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu: Tự động hóa Tam Nguyên Cửu Vận (Vận 1 - Vận 9), Bát Trạch Quẻ Mệnh và La Kinh 5 Tầng tối ưu đồ họa thực chiến.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG & MA TRẬN 9 VẬN HUYỀN KHÔNG PHI TINH ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -78,16 +78,13 @@ def tinh_van_huyen_khong(nam_nhap_trach):
     van = (khoang_cach % 9) + 1
     return van
 
-# Thuật toán sinh ma trận Phi Tinh thuận chuẩn Lạc Thư cho bất kỳ Vận nào từ 1 đến 9
 def get_fly_star_matrix(van_num):
-    # Tọa độ cơ bản Lạc Thư của 8 hướng + Trung Cung
     base_map = {
         "Bắc": 1, "Tây Nam": 2, "Đông": 3, "Đông Nam": 4, 
         "Trung Cung": 5, "Tây Bắc": 6, "Tây": 7, "Đông Bắc": 8, "Nam": 9
     }
     matrix = {}
     for dir_name, base_val in base_map.items():
-        # Công thức bay thuận: Star = ((base_val - 5 + van_num - 1) % 9) + 1
         star_num = ((base_val - 5 + van_num - 1) % 9) + 1
         status = "Đương Vận (Vượng)" if star_num == van_num else ("Sinh Khí" if star_num == (van_num % 9 + 1) else "Bình/Hung")
         matrix[dir_name] = {"star": STAR_NAMES[star_num], "status": status, "num": star_num}
@@ -264,11 +261,11 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v17.0</i>
+            <i>System: Master Bagua Engine v18.0</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH 5 TẦNG ĐỘNG THEO 9 VẬN ---
+# --- 3. HÀM VẼ LA KINH 5 TẦNG TỐI ƯU ĐỒ HỌC CHỐNG ĐÈ CHỮ ---
 def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, van_num):
     fig, ax = plt.subplots(figsize=(7.8, 7.8), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
@@ -286,7 +283,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
             rot += 180
         return rot
 
-    # TẦNG 1: Vận Tinh Huyền Không động chuẩn xác cho mọi Vận 1-9 (Bán kính 0.35 -> 0.52)
+    # TẦNG 1: Vận Tinh Huyền Không (Tối ưu bán kính r = 0.435, thu gọn font size = 7 để không đè chữ)
     for dir_name, angle in DIRECTION_ANGLES.items():
         star_info = star_matrix.get(dir_name, {"star": "", "status": ""})
         rad = np.radians(angle)
@@ -295,10 +292,10 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
         
         rot_angle = get_text_rotation(angle)
         star_text = f"V: {star_info['star']}"
-        ax.text(rad, 0.435, star_text, color='#38bdf8', fontsize=8, fontweight='bold',
+        ax.text(rad, 0.435, star_text, color='#38bdf8', fontsize=7, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
 
-    # TẦNG 2: 8 hướng Bát Trạch Cát/Hung chuẩn Mệnh chủ (Bán kính 0.52 -> 0.72)
+    # TẦNG 2: 8 hướng Bát Trạch Cát/Hung (Bán kính 0.52 -> 0.72)
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
@@ -306,10 +303,10 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
                color=info["color"], alpha=0.9, edgecolor='white', linewidth=1.2)
         
         rot_angle = get_text_rotation(angle)
-        ax.text(rad, 0.62, info['cat_hung'], color='white', fontsize=9, fontweight='bold',
+        ax.text(rad, 0.62, info['cat_hung'], color='white', fontsize=8.5, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
 
-    # TẦNG 3: Quẻ vị Hậu Thiên (Bán kính 0.72 -> 0.92)
+    # TẦNG 3: Quẻ vị Hậu Thiên (Thu gọn font size = 8 để tách bạch với Tầng 1)
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
@@ -318,7 +315,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
         
         trig_text = f"{info['trigram']} {info['name']}"
         rot_angle = get_text_rotation(angle)
-        ax.text(rad, 0.82, trig_text, color='#f0f6fc', fontsize=8.5,
+        ax.text(rad, 0.82, trig_text, color='#f0f6fc', fontsize=8,
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
 
     # TẦNG 4: 24 Sơn Hướng - Địa bàn chính châm (Bán kính 0.92 -> 1.18)
@@ -331,7 +328,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
                color='#161b22', alpha=0.9, edgecolor='#30363d', linewidth=0.8)
         
         rot_angle = get_text_rotation(mid_deg)
-        ax.text(rad_son, 1.05, son['name'], color='#58a6ff', fontsize=8.5, fontweight='bold',
+        ax.text(rad_son, 1.05, son['name'], color='#58a6ff', fontsize=8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
 
     # TẦNG 5: Ngũ Hành Nạp Âm chuẩn 24 Sơn (Bán kính 1.18 -> 1.42)
@@ -344,7 +341,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
                color='#0d1117', alpha=0.9, edgecolor='#30363d', linewidth=0.6)
         
         rot_angle = get_text_rotation(mid_deg)
-        ax.text(rad_son, 1.30, son['elem'], color='#8b949e', fontsize=7.5,
+        ax.text(rad_son, 1.30, son['elem'], color='#8b949e', fontsize=7,
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
 
     # Vòng chia độ nhỏ chi tiết ngoài cùng
@@ -354,7 +351,7 @@ def render_matplotlib_lakinh(quai_num, survey_direction, gender_str, eff_year, v
             line_len = 0.04 if d_tick % 15 == 0 else 0.025
             ax.plot([rad_t, rad_t], [1.42, 1.42 + line_len], color='#8b949e', lw=1.0)
             if d_tick % 45 == 0:
-                ax.text(rad_t, 1.55, f"{d_tick}°", color='#8b949e', fontsize=8, ha='center', va='center')
+                ax.text(rad_t, 1.55, f"{d_tick}°", color='#8b949e', fontsize=7.5, ha='center', va='center')
         else:
             ax.plot([rad_t, rad_t], [1.42, 1.42 + 0.01], color='#484f58', lw=0.5)
 
@@ -398,7 +395,7 @@ if st.session_state.initialized:
             <div style="position: absolute; top: 10px; font-weight: bold; color: #ff7b72; font-size: 14px;">BẮC (0°)</div>
             <div style="position: absolute; bottom: 10px; font-weight: bold; color: #8b949e; font-size: 14px;">NAM (180°)</div>
         </div>
-        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang nạp Khí số cho năm {survey_year} (Vận {current_van})...</h3>
+        <h3 id="status-text" style="margin-top: 25px; color: #58a6ff; letter-spacing: 1px;">Đang khởi tạo La Kinh Pro v18.0 cho năm {survey_year} (Vận {current_van})...</h3>
     </div>
     
     <style>
@@ -411,7 +408,7 @@ if st.session_state.initialized:
     
     <script>
     setTimeout(function() {{
-        document.getElementById("status-text").innerText = "✨ Đã đồng bộ hoàn tất La Kinh Phong Thủy!";
+        document.getElementById("status-text").innerText = "✨ Hoàn tất tối ưu hóa giao diện La Kinh!";
     }}, 3000);
     </script>
     """
