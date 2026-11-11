@@ -6,7 +6,7 @@ import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v21.0",
+    page_title="Professional Feng Shui Master Bagua Engine v21.1",
     layout="wide"
 )
 
@@ -41,15 +41,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v21.0")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v21.1")
 st.markdown("Hệ thống Khí số Chuyên sâu: Tinh bàn Huyền Không 3 Sao (Vận - Sơn - Hướng), Phi Tinh Lưu Niên/Lưu Nguyệt, Bát Trạch Cung Phi và Vòng 120 Phân Kim.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG (KÈM NGUYÊN LONG & ÂM DƯƠNG) ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
-# yuan_long: 0 = Địa Nguyên Long, 1 = Thiên Nguyên Long, 2 = Nhân Nguyên Long
-# polarity: 1 = Dương (Phi Thuận), -1 = Âm (Phi Nghịch) theo quy tắc Tam Nguyên Long Lạc Thư
+# yuan: 0 = Địa Nguyên Long, 1 = Thiên Nguyên Long, 2 = Nhân Nguyên Long
+# pol: 1 = Dương (Phi Thuận), -1 = Âm (Phi Nghịch)
 SON_HUONG_24 = [
     {"name": "Nhâm", "deg_start": 337.5, "deg_end": 352.5, "elem": "Thủy", "dir": "Bắc", "yuan": 0, "pol": 1},
     {"name": "Tý",   "deg_start": 352.5, "deg_end": 7.5,   "elem": "Thủy", "dir": "Bắc", "yuan": 1, "pol": -1},
@@ -77,33 +77,10 @@ SON_HUONG_24 = [
     {"name": "Hợi",  "deg_start": 322.5, "deg_end": 337.5, "elem": "Thủy", "dir": "Tây Bắc", "yuan": 2, "pol": -1},
 ]
 
-# Quy tắc Âm Dương của 9 số Lạc Thư theo Tam Nguyên Long [Số sao][Nguyên Long: 0=Địa, 1=Thiên, 2=Nhân]
-# 1 = Dương (Thuận), -1 = Âm (Nghịch). Với sao 5 (Ngũ Hoàng), lấy theo Âm Dương của Sơn/Hướng gốc.
-STAR_POLARITY = {
-    1: [1, -1, -1],   # Nhâm(+), Tý(-), Quý(-)
-    2: [-1, 1, 1],    # Mùi(-), Khôn(+), Thân(+) -> Lưu ý: Khôn(Địa +, Thân Nhân +, Mùi Thiên -) -> Chuẩn Huyền Không: Khôn(+), Mùi(-), Thân(-) => Địa: +, Thiên: -, Nhân: -
-    3: [1, -1, -1],   # Giáp(+), Mão(-), Ất(-)
-    4: [1, -1, -1],   # Tốn(+), Thìn(-), Tỵ(-)
-    6: [1, -1, -1],   # Càn(+), Tuất(-), Hợi(-)
-    7: [1, -1, -1],   # Canh(+), Dậu(-), Tân(-)
-    8: [1, -1, -1],   # Cấn(+), Sửu(-), Dần(-)
-    9: [1, -1, -1],   # Bính(+), Ngọ(-), Đinh(-)
-}
-# Lưu ý học thuật chuẩn: Trong 8 quẻ Hậu Thiên, cả 8 cung đều có:
-# Địa Nguyên Long (Nhâm, Cấn, Giáp, Tốn, Bính, Khôn, Canh, Càn) = DƯƠNG (+1)
-# Thiên Nguyên Long (Tý, Sửu, Mão, Thìn, Ngọ, Mùi, Dậu, Tuất) = ÂM (-1)
-# Nhân Nguyên Long (Quý, Dần, Ất, Tỵ, Đinh, Thân, Tân, Hợi) = ÂM (-1)
-
 STAR_NAMES = {
     1: "Nhất Bạch (1)", 2: "Nhị Hắc (2)", 3: "Tam Bích (3)", 
     4: "Tứ Lục (4)", 5: "Ngũ Hoàng (5)", 6: "Lục Bạch (6)", 
     7: "Thất Xích (7)", 8: "Bát Bạch (8)", 9: "Cửu Tử (9)"
-}
-
-STAR_SHORT = {
-    1: "1 Bạch", 2: "2 Hắc", 3: "3 Bích",
-    4: "4 Lục", 5: "5 Hoàng", 6: "6 Bạch",
-    7: "7 Xích", 8: "8 Bạch", 9: "9 Tử"
 }
 
 LO_SHU_BASE = {
@@ -117,7 +94,6 @@ def tinh_van_huyen_khong(nam_nhap_trach):
     return van
 
 def phi_tinh_9_cung(center_star, direction=1):
-    """Phi tinh từ Trung cung qua 8 cung theo quỹ đạo Lạc Thư (5->6->7->8->9->1->2->3->4)"""
     matrix = {}
     for dir_name, base_val in LO_SHU_BASE.items():
         steps = (base_val - 5) % 9
@@ -137,15 +113,12 @@ def get_son_by_degree(deg):
     return SON_HUONG_24[1]
 
 def compute_full_xuan_kong_chart(van_num, facing_deg):
-    """Lập Tinh bàn Huyền Không Phi Tinh 3 sao (Vận - Sơn - Hướng) & Định danh Cách cục"""
     sitting_deg = (facing_deg + 180.0) % 360.0
     facing_son = get_son_by_degree(facing_deg)
     sitting_son = get_son_by_degree(sitting_deg)
     
-    # 1. Vận bàn (luôn phi thuận)
     van_chart = phi_tinh_9_cung(van_num, direction=1)
     
-    # 2. Sơn bàn (lấy sao Vận tại cung Tọa nhập Trung cung)
     son_center = van_chart[sitting_son["dir"]]
     if son_center == 5:
         son_dir = sitting_son["pol"]
@@ -153,7 +126,6 @@ def compute_full_xuan_kong_chart(van_num, facing_deg):
         son_dir = 1 if sitting_son["yuan"] == 0 else -1
     son_chart = phi_tinh_9_cung(son_center, direction=son_dir)
     
-    # 3. Hướng bàn (lấy sao Vận tại cung Hướng nhập Trung cung)
     huong_center = van_chart[facing_son["dir"]]
     if huong_center == 5:
         huong_dir = facing_son["pol"]
@@ -161,7 +133,6 @@ def compute_full_xuan_kong_chart(van_num, facing_deg):
         huong_dir = 1 if facing_son["yuan"] == 0 else -1
     huong_chart = phi_tinh_9_cung(huong_center, direction=huong_dir)
     
-    # 4. Phân tích cách cục tổng thể
     s_at_sit = son_chart[sitting_son["dir"]]
     h_at_sit = huong_chart[sitting_son["dir"]]
     s_at_fac = son_chart[facing_son["dir"]]
@@ -204,18 +175,15 @@ def compute_full_xuan_kong_chart(van_num, facing_deg):
     }
 
 def get_annual_monthly_stars(survey_year, survey_month):
-    """Tính Phi Tinh Lưu Niên (nhập Trung cung nghịch mỗi năm) & Lưu Nguyệt"""
-    # Mốc chuẩn: Năm 2026 (Bính Ngọ) sao Nhất Bạch (1) nhập Trung cung. Mỗi năm lùi 1 số.
     annual_center = ((1 - (survey_year - 2026) - 1) % 9) + 1
     annual_chart = phi_tinh_9_cung(annual_center, direction=1)
     
-    # Lưu Nguyệt: Căn cứ Địa Chi của năm (Tý Ngọ Mão Dậu -> T1 khởi 8; Thìn Tuất Sửu Mùi -> T1 khởi 5; Dần Thân Tỵ Hợi -> T1 khởi 2)
     chi_idx = (survey_year - 1984) % 12
-    if chi_idx in [0, 3, 6, 9]:      # Tý, Mão, Ngọ, Dậu
+    if chi_idx in [0, 3, 6, 9]:
         m1_star = 8
-    elif chi_idx in [1, 4, 7, 10]:   # Sửu, Thìn, Mùi, Tuất
+    elif chi_idx in [1, 4, 7, 10]:
         m1_star = 5
-    else:                            # Dần, Tỵ, Thân, Hợi
+    else:
         m1_star = 2
     monthly_center = ((m1_star - (survey_month - 1) - 1) % 9) + 1
     monthly_chart = phi_tinh_9_cung(monthly_center, direction=1)
@@ -223,16 +191,13 @@ def get_annual_monthly_stars(survey_year, survey_month):
     return annual_center, annual_chart, monthly_center, monthly_chart
 
 def analyze_120_phan_kim(deg):
-    """Phân tích Vòng 120 Phân Kim (120 ô, mỗi ô 3 độ, 5 ô trên mỗi Sơn 15 độ)"""
     deg = deg % 360.0
     son = get_son_by_degree(deg)
     
-    # Tính góc lệch từ điểm bắt đầu của Sơn (0 -> 15 độ)
     offset = (deg - son["deg_start"]) % 360.0
-    slot_idx = int(offset // 3.0)  # 0, 1, 2, 3, 4
+    slot_idx = int(offset // 3.0)
     slot_idx = min(max(slot_idx, 0), 4)
     
-    # Kiểm tra Đại Không Vong (ranh giới 8 quái: 22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5)
     dai_khong_vong = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5]
     for dkv in dai_khong_vong:
         if abs(deg - dkv) <= 1.0 or abs(deg - dkv) >= 359.0:
@@ -402,7 +367,7 @@ with st.sidebar:
     with col_y:
         survey_year = st.number_input("Năm Lưu Niên", min_value=1900, max_value=2100, value=2026, step=1)
     with col_m:
-        survey_month = st.selectbox("Tháng Tiết Khí", list(range(1, 13)), index=10) # Tháng 11 (Bính Tý/Kỷ Hợi)
+        survey_month = st.selectbox("Tháng Tiết Khí", list(range(1, 13)), index=10)
         
     st.info(f"📌 Vận Trạch: **Vận {current_van}** | Lưu Niên: **{survey_year}**")
     
@@ -410,7 +375,7 @@ with st.sidebar:
     st.subheader("🧭 Đo Đạc Thực Địa (Số Độ)")
     quick_dir = st.selectbox(
         "Chọn nhanh phương vị (hoặc nhập độ chính xác bên dưới)",
-        list(DIRECTION_ANGLES.keys()), index=1 # Mặc định Đông Bắc (45°)
+        list(DIRECTION_ANGLES.keys()), index=1
     )
     exact_deg = st.number_input(
         "Số độ Hướng nhà thực tế (0.0° - 360.0°)",
@@ -430,11 +395,35 @@ with st.sidebar:
             <b>Engineer:</b> TruongfNV<br>
             <b>Email:</b> truongnv.d11@gmail.com<br>
             <b>Hotline:</b> 0919855966<br>
-            <i>System: Master Bagua Engine v21.0</i>
+            <i>System: Master Bagua Engine v21.1</i>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH 7 TẦNG CHUYÊN NGHIỆP ---
+# --- 3. HÀM VẼ CHỮ UỐN CONG ĐỒNG TÂM & LA KINH 7 TẦNG ---
+def draw_curved_text(ax, center_deg, radius, text, fontsize=7.5, color='white', fontweight='normal', char_spacing_factor=1.0, zorder=8):
+    if not text:
+        return
+    deg_per_char = (fontsize * 0.62 / max(radius, 0.15)) * char_spacing_factor
+    total_span = deg_per_char * (len(text) - 1)
+    is_bottom = 90 < (center_deg % 360) <= 270
+
+    for i, char in enumerate(text):
+        offset = -total_span / 2.0 + i * deg_per_char
+        if is_bottom:
+            char_deg = (center_deg - offset) % 360.0
+            rot = -char_deg + 180.0
+        else:
+            char_deg = (center_deg + offset) % 360.0
+            rot = -char_deg
+
+        ax.text(
+            np.radians(char_deg), radius, char,
+            color=color, fontsize=fontsize, fontweight=fontweight,
+            ha='center', va='center',
+            rotation=rot, rotation_mode='anchor',
+            zorder=zorder
+        )
+
 def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart):
     fig, ax = plt.subplots(figsize=(8.6, 8.6), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19')
@@ -443,145 +432,138 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.set_theta_direction(-1)
     
     mapping = BAT_TRACH_MAPPING[quai_num]
-    
-    def get_text_rotation(angle_deg):
-        rot = -angle_deg
-        if 90 < angle_deg <= 270:
-            rot += 180
-        return rot
-        
-    # TẦNG 1 (r: 0.30 -> 0.50): TINH BÀN HUYỀN KHÔNG 3 SAO (SƠN - HƯỚNG / VẬN)
+
+    # TẦNG 1 (r: 0.27 -> 0.45): TINH BÀN HUYỀN KHÔNG 3 SAO (2 HÀNG CONG ĐỒNG TÂM)
     for dir_name, angle in DIRECTION_ANGLES.items():
         p_info = xk_chart["palaces"][dir_name]
         rad = np.radians(angle)
-        ax.bar(rad, width=np.radians(45), bottom=0.30, height=0.20,
-               color='#111827', alpha=0.95, edgecolor='#30363d', linewidth=1.0)
-        rot_angle = get_text_rotation(angle)
-        # Hiển thị chuẩn Tinh bàn: Sơn [trái] - Hướng [phải] / Vận [dưới]
-        star_text = f"S:{p_info['son']} | H:{p_info['huong']}\n[V:{p_info['van']}]"
-        ax.text(rad, 0.40, star_text, color='#38bdf8', fontsize=6.4, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
+        ax.bar(rad, width=np.radians(45), bottom=0.27, height=0.18,
+               color='#111827', alpha=0.95, edgecolor='#30363d', linewidth=0.9)
+        
+        is_bottom = 90 < (angle % 360) <= 270
+        r_outer_line = 0.32 if is_bottom else 0.40
+        r_inner_line = 0.40 if is_bottom else 0.32
+        
+        draw_curved_text(ax, angle, r_outer_line, f"S:{p_info['son']} H:{p_info['huong']}",
+                         fontsize=6.2, color='#38bdf8', fontweight='bold', char_spacing_factor=0.92)
+        draw_curved_text(ax, angle, r_inner_line, f"[V:{p_info['van']}]",
+                         fontsize=5.8, color='#7dd3fc', fontweight='bold', char_spacing_factor=0.92)
 
-    # TẦNG 2 (r: 0.50 -> 0.66): PHI TINH LƯU NIÊN & LƯU NGUYỆT
+    # TẦNG 2 (r: 0.45 -> 0.61): PHI TINH LƯU NIÊN & LƯU NGUYỆT
     for dir_name, angle in DIRECTION_ANGLES.items():
         y_star = annual_chart[dir_name]
         m_star = monthly_chart[dir_name]
         rad = np.radians(angle)
-        # Tô nền cảnh báo nhẹ nếu gặp Ngũ Hoàng (5) hoặc Nhị Hắc (2) Lưu Niên
         cell_bg = '#2c1518' if y_star in [2, 5] else ('#122620' if y_star in [1, 8, 9] else '#161b22')
-        ax.bar(rad, width=np.radians(45), bottom=0.50, height=0.16,
+        ax.bar(rad, width=np.radians(45), bottom=0.45, height=0.16,
                color=cell_bg, alpha=0.95, edgecolor='#30363d', linewidth=0.9)
-        rot_angle = get_text_rotation(angle)
-        ym_text = f"N:{y_star} | T:{m_star}"
+        
         ym_color = '#ff7b72' if y_star in [2, 5] else ('#3fb950' if y_star in [1, 8, 9] else '#d2a8ff')
-        ax.text(rad, 0.58, ym_text, color=ym_color, fontsize=6.5, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
+        draw_curved_text(ax, angle, 0.53, f"N:{y_star} | T:{m_star}",
+                         fontsize=6.5, color=ym_color, fontweight='bold', char_spacing_factor=0.95)
 
-    # TẦNG 3 (r: 0.66 -> 0.85): 8 HƯỚNG BÁT TRẠCH CÁT / HUNG
+    # TẦNG 3 (r: 0.61 -> 0.79): 8 HƯỚNG BÁT TRẠCH CÁT / HUNG
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
-        ax.bar(rad, width=np.radians(45), bottom=0.66, height=0.19,
+        ax.bar(rad, width=np.radians(45), bottom=0.61, height=0.18,
                color=info["color"], alpha=0.9, edgecolor='white', linewidth=1.1)
-        rot_angle = get_text_rotation(angle)
-        ax.text(rad, 0.755, info['cat_hung'], color='white', fontsize=8.0, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
+        
+        draw_curved_text(ax, angle, 0.70, info['cat_hung'],
+                         fontsize=8.2, color='white', fontweight='bold', char_spacing_factor=1.0)
                 
-    # TẦNG 4 (r: 0.85 -> 1.02): QUẺ VỊ HẬU THIÊN BÁT QUÁI
+    # TẦNG 4 (r: 0.79 -> 0.96): QUẺ VỊ HẬU THIÊN BÁT QUÁI
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
-        ax.bar(rad, width=np.radians(45), bottom=0.85, height=0.17,
+        ax.bar(rad, width=np.radians(45), bottom=0.79, height=0.17,
                color='#1f242c', alpha=0.95, edgecolor='#30363d', linewidth=1.0)
+        
         trig_text = f"{info['trigram']} {info['name']}"
-        rot_angle = get_text_rotation(angle)
-        ax.text(rad, 0.935, trig_text, color='#f0f6fc', fontsize=7.5,
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
+        draw_curved_text(ax, angle, 0.875, trig_text,
+                         fontsize=7.6, color='#f0f6fc', fontweight='bold', char_spacing_factor=1.0)
                 
-    # TẦNG 5 (r: 1.02 -> 1.24): 24 SƠN HƯỚNG - ĐỊA BÀN CHÍNH CHÂM
+    # TẦNG 5 (r: 0.96 -> 1.18): 24 SƠN HƯỚNG - ĐỊA BÀN CHÍNH CHÂM
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
         rad_son = np.radians(mid_deg)
-        ax.bar(rad_son, width=np.radians(15), bottom=1.02, height=0.22,
+        ax.bar(rad_son, width=np.radians(15), bottom=0.96, height=0.22,
                color='#161b22', alpha=0.9, edgecolor='#30363d', linewidth=0.8)
-        rot_angle = get_text_rotation(mid_deg)
-        ax.text(rad_son, 1.13, son['name'], color='#58a6ff', fontsize=7.8, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
+        
+        draw_curved_text(ax, mid_deg, 1.07, son['name'],
+                         fontsize=7.8, color='#58a6ff', fontweight='bold', char_spacing_factor=0.95)
                 
-    # TẦNG 6 (r: 1.24 -> 1.42): NGŨ HÀNH NẠP ÂM 24 SƠN
+    # TẦNG 6 (r: 1.18 -> 1.36): NGŨ HÀNH NẠP ÂM 24 SƠN
     for son in SON_HUONG_24:
         mid_deg = (son["deg_start"] + son["deg_end"]) / 2
         if son["deg_start"] > son["deg_end"]:
             mid_deg = ((son["deg_start"] + son["deg_end"] + 360) / 2) % 360
         rad_son = np.radians(mid_deg)
-        ax.bar(rad_son, width=np.radians(15), bottom=1.24, height=0.18,
+        ax.bar(rad_son, width=np.radians(15), bottom=1.18, height=0.18,
                color='#0d1117', alpha=0.9, edgecolor='#30363d', linewidth=0.6)
-        rot_angle = get_text_rotation(mid_deg)
-        ax.text(rad_son, 1.33, son['elem'], color='#c9d1d9', fontsize=6.8,
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
+        
+        draw_curved_text(ax, mid_deg, 1.27, son['elem'],
+                         fontsize=6.8, color='#c9d1d9', fontweight='normal', char_spacing_factor=0.95)
 
-    # TẦNG 7 (r: 1.42 -> 1.50): VÒNG 120 PHÂN KIM (120 Ô x 3°, 5 Ô / SƠN)
+    # TẦNG 7 (r: 1.36 -> 1.44): VÒNG 120 PHÂN KIM
     for son in SON_HUONG_24:
         for slot in range(5):
             slot_start = (son["deg_start"] + slot * 3.0) % 360.0
             slot_mid = (slot_start + 1.5) % 360.0
             rad_pk = np.radians(slot_mid)
-            # Ô 2 (index 2) là Chính tuyến cực vượng, Ô 1 & 3 là Vượng Tướng, Ô 0 & 4 là Cô Hư/Không Vong
             if slot == 2:
-                pk_color = '#2ea043'      # Xanh lá sáng - Chính Tuyến
+                pk_color = '#2ea043'
             elif slot in [1, 3]:
-                pk_color = '#1f6feb'      # Xanh dương - Vượng Tướng
+                pk_color = '#1f6feb'
             else:
-                pk_color = '#30363d'      # Xám tối - Cô Hư / Giáp ranh
-            ax.bar(rad_pk, width=np.radians(3.0), bottom=1.42, height=0.08,
+                pk_color = '#30363d'
+            ax.bar(rad_pk, width=np.radians(3.0), bottom=1.36, height=0.08,
                    color=pk_color, alpha=0.9, edgecolor='#0b0f19', linewidth=0.4)
 
-    # VÒNG NGOÀI CÙNG (r: 1.50 -> 1.56): VẠCH CHIA ĐỘ CHI TIẾT (1° VÀ 5° ĐẾN 360°)
+    # VÒNG NGOÀI CÙNG (r: 1.44 -> 1.51): VẠCH CHIA ĐỘ CHI TIẾT
     for d_tick in range(360):
         rad_t = np.radians(d_tick)
         if d_tick % 15 == 0:
-            line_len = 0.055
+            line_len = 0.05
             lw = 1.2
             col = '#FFD700'
         elif d_tick % 5 == 0:
-            line_len = 0.035
+            line_len = 0.03
             lw = 0.8
             col = 'white'
         else:
-            line_len = 0.018
+            line_len = 0.015
             lw = 0.4
             col = '#6e7681'
-        ax.plot([rad_t, rad_t], [1.50, 1.50 + line_len], color=col, lw=lw)
+        ax.plot([rad_t, rad_t], [1.44, 1.44 + line_len], color=col, lw=lw)
         if d_tick % 45 == 0:
-            ax.text(rad_t, 1.65, f"{d_tick}°", color='#c9d1d9', fontsize=7.5, ha='center', va='center')
+            ax.text(rad_t, 1.58, f"{d_tick}°", color='#c9d1d9', fontsize=7.5, ha='center', va='center')
             
-    # THẬP TỰ THIÊN TÂM 4 CHIỀU (DỌC & NGANG)
-    ax.plot([0, np.pi], [1.50, 1.50], color='#ff7b72', linestyle='--', lw=1.1, alpha=0.75, zorder=10)
-    ax.plot([np.pi/2, 3*np.pi/2], [1.50, 1.50], color='#58a6ff', linestyle='--', lw=1.1, alpha=0.75, zorder=10)
+    # THẬP TỰ THIÊN TÂM 4 CHIỀU
+    ax.plot([0, np.pi], [1.44, 1.44], color='#ff7b72', linestyle='--', lw=1.1, alpha=0.75, zorder=10)
+    ax.plot([np.pi/2, 3*np.pi/2], [1.44, 1.44], color='#58a6ff', linestyle='--', lw=1.1, alpha=0.75, zorder=10)
     
-    # TIA LASER CHỈ HƯỚNG (XANH NGỌC) & TỌA (VÀNG CAM)
+    # TIA LASER CHỈ HƯỚNG & TỌA
     if show_laser_flag and exact_deg_val is not None:
         fac_rad = np.radians(exact_deg_val)
         sit_rad = np.radians((exact_deg_val + 180.0) % 360.0)
-        # Tia Hướng
-        ax.annotate('', xy=(fac_rad, 1.52), xytext=(0, 0),
+        ax.annotate('', xy=(fac_rad, 1.46), xytext=(0, 0),
                     arrowprops=dict(facecolor='#00ffcc', edgecolor='#00ffcc', lw=2.0, width=1.8, headwidth=8),
                     zorder=14)
-        # Tia Tọa (nét đứt vàng)
-        ax.plot([0, sit_rad], [0, 1.50], color='#FFD700', linestyle=':', lw=1.8, alpha=0.9, zorder=13)
+        ax.plot([0, sit_rad], [0, 1.44], color='#FFD700', linestyle=':', lw=1.8, alpha=0.9, zorder=13)
                     
     # TRUNG CUNG / THIÊN TRÌ & KIM LA BÀN CHÌM
-    ax.fill([0, 0.15, np.pi, -0.15], [0.85, 0.12, 0, 0.12], color='#FF3333', alpha=0.4, zorder=4)
-    ax.fill([np.pi, np.pi - 0.15, 0, np.pi + 0.15], [0.85, 0.12, 0, 0.12], color='#E0E0E0', alpha=0.3, zorder=4)
+    ax.fill([0, 0.15, np.pi, -0.15], [0.75, 0.10, 0, 0.10], color='#FF3333', alpha=0.4, zorder=4)
+    ax.fill([np.pi, np.pi - 0.15, 0, np.pi + 0.15], [0.75, 0.10, 0, 0.10], color='#E0E0E0', alpha=0.3, zorder=4)
     ax.scatter([0], [0], color='#FFD700', s=20, zorder=12, edgecolors='black', linewidth=0.5)
     
     group_name = "Đông Tứ Mệnh" if quai_num in [1, 3, 4, 9] else "Tây Tứ Mệnh"
     center_text = f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str} ({eff_year})\n{group_name}"
-    ax.text(0, 0, center_text, color='#ff7b72', fontsize=7.0, fontweight='bold',
+    ax.text(0, 0, center_text, color='#ff7b72', fontsize=6.6, fontweight='bold',
             ha='center', va='center', zorder=15,
-            bbox=dict(boxstyle='round,pad=0.28', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.4))
+            bbox=dict(boxstyle='round,pad=0.25', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.4))
             
     ax.set_yticklabels([])
     ax.set_xticklabels([])
@@ -595,7 +577,6 @@ if st.session_state.initialized:
     can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     mapping = BAT_TRACH_MAPPING[quai_num]
     
-    # Tính toán các hệ thống chuyên sâu
     xk_chart = compute_full_xuan_kong_chart(current_van, exact_deg)
     ann_center, annual_chart, mon_center, monthly_chart = get_annual_monthly_stars(survey_year, survey_month)
     pk_son, pk_slot, pk_title, pk_desc = analyze_120_phan_kim(exact_deg)
@@ -608,7 +589,7 @@ if st.session_state.initialized:
                 <div style="position: absolute; top: 10px; font-weight: bold; color: #ff7b72; font-size: 13px;">BẮC (0°)</div>
                 <div style="position: absolute; bottom: 10px; font-weight: bold; color: #8b949e; font-size: 13px;">NAM (180°)</div>
             </div>
-            <h3 style="margin-top: 20px; color: #58a6ff; letter-spacing: 1px;">Đang lập Tinh bàn Huyền Không 3 Sao & 120 Phân Kim (v21.0)...</h3>
+            <h3 style="margin-top: 20px; color: #58a6ff; letter-spacing: 1px;">Đang lập Tinh bàn Huyền Không 3 Sao & 120 Phân Kim (v21.1)...</h3>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -636,7 +617,6 @@ if st.session_state.initialized:
             st.metric("Nhóm Mệnh", group_name)
             st.metric("Lưu Niên / Nguyệt", f"N:{ann_center} | T:{mon_center}")
             
-        # KẾT QUẢ PHÂN TÍCH 120 PHÂN KIM & TỌA HƯỚNG
         st.markdown("### 🎯 Phân Tích Tọa Hướng & 120 Phân Kim")
         st.info(
             f"**Tọa {xk_chart['sitting_son']['name']} ({xk_chart['sitting_deg']:.1f}°) — Hướng {xk_chart['facing_son']['name']} ({exact_deg:.1f}°)**\n\n"
@@ -647,7 +627,6 @@ if st.session_state.initialized:
         
         st.success(f"**{xk_chart['cach_cuc']}**\n\n{xk_chart['cach_cuc_desc']}")
 
-        # CẢNH BÁO LƯU NIÊN & LƯU NGUYỆT
         st.markdown(f"### 📅 Phi Tinh Lưu Niên ({survey_year}) & Tháng {survey_month}")
         ngu_hoang_dir = [k for k, v in annual_chart.items() if v == 5 and k != "Trung Cung"]
         nhi_hac_dir = [k for k, v in annual_chart.items() if v == 2 and k != "Trung Cung"]
@@ -665,7 +644,6 @@ if st.session_state.initialized:
             </div>
         """, unsafe_allow_html=True)
 
-        # GỢI Ý CÔNG NĂNG BÁT TRẠCH
         st.markdown("### 🏛️ Bố trí Công năng Bát Trạch")
         for d_key, info in mapping.items():
             if info["type"] == "Cát":
@@ -684,7 +662,6 @@ if st.session_state.initialized:
         )
         st.pyplot(fig_mpl)
         
-        # BẢNG CỬU CUNG TINH BÀN HUYỀN KHÔNG TRỰC QUAN (3x3)
         st.markdown("#### 🔢 Ma Trận Cửu Cung Huyền Không Phi Tinh (Sơn Tinh | Hướng Tinh / Vận Tinh)")
         grid_rows = [
             ["Đông Nam", "Nam", "Tây Nam"],
