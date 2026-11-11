@@ -94,7 +94,7 @@ def analyze_exact_degree(deg):
     deg = deg % 360.0
     matched_son = None
     for son in SON_HUONG_24:
-        if son["deg_start"] > son["deg_end"]:  # Sơn Tý (352.5 -> 7.5)
+        if son["deg_start"] > son["deg_end"]:
             if deg >= son["deg_start"] or deg < son["deg_end"]:
                 matched_son = son
                 break
@@ -103,7 +103,6 @@ def analyze_exact_degree(deg):
                 matched_son = son
                 break
                 
-    # Kiểm tra tuyến Không Vong (Ranh giới giữa các quẻ/sơn)
     dai_khong_vong = [22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5]
     warning = "Tuyến chính vượng (An toàn)"
     for dkv in dai_khong_vong:
@@ -118,7 +117,7 @@ def analyze_exact_degree(deg):
                 
     return matched_son, warning
 
-# --- MA TRẬN BÁT TRẠCH CHUẨN XÁC CHO 8 QUẺ MỆNH (ĐÃ SỬA LỖI CHÍNH TẢ) ---
+# --- MA TRẬN BÁT TRẠCH CHUẨN XÁC CHO 8 QUẺ MỆNH ---
 BAT_TRACH_MAPPING = {
     1: {  # Khảm (Đông Tứ Mệnh)
         "Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☵", "name": "KHẢM"},
@@ -165,9 +164,9 @@ BAT_TRACH_MAPPING = {
         "Đông Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☶", "name": "CẤN"},
         "Đông": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☳", "name": "CHẤN"},
         "Đông Nam": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☷", "name": "KHÔN"},
 Hãy thận trọng khi sử dụng mã.
-"Nam": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☲", "name": "LY"},
-"Tây Nam": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☷", "name": "KHÔN"},
 "Tây": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☱", "name": "ĐOÀI"},
 "Tây Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☰", "name": "CÀN"}
 },
@@ -311,7 +310,7 @@ rot = -angle_deg
 if 90 < angle_deg <= 270:
 rot += 180
 return rot
-# TẦNG 1: Vận Tinh Huyền Không (Tối ưu fontsize=6.3 chống chạm vạch)
+# TẦNG 1: Vận Tinh Huyền Không
 for dir_name, angle in DIRECTION_ANGLES.items():
 star_info = star_matrix.get(dir_name, {"star": "", "status": ""})
 rad = np.radians(angle)
@@ -351,7 +350,7 @@ color='#161b22', alpha=0.9, edgecolor='#30363d', linewidth=0.8)
 rot_angle = get_text_rotation(mid_deg)
 ax.text(rad_son, 1.05, son['name'], color='#58a6ff', fontsize=8, fontweight='bold',
 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor')
-# TẦNG 5: Ngũ Hành Nạp Âm chuẩn 24 Sơn (Tăng độ sáng màu chữ #c9d1d9)
+# TẦNG 5: Ngũ Hành Nạp Âm chuẩn 24 Sơn
 for son in SON_HUONG_24:
 mid_deg = (son["deg_start"] + son["deg_end"]) / 2
 if son["deg_start"] > son["deg_end"]:
@@ -411,7 +410,6 @@ if st.session_state.initialized:
 can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
 mapping = BAT_TRACH_MAPPING[quai_num]
 star_matrix = get_fly_star_matrix(current_van)
-# Chỉ chạy hiệu ứng xoay lần đầu bấm nút, các lần chỉnh thông số sau phản hồi tức thì
 if st.session_state.play_spin:
 spin_html = f"""
 
