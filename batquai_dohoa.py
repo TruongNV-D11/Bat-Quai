@@ -9,7 +9,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v23.0",
+    page_title="Professional Feng Shui Master Bagua Engine v24.0",
     layout="wide"
 )
 
@@ -36,14 +36,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v23.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Lưu Niên/Nguyệt, Bát Trạch & 120 Phân Kim.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v24.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Lưu Niên/Nguyệt, Bát Trạch & 120 Phân Kim.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT & QUY TẮC MÀU NGŨ HÀNH CỬU TINH ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
-# Từ điển Cửu Tinh chuẩn Ngũ Hành & Trạng thái Vận 9 (2024 - 2043) cho Thầy Phong thủy dễ tra cứu
 STAR_META = {
     1: {"name": "1 Bạch", "elem": "Thủy", "bg": "#1e3a8a", "fg": "#93c5fd", "type": "Cát"},
     2: {"name": "2 Hắc",  "elem": "Thổ",  "bg": "#7f1d1d", "fg": "#fca5a5", "type": "Hung"},
@@ -385,14 +384,14 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v23.0
+        System: Master Bagua Engine v24.0
     </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH CHUẨN THẦY PHONG THỦY (VIỆT HÓA 100%, GỌN GÀNG, KHÔNG CHỒNG CHÉO) ---
+# --- 3. HÀM VẼ LA KINH KÝ HIỆU HÓA GỌN GÀNG (CHUẨN THẦY PHONG THỦY) ---
 def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, alpha_bg=1.0):
     plt.close('all')
-    fig, ax = plt.subplots(figsize=(9.8, 10.2), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(9.8, 10.4), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_theta_zero_location('N')
@@ -459,13 +458,13 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         if d_tick % 45 == 0:
             ax.text(rad_t, 1.58, f"{d_tick}°", color='#f0f6fc', fontsize=8.0, fontweight='bold', ha='center', va='center', zorder=4)
 
-    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG): TÊN GỌI CHUẨN THẦY PHONG THỦY, TRÌNH BÀY GỌN GÀNG ---
+    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG): KÝ HIỆU SỐ GỌN GÀNG (S.H.V & N.T) ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
         rot_angle = get_text_rotation(angle)
         
-        # Vòng 2 (r: 0.48 -> 0.68): Lưu Niên (Năm) & Lưu Nguyệt (Tháng)
+        # Vòng 2 (r: 0.48 -> 0.68): Lưu Niên & Lưu Nguyệt (Ký hiệu: N[sao] - T[sao])
         y_star = annual_chart.get(dir_name, 1)
         m_star = monthly_chart.get(dir_name, 1)
         y_meta = STAR_META[y_star]
@@ -474,23 +473,24 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.bar(bar_start, width=np.radians(45), bottom=0.48, height=0.20, align='edge',
                color=y_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#ffffff', linewidth=0.8, zorder=20)
         
-        # Rút gọn dễ nhìn cho Thầy Phong thủy: Năm: 6Bạch | Th: 4Lục
-        ym_label = f"Năm: {y_meta['name']} | Th: {m_meta['name']}"
-        ax.text(rad, 0.58, ym_label, color=y_meta["fg"], fontsize=6.8, fontweight='bold',
+        # Gọn gàng tuyệt đối: N:6 - T:4
+        ym_label = f"N:{y_star} | T:{m_star}"
+        ax.text(rad, 0.58, ym_label, color=y_meta["fg"], fontsize=8.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
-        # Vòng 1 (r: 0.24 -> 0.48): Tinh Bàn Huyền Không (Sơn - Hướng - Vận)
+        # Vòng 1 (r: 0.24 -> 0.48): Tinh Bàn Huyền Không (Ký hiệu: S[s].H[h].[Vv])
         p_info = xk_chart["palaces"].get(dir_name, {"son": 1, "huong": 1, "van": van_num})
-        s_meta = STAR_META[p_info['son']]
-        h_meta = STAR_META[p_info['huong']]
-        v_meta = STAR_META[p_info['van']]
+        s_star = p_info['son']
+        h_star = p_info['huong']
+        v_star = p_info['van']
+        h_meta = STAR_META[h_star]
         
         ax.bar(bar_start, width=np.radians(45), bottom=0.24, height=0.24, align='edge',
                color=h_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#cbd5e1', linewidth=0.9, zorder=20)
         
-        # Trình bày rõ ràng: Sơn:2Hắc | Hướng:7Xích [Vận:9Tử]
-        xk_label = f"Sơn:{s_meta['name']} | Hướng:{h_meta['name']}\n[Vận:{v_meta['name']}]"
-        ax.text(rad, 0.36, xk_label, color=h_meta["fg"], fontsize=6.2, fontweight='bold',
+        # Chuẩn định dạng Thầy Phong thủy: S:2 H:7 [V:9]
+        xk_label = f"S:{s_star} H:{h_star}\n[V:{v_star}]"
+        ax.text(rad, 0.36, xk_label, color=h_meta["fg"], fontsize=7.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
     # --- ĐƯỜNG THẬP TỰ & TIA LASER ---
@@ -517,17 +517,17 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     
-    # --- CHÚ GIẢI THỰC CHIẾN DƯỚI ĐÁY LA KINH ---
+    # --- BẢNG CHÚ GIẢI CHI TIẾT DƯỚI ĐÁY (ĐỂ THẦY DỄ TRA CỨU) ---
     legend_text = (
-        "HƯỚNG DẪN ĐỌC LA KINH CHO THẦY PHONG THỦY:\n"
-        "• Vòng 1 (Trong): Sơn (Quản Nhân Đinh/Sức khỏe) | Hướng (Quản Tài lộc) | Vận (Vận tinh chủ quản)\n"
-        "• Vòng 2 (Ngoài): Lưu Niên (Sao năm chủ quản) & Lưu Nguyệt (Sao tháng chủ quản)\n"
-        "• MÀU SẮC NGŨ HÀNH:  ■ Hồng/Tím: Cửu Tử (Đại Cát)   ■ Xanh dương: Nhất Bạch (Cát)   ■ Vàng: Bát Bạch (Tài lộc)   ■ Đỏ sẫm/Nâu: Nhị Hắc, Ngũ Hoàng, Tam Bích (Hung sát)"
+        "BẢNG CHÚ GIẢI KÝ HIỆU LA KINH CHUYÊN SÂU:\n"
+        "• Vòng 1 (Trong): S = Sơn Tinh (Quản Nhân Đinh/Sức khỏe) | H = Hướng Tinh (Quản Tài lộc) | [V] = Vận Tinh chủ quản\n"
+        "• Vòng 2 (Ngoài): N = Lưu Niên (Sao năm) | T = Lưu Nguyệt (Sao tháng)\n"
+        "• MÀU NỀN & NGŨ HÀNH:  ■ Hồng/Tím (9 Tử - Đại Cát)   ■ Xanh dương (1 Bạch - Cát)   ■ Vàng (8 Bạch - Tài lộc)   ■ Đỏ sẫm/Nâu (2 Hắc, 3 Bích, 5 Hoàng - Hung sát)"
     )
-    fig.text(0.5, 0.005, legend_text, ha='center', va='bottom', fontsize=7.4, color='#e2e8f0',
+    fig.text(0.5, 0.002, legend_text, ha='center', va='bottom', fontsize=7.5, color='#e2e8f0',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='#161b22', edgecolor='#30363d', lw=1))
     
-    plt.tight_layout(rect=[0, 0.06, 1, 1])
+    plt.tight_layout(rect=[0, 0.07, 1, 1])
     return fig
 
 # --- 4. HIỂN THỊ KẾT QUẢ ---
