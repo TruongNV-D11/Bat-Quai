@@ -376,15 +376,15 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH 7 TẦNG CHUYÊN SÂU ---
+# --- 3. HÀM VẼ LA KINH CHUẨN XÁC HOÀN TOÀN ---
 def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, alpha_bg=1.0):
     plt.close('all')
-    fig, ax = plt.subplots(figsize=(8.8, 8.8), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(9.0, 9.0), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
-    ax.set_ylim(0, 1.66)
+    ax.set_ylim(0, 1.65)
     
     mapping = BAT_TRACH_MAPPING[quai_num]
     
@@ -394,24 +394,26 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             rot += 180
         return rot
 
-    # 1. TẦNG BÁT TRẠCH & HẬU THIÊN (r: 0.72 -> 1.04)
+    # --- 1. TẦNG BÁT TRẠCH & HẬU THIÊN (r: 0.68 -> 1.02) ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
         rot_angle = get_text_rotation(angle)
         
-        ax.bar(bar_start, width=np.radians(45), bottom=0.72, height=0.16, align='edge',
-               color=info["color"], alpha=0.85 * alpha_bg, edgecolor='white', linewidth=1.1, zorder=2)
-        ax.text(rad, 0.80, info['cat_hung'], color='white', fontsize=8.5, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=3)
+        # Vòng Bát Trạch
+        ax.bar(bar_start, width=np.radians(45), bottom=0.68, height=0.17, align='edge',
+               color=info["color"], alpha=0.88 * alpha_bg, edgecolor='#ffffff', linewidth=1.0, zorder=2)
+        ax.text(rad, 0.765, info['cat_hung'], color='#ffffff', fontsize=8.8, fontweight='bold',
+                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
                 
-        ax.bar(bar_start, width=np.radians(45), bottom=0.88, height=0.16, align='edge',
-               color='#1f242c', alpha=0.90 * alpha_bg, edgecolor='#30363d', linewidth=1.0, zorder=2)
-        ax.text(rad, 0.96, f"{info['trigram']} {info['name']}", color='#f0f6fc', fontsize=8.0, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=3)
+        # Vòng Hậu Thiên Bát Quái
+        ax.bar(bar_start, width=np.radians(45), bottom=0.85, height=0.17, align='edge',
+               color='#1f242c', alpha=0.92 * alpha_bg, edgecolor='#30363d', linewidth=1.0, zorder=2)
+        ax.text(rad, 0.935, f"{info['trigram']} {info['name']}", color='#f0f6fc', fontsize=8.2, fontweight='bold',
+                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
 
-    # 2. 24 SƠN HƯỚNG & NẠP ÂM (r: 1.04 -> 1.38)
+    # --- 2. 24 SƠN HƯỚNG & NGŨ HÀNH (r: 1.02 -> 1.38) ---
     for son in SON_HUONG_24:
         mid_deg = ((son["deg_start"] + son["deg_end"]) / 2) % 360
         if son["deg_start"] > son["deg_end"]:
@@ -419,78 +421,80 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         rad_son = np.radians(mid_deg)
         rot_son = get_text_rotation(mid_deg)
         
-        ax.bar(np.radians(son["deg_start"]), width=np.radians(15), bottom=1.04, height=0.19, align='edge',
-               color='#161b22', alpha=0.85 * alpha_bg, edgecolor='#30363d', linewidth=0.8, zorder=2)
-        ax.text(rad_son, 1.135, son['name'], color='#58a6ff', fontsize=8.5, fontweight='bold',
-                ha='center', va='center', rotation=rot_son, rotation_mode='anchor', zorder=3)
+        ax.bar(np.radians(son["deg_start"]), width=np.radians(15), bottom=1.02, height=0.20, align='edge',
+               color='#161b22', alpha=0.88 * alpha_bg, edgecolor='#30363d', linewidth=0.8, zorder=2)
+        ax.text(rad_son, 1.12, son['name'], color='#58a6ff', fontsize=8.6, fontweight='bold',
+                ha='center', va='center', rotation=rot_son, rotation_mode='anchor', zorder=4)
                 
-        ax.bar(np.radians(son["deg_start"]), width=np.radians(15), bottom=1.23, height=0.15, align='edge',
-               color='#0d1117', alpha=0.85 * alpha_bg, edgecolor='#30363d', linewidth=0.6, zorder=2)
-        ax.text(rad_son, 1.305, son['elem'], color='#c9d1d9', fontsize=7.2, fontweight='bold',
-                ha='center', va='center', rotation=rot_son, rotation_mode='anchor', zorder=3)
+        ax.bar(np.radians(son["deg_start"]), width=np.radians(15), bottom=1.22, height=0.16, align='edge',
+               color='#0d1117', alpha=0.88 * alpha_bg, edgecolor='#30363d', linewidth=0.6, zorder=2)
+        ax.text(rad_son, 1.30, son['elem'], color='#c9d1d9', fontsize=7.4, fontweight='bold',
+                ha='center', va='center', rotation=rot_son, rotation_mode='anchor', zorder=4)
 
-    # 3. 120 PHÂN KIM (r: 1.38 -> 1.45)
+    # --- 3. 120 PHÂN KIM (r: 1.38 -> 1.45) ---
     for son in SON_HUONG_24:
         for slot in range(5):
             slot_start = (son["deg_start"] + slot * 3.0) % 360.0
             pk_color = '#2ea043' if slot == 2 else ('#1f6feb' if slot in [1, 3] else '#30363d')
             ax.bar(np.radians(slot_start), width=np.radians(3.0), bottom=1.38, height=0.07, align='edge',
-                   color=pk_color, alpha=0.85 * alpha_bg, edgecolor='#0b0f19', linewidth=0.4, zorder=2)
+                   color=pk_color, alpha=0.88 * alpha_bg, edgecolor='#0b0f19', linewidth=0.4, zorder=2)
 
-    # 4. VÒNG CHIA ĐỘ (r: 1.45 -> 1.58)
+    # --- 4. VÒNG CHIA ĐỘ (r: 1.45 -> 1.58) ---
     for d_tick in range(360):
         rad_t = np.radians(d_tick)
         line_len = 0.04 if d_tick % 15 == 0 else (0.025 if d_tick % 5 == 0 else 0.012)
         col = '#FFD700' if d_tick % 15 == 0 else ('white' if d_tick % 5 == 0 else '#6e7681')
         ax.plot([rad_t, rad_t], [1.45, 1.45 + line_len], color=col, lw=1.2 if d_tick % 15 == 0 else 0.4, zorder=2)
         if d_tick % 45 == 0:
-            ax.text(rad_t, 1.58, f"{d_tick}°", color='#c9d1d9', fontsize=7.5, ha='center', va='center', zorder=3)
+            ax.text(rad_t, 1.58, f"{d_tick}°", color='#f0f6fc', fontsize=8.0, fontweight='bold', ha='center', va='center', zorder=4)
 
-    # 5. 2 VÒNG TRONG CÙNG (ĐÃ ĐẨY BÁN KÍNH LÊN RÕ RÀNG: r: 0.42 -> 0.72)
+    # --- 5. 2 VÒNG TRONG CÙNG: ÁNH XẠ CHUẨN XÁC DỮ LIỆU TỪ HÀM TÍNH TOÁN ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
         rot_angle = get_text_rotation(angle)
         
-        # Tầng 2: Lưu Niên / Nguyệt (r: 0.57 -> 0.72)
-        y_star = annual_chart[dir_name]
-        m_star = monthly_chart[dir_name]
-        ax.bar(bar_start, width=np.radians(45), bottom=0.57, height=0.15, align='edge',
-               color='#1c2333', alpha=0.95 * alpha_bg, edgecolor='#30363d', linewidth=1.2, zorder=10)
-        ym_color = '#ff7b72' if y_star in [2, 5] else ('#3fb950' if y_star in [1, 8, 9] else '#d2a8ff')
-        ax.text(rad, 0.645, f"N:{y_star} T:{m_star}", color=ym_color, fontsize=7.5, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=15)
+        # Vòng 2: Lưu Niên & Lưu Nguyệt (r: 0.48 -> 0.68)
+        y_star = annual_chart.get(dir_name, 1)
+        m_star = monthly_chart.get(dir_name, 1)
+        ax.bar(bar_start, width=np.radians(45), bottom=0.48, height=0.20, align='edge',
+               color='#1e293b', alpha=0.98 * alpha_bg, edgecolor='#64748b', linewidth=1.1, zorder=20)
+        
+        ym_color = '#ff7b72' if y_star in [2, 5] else ('#4ade80' if y_star in [1, 8, 9] else '#e2e8f0')
+        ax.text(rad, 0.58, f"N:{y_star} | T:{m_star}", color=ym_color, fontsize=8.2, fontweight='bold',
+                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
-        # Tầng 1: Huyền Không 3 Sao (r: 0.42 -> 0.57)
-        p_info = xk_chart["palaces"][dir_name]
-        ax.bar(bar_start, width=np.radians(45), bottom=0.42, height=0.15, align='edge',
-               color='#111827', alpha=0.95 * alpha_bg, edgecolor='#30363d', linewidth=1.2, zorder=10)
-        ax.text(rad, 0.495, f"S:{p_info['son']} H:{p_info['huong']} [V{p_info['van']}]", color='#38bdf8', fontsize=7.0, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=15)
+        # Vòng 1: Tinh Bàn Huyền Không 3 Sao (r: 0.25 -> 0.48)
+        p_info = xk_chart["palaces"].get(dir_name, {"son": 1, "huong": 1, "van": van_num})
+        ax.bar(bar_start, width=np.radians(45), bottom=0.25, height=0.23, align='edge',
+               color='#0f172a', alpha=0.98 * alpha_bg, edgecolor='#475569', linewidth=1.1, zorder=20)
+        
+        xk_label = f"S:{p_info['son']}  H:{p_info['huong']}\n[Vận {p_info['van']}]"
+        ax.text(rad, 0.365, xk_label, color='#38bdf8', fontsize=7.6, fontweight='bold',
+                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
-    # Thập tự & Tia laser (Hướng & Tọa)
-    ax.plot([0, np.pi], [1.45, 1.45], color='#ff7b72', linestyle='--', lw=1.1, alpha=0.75, zorder=16)
-    ax.plot([np.pi/2, 3*np.pi/2], [1.45, 1.45], color='#58a6ff', linestyle='--', lw=1.1, alpha=0.75, zorder=16)
+    # --- 6. ĐƯỜNG THẬP TỰ & TIA LASER ---
+    ax.plot([0, np.pi], [1.45, 1.45], color='#ff7b72', linestyle='--', lw=0.9, alpha=0.45, zorder=15)
+    ax.plot([np.pi/2, 3*np.pi/2], [1.45, 1.45], color='#58a6ff', linestyle='--', lw=0.9, alpha=0.45, zorder=15)
     
     if show_laser_flag and exact_deg_val is not None:
         fac_rad = np.radians(exact_deg_val)
         sit_rad = np.radians((exact_deg_val + 180.0) % 360.0)
-        ax.annotate('', xy=(fac_rad, 1.47), xytext=(0, 0),
-                    arrowprops=dict(facecolor='#00ffcc', edgecolor='#00ffcc', lw=2.0, width=1.8, headwidth=8), zorder=18)
-        ax.plot([0, sit_rad], [0, 1.45], color='#FFD700', linestyle=':', lw=1.8, alpha=0.9, zorder=17)
+        ax.annotate('', xy=(fac_rad, 1.48), xytext=(0, 0),
+                    arrowprops=dict(facecolor='#00ffcc', edgecolor='#00ffcc', lw=2.2, width=1.8, headwidth=9), zorder=30)
+        ax.plot([0, sit_rad], [0, 1.45], color='#FFD700', linestyle=':', lw=2.0, alpha=0.95, zorder=29)
                     
-    # Thiên Trì Trung Cung
-    ax.fill([0, 0.15, np.pi, -0.15], [0.42, 0.05, 0, 0.05], color='#FF3333', alpha=0.35, zorder=11)
-    ax.fill([np.pi, np.pi - 0.15, 0, np.pi + 0.15], [0.42, 0.05, 0, 0.05], color='#E0E0E0', alpha=0.25, zorder=11)
-    ax.scatter([0], [0], color='#FFD700', s=25, zorder=21, edgecolors='black', linewidth=0.5)
+    # --- 7. THIÊN TRÌ TRUNG CUNG ---
+    ax.bar(0, width=2*np.pi, bottom=0.0, height=0.25, align='edge',
+           color='#090d16', alpha=1.0, edgecolor='#ff7b72', linewidth=1.2, zorder=32)
     
-    ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str} ({eff_year})", color='#ff7b72', fontsize=7.0, fontweight='bold',
-            ha='center', va='center', zorder=22,
-            bbox=dict(boxstyle='round,pad=0.25', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.4))
+    ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str}\n({eff_year})", color='#ff7b72', fontsize=7.4, fontweight='bold',
+            ha='center', va='center', zorder=35,
+            bbox=dict(boxstyle='round,pad=0.3', facecolor='#0d1117', edgecolor='#ff7b72', lw=1.4))
             
     ax.set_yticklabels([])
     ax.set_xticklabels([])
-    ax.grid(color='#30363d', linestyle='--', linewidth=0.8)
+    ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     plt.tight_layout()
     return fig
