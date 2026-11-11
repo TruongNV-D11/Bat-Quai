@@ -1,14 +1,14 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import matplotlib
-matplotlib.use('Agg')  # Khóa backend không giao diện để chống treo tiến trình trên Streamlit
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import time as time_mod
 from datetime import datetime, time as dt_time
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v21.4",
+    page_title="Professional Feng Shui Master Bagua Engine v21.5",
     layout="wide"
 )
 
@@ -19,7 +19,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v21.4")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v21.5")
 
 # --- 1. DỮ LIỆU HỌC THUẬT: 24 SƠN HƯỚNG ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -57,6 +57,11 @@ LO_SHU_BASE = {
     "Trung Cung": 5, "Tây Bắc": 6, "Tây": 7, "Đông Bắc": 8, "Nam": 9
 }
 
+DIRECTION_ANGLES = {
+    "Bắc": 0.0, "Đông Bắc": 45.0, "Đông": 90.0, "Đông Nam": 135.0,
+    "Nam": 180.0, "Tây Nam": 225.0, "Tây": 270.0, "Tây Bắc": 315.0
+}
+
 def tinh_van_huyen_khong(nam_nhap_trach):
     return (((nam_nhap_trach - 1864) // 20) % 9) + 1
 
@@ -89,7 +94,7 @@ def compute_full_xuan_kong_chart(van_num, facing_deg):
     son_chart = phi_tinh_9_cung(son_center, direction=son_dir)
     
     huong_center = van_chart[facing_son["dir"]]
-    huong_dir = facing_son["pol"] if huong_center == 5 else (1 if facing_son["yuan"] == 0 else -1)
+    huong_dir = facing_son["pol"] if huong_center == 5 else (1 if huong_center["yuan"] == 0 else -1)
     huong_chart = phi_tinh_9_cung(huong_center, direction=huong_dir)
     
     full_palaces = {p_name: {"van": van_chart[p_name], "son": son_chart[p_name], "huong": huong_chart[p_name]} for p_name in LO_SHU_BASE.keys()}
@@ -109,101 +114,87 @@ def get_annual_monthly_stars(survey_year, survey_month):
     monthly_chart = phi_tinh_9_cung(monthly_center, direction=1)
     return annual_center, annual_chart, monthly_center, monthly_chart
 
-def analyze_120_phan_kim(deg):
-    deg = deg % 360.0
-    son = get_son_by_degree(deg)
-    offset = (deg - son["deg_start"]) % 360.0
-    slot_idx = min(max(int(offset // 3.0), 0), 4)
-    if slot_idx == 2:
-        return son, slot_idx, "CHÍNH TUYẾN (Ô 3/5)", "🟢 CỰC VƯỢNG: Đúng tâm sơn."
-    return son, slot_idx, f"VƯỢNG TƯỚNG (Ô {slot_idx+1}/5)", "🔵 CÁT: Vùng vượng khí."
-
 BAT_TRACH_MAPPING = {
     1: {
-        "Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☵", "name": "KHẢM"},
+        "Đông Bắc": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☶", "name": "CẤN"},
+        "Đông": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☳", "name": "CHẤN"},
+        "Đông Nam": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☷", "name": "KHÔN"},
+        "Tây": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☱", "name": "ĐOÀI"},
+        "Tây Bắc": {"cat_hung": "Họa Hại", "color": "#9e6a03", "trigram": "☰", "name": "CÀN"}
     },
     9: {
-        "Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☵", "name": "KHẢM"},
+        "Đông Bắc": {"cat_hung": "Họa Hại", "color": "#9e6a03", "trigram": "☶", "name": "CẤN"},
+        "Đông": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☳", "name": "CHẤN"},
+        "Đông Nam": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☷", "name": "KHÔN"},
+        "Tây": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☱", "name": "ĐOÀI"},
+        "Tây Bắc": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☰", "name": "CÀN"}
     },
     3: {
-        "Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☵", "name": "KHẢM"},
+        "Đông Bắc": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☶", "name": "CẤN"},
+        "Đông": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☳", "name": "CHẤN"},
+        "Đông Nam": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Họa Hại", "color": "#9e6a03", "trigram": "☷", "name": "KHÔN"},
+        "Tây": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☱", "name": "ĐOÀI"},
+        "Tây Bắc": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☰", "name": "CÀN"}
     },
     4: {
-        "Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☵", "name": "KHẢM"},
+        "Đông Bắc": {"cat_hung": "Họa Hại", "color": "#9e6a03", "trigram": "☶", "name": "CẤN"},
+        "Đông": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☳", "name": "CHẤN"},
+        "Đông Nam": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☷", "name": "KHÔN"},
+        "Tây": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☱", "name": "ĐOÀI"},
+        "Tây Bắc": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☰", "name": "CÀN"}
     },
     6: {
-        "Bắc": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☵", "name": "KHẢM"},
+        "Đông Bắc": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☶", "name": "CẤN"},
+        "Đông": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☳", "name": "CHẤN"},
+        "Đông Nam": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Họa Hại", "color": "#9e6a03", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☷", "name": "KHÔN"},
+        "Tây": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☱", "name": "ĐOÀI"},
+        "Tây Bắc": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☰", "name": "CÀN"}
     },
     2: {
-        "Bắc": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☵", "name": "KHẢM"},
+        "Đông Bắc": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☶", "name": "CẤN"},
+        "Đông": {"cat_hung": "Họa Hại", "color": "#9e6a03", "trigram": "☳", "name": "CHẤN"},
+        "Đông Nam": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☷", "name": "KHÔN"},
+        "Tây": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☱", "name": "ĐOÀI"},
+        "Tây Bắc": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☰", "name": "CÀN"}
     },
     7: {
-        "Bắc": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Họa Hại", "color": "#9e6a03", "trigram": "☵", "name": "KHẢM"},
+        "Đông Bắc": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☶", "name": "CẤN"},
+        "Đông": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☳", "name": "CHẤN"},
+        "Đông Nam": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☷", "name": "KHÔN"},
+        "Tây": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☱", "name": "ĐOÀI"},
+        "Tây Bắc": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☰", "name": "CÀN"}
     },
     8: {
-        "Bắc": {"cat_hung": "Ngũ Quỷ", "type": "Hung", "color": "#da3633", "trigram": "☵", "name": "KHẢM"},
-        "Đông Bắc": {"cat_hung": "Phục Vị", "type": "Cát", "color": "#1f6feb", "trigram": "☶", "name": "CẤN"},
-        "Đông": {"cat_hung": "Họa Hại", "type": "Hung", "color": "#9e6a03", "trigram": "☳", "name": "CHẤN"},
-        "Đông Nam": {"cat_hung": "Tuyệt Mệnh", "type": "Hung", "color": "#8b0000", "trigram": "☴", "name": "TỐN"},
-        "Nam": {"cat_hung": "Lục Sát", "type": "Hung", "color": "#6e7681", "trigram": "☲", "name": "LY"},
-        "Tây Nam": {"cat_hung": "Sinh Khí", "type": "Cát", "color": "#2ea043", "trigram": "☷", "name": "KHÔN"},
-        "Tây": {"cat_hung": "Diên Niên", "type": "Cát", "color": "#238636", "trigram": "☱", "name": "ĐOÀI"},
-        "Tây Bắc": {"cat_hung": "Thiên Y", "type": "Cát", "color": "#58a6ff", "trigram": "☰", "name": "CÀN"}
+        "Bắc": {"cat_hung": "Ngũ Quỷ", "color": "#da3633", "trigram": "☵", "name": "KHẢM"},
+        "Đông Bắc": {"cat_hung": "Phục Vị", "color": "#1f6feb", "trigram": "☶", "name": "CẤN"},
+        "Đông": {"cat_hung": "Họa Hại", "color": "#9e6a03", "trigram": "☳", "name": "CHẤN"},
+        "Đông Nam": {"cat_hung": "Tuyệt Mệnh", "color": "#8b0000", "trigram": "☴", "name": "TỐN"},
+        "Nam": {"cat_hung": "Lục Sát", "color": "#6e7681", "trigram": "☲", "name": "LY"},
+        "Tây Nam": {"cat_hung": "Sinh Khí", "color": "#2ea043", "trigram": "☷", "name": "KHÔN"},
+        "Tây": {"cat_hung": "Diên Niên", "color": "#238636", "trigram": "☱", "name": "ĐOÀI"},
+        "Tây Bắc": {"cat_hung": "Thiên Y", "color": "#58a6ff", "trigram": "☰", "name": "CÀN"}
     }
-}
-
-DIRECTION_ANGLES = {
-    "Bắc": 0.0, "Đông Bắc": 45.0, "Đông": 90.0, "Đông Nam": 135.0,
-    "Nam": 180.0, "Tây Nam": 225.0, "Tây": 270.0, "Tây Bắc": 315.0
 }
 
 def get_can_chi_academic(solar_date, solar_time, has_time):
@@ -270,7 +261,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             rot += 180
         return rot
 
-    # Tầng Bát Trạch & Hậu Thiên
+    # 1. TẦNG BÁT TRẠCH & HẬU THIÊN (ĐỒNG NHẤT GÓC TÂM ±22.5°)
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
@@ -282,7 +273,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.bar(bar_start, width=np.radians(45), bottom=0.85, height=0.17, color='#1f242c', alpha=0.95, edgecolor='#30363d', linewidth=1.0, zorder=2)
         ax.text(rad, 0.935, f"{info['trigram']} {info['name']}", color='#f0f6fc', fontsize=8.0, fontweight='bold', ha='center', va='center', rotation=get_text_rotation(angle), rotation_mode='anchor', zorder=3)
                 
-    # 24 Sơn Hướng & Nạp Âm
+    # 2. 24 SƠN HƯỚNG & NẠP ÂM (ĐỒNG NHẤT GÓC BẮT ĐẦU)
     for son in SON_HUONG_24:
         mid_deg = ((son["deg_start"] + son["deg_end"]) / 2) % 360
         if son["deg_start"] > son["deg_end"]:
@@ -296,7 +287,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.bar(np.radians(son["deg_start"]), width=np.radians(15), bottom=1.22, height=0.16, color='#0d1117', alpha=0.9, edgecolor='#30363d', linewidth=0.6, zorder=2)
         ax.text(rad_son, 1.30, son['elem'], color='#c9d1d9', fontsize=7.2, fontweight='bold', ha='center', va='center', rotation=rot_son, rotation_mode='anchor', zorder=3)
 
-    # 120 Phân Kim
+    # 3. 120 PHÂN KIM
     for son in SON_HUONG_24:
         for slot in range(5):
             slot_start = (son["deg_start"] + slot * 3.0) % 360.0
@@ -304,7 +295,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             pk_color = '#2ea043' if slot == 2 else ('#1f6feb' if slot in [1, 3] else '#30363d')
             ax.bar(np.radians(slot_start), width=np.radians(3.0), bottom=1.38, height=0.07, color=pk_color, alpha=0.9, edgecolor='#0b0f19', linewidth=0.4, zorder=2)
 
-    # Vòng chia độ
+    # 4. VÒNG CHIA ĐỘ
     for d_tick in range(360):
         rad_t = np.radians(d_tick)
         line_len = 0.04 if d_tick % 15 == 0 else (0.025 if d_tick % 5 == 0 else 0.012)
@@ -313,7 +304,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         if d_tick % 45 == 0:
             ax.text(rad_t, 1.58, f"{d_tick}°", color='#c9d1d9', fontsize=7.5, ha='center', va='center', zorder=3)
 
-    # 2 Vòng trong cùng (Lưu Niên & Huyền Không)
+    # 5. 2 VÒNG TRONG CÙNG (ĐỒNG NHẤT GÓC TÂM ±22.5°, KHỚP 100% CÁC CUNG BÊN NGOÀI)
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
@@ -364,7 +355,7 @@ if st.session_state.initialized:
         st.metric("Can Chi", f"{can} {chi} ({eff_year})")
         st.metric("Nhóm Mệnh", group_name)
     with col_right:
-        st.subheader("🧭 Đồ họa La Kinh v21.4")
+        st.subheader("🧭 Đồ họa La Kinh v21.5")
         fig_mpl = render_matplotlib_lakinh(quai_num, exact_deg, show_laser, gender, eff_year, current_van, xk_chart, annual_chart, monthly_chart)
         st.pyplot(fig_mpl)
 else:
