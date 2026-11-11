@@ -9,7 +9,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v22.0",
+    page_title="Professional Feng Shui Master Bagua Engine v23.0",
     layout="wide"
 )
 
@@ -36,24 +36,24 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v22.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuẩn hóa Ngũ Hành & Việt hóa trực quan: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Lưu Niên/Nguyệt, Bát Trạch & 120 Phân Kim.")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v23.0")
+st.markdown("Hệ thống lập bản đồ Khí số chuyên sâu chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Lưu Niên/Nguyệt, Bát Trạch & 120 Phân Kim.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT & QUY TẮC MÀU NGŨ HÀNH CỬU TINH ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
-# Từ điển Cửu Tinh chuẩn Ngũ Hành & Trạng thái Vận 9 (2024 - 2043)
+# Từ điển Cửu Tinh chuẩn Ngũ Hành & Trạng thái Vận 9 (2024 - 2043) cho Thầy Phong thủy dễ tra cứu
 STAR_META = {
-    1: {"short": "1 Bạch", "full": "Nhất Bạch (Thủy - Cát)",   "bg": "#1e3a8a", "fg": "#93c5fd", "status": "Cát"},
-    2: {"short": "2 Hắc",  "full": "Nhị Hắc (Thổ - Bệnh)",    "bg": "#7f1d1d", "fg": "#fca5a5", "status": "Hung"},
-    3: {"short": "3 Bích", "full": "Tam Bích (Mộc - Thị phi)", "bg": "#7c2d12", "fg": "#fdba74", "status": "Hung"},
-    4: {"short": "4 Lục",  "full": "Tứ Lục (Mộc - Văn xương)", "bg": "#14532d", "fg": "#86efac", "status": "Bình"},
-    5: {"short": "5 Hoàng","full": "Ngũ Hoàng (Thổ - Đại sát)","bg": "#991b1b", "fg": "#fef08a", "status": "Đại Hung"},
-    6: {"short": "6 Bạch", "full": "Lục Bạch (Kim - Quyền uy)","bg": "#334155", "fg": "#f1f5f9", "status": "Cát"},
-    7: {"short": "7 Xích", "full": "Thất Xích (Kim - Hao tán)", "bg": "#4c1d95", "fg": "#f5d0fe", "status": "Hung"},
-    8: {"short": "8 Bạch", "full": "Bát Bạch (Thổ - Tài lộc)", "bg": "#713f12", "fg": "#fde047", "status": "Cát"},
-    9: {"short": "9 Tử",   "full": "Cửu Tử (Hỏa - Đương vận)", "bg": "#831843", "fg": "#fde047", "status": "Đại Cát"}
+    1: {"name": "1 Bạch", "elem": "Thủy", "bg": "#1e3a8a", "fg": "#93c5fd", "type": "Cát"},
+    2: {"name": "2 Hắc",  "elem": "Thổ",  "bg": "#7f1d1d", "fg": "#fca5a5", "type": "Hung"},
+    3: {"name": "3 Bích", "elem": "Mộc",  "bg": "#7c2d12", "fg": "#fdba74", "type": "Hung"},
+    4: {"name": "4 Lục",  "elem": "Mộc",  "bg": "#14532d", "fg": "#86efac", "type": "Bình"},
+    5: {"name": "5 Hoàng","elem": "Thổ",  "bg": "#991b1b", "fg": "#fef08a", "type": "Đại Hung"},
+    6: {"name": "6 Bạch", "elem": "Kim",  "bg": "#334155", "fg": "#f1f5f9", "type": "Cát"},
+    7: {"name": "7 Xích", "elem": "Kim",  "bg": "#4c1d95", "fg": "#f5d0fe", "type": "Hung"},
+    8: {"name": "8 Bạch", "elem": "Thổ",  "bg": "#713f12", "fg": "#fde047", "type": "Cát"},
+    9: {"name": "9 Tử",   "elem": "Hỏa",  "bg": "#831843", "fg": "#fde047", "type": "Đại Cát"}
 }
 
 SON_HUONG_24 = [
@@ -385,14 +385,14 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v22.0
+        System: Master Bagua Engine v23.0
     </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH CHUẨN MÀU NGŨ HÀNH & VIỆT HÓA DỄ HIỂU ---
+# --- 3. HÀM VẼ LA KINH CHUẨN THẦY PHONG THỦY (VIỆT HÓA 100%, GỌN GÀNG, KHÔNG CHỒNG CHÉO) ---
 def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, alpha_bg=1.0):
     plt.close('all')
-    fig, ax = plt.subplots(figsize=(9.5, 9.8), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(9.8, 10.2), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_theta_zero_location('N')
@@ -407,23 +407,21 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             rot += 180
         return rot
 
-    # --- TẦNG 3 & 4: BÁT TRẠCH (DU NIÊN) & HẬU THIÊN BÁT QUÁI (r: 0.70 -> 1.04) ---
+    # --- TẦNG 3 & 4: BÁT TRẠCH & HẬU THIÊN BÁT QUÁI (r: 0.68 -> 1.04) ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
         rot_angle = get_text_rotation(angle)
         
-        # Vòng Bát Trạch (r: 0.70 -> 0.87)
-        ax.bar(bar_start, width=np.radians(45), bottom=0.70, height=0.17, align='edge',
+        ax.bar(bar_start, width=np.radians(45), bottom=0.68, height=0.18, align='edge',
                color=info["color"], alpha=0.88 * alpha_bg, edgecolor='#ffffff', linewidth=1.0, zorder=2)
-        ax.text(rad, 0.785, info['cat_hung'], color='#ffffff', fontsize=8.8, fontweight='bold',
+        ax.text(rad, 0.77, info['cat_hung'], color='#ffffff', fontsize=8.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
                 
-        # Vòng Hậu Thiên Bát Quái (r: 0.87 -> 1.04)
-        ax.bar(bar_start, width=np.radians(45), bottom=0.87, height=0.17, align='edge',
+        ax.bar(bar_start, width=np.radians(45), bottom=0.86, height=0.18, align='edge',
                color='#1f242c', alpha=0.92 * alpha_bg, edgecolor='#30363d', linewidth=1.0, zorder=2)
-        ax.text(rad, 0.955, f"{info['trigram']} {info['name']}", color='#f0f6fc', fontsize=8.2, fontweight='bold',
+        ax.text(rad, 0.95, f"{info['trigram']} {info['name']}", color='#f0f6fc', fontsize=8.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
 
     # --- TẦNG 5 & 6: 24 SƠN HƯỚNG & NGŨ HÀNH (r: 1.04 -> 1.38) ---
@@ -461,36 +459,38 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         if d_tick % 45 == 0:
             ax.text(rad_t, 1.58, f"{d_tick}°", color='#f0f6fc', fontsize=8.0, fontweight='bold', ha='center', va='center', zorder=4)
 
-    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG): ĐỔ MÀU CHUẨN NGŨ HÀNH CỬU TINH & TÊN TIẾNG VIỆT ---
+    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG): TÊN GỌI CHUẨN THẦY PHONG THỦY, TRÌNH BÀY GỌN GÀNG ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
         rot_angle = get_text_rotation(angle)
         
-        # Tầng 2 (r: 0.49 -> 0.70): Lưu Niên & Lưu Nguyệt (Đổ màu theo Sao Lưu Niên chủ quản năm)
+        # Vòng 2 (r: 0.48 -> 0.68): Lưu Niên (Năm) & Lưu Nguyệt (Tháng)
         y_star = annual_chart.get(dir_name, 1)
         m_star = monthly_chart.get(dir_name, 1)
         y_meta = STAR_META[y_star]
         m_meta = STAR_META[m_star]
         
-        ax.bar(bar_start, width=np.radians(45), bottom=0.49, height=0.21, align='edge',
-               color=y_meta["bg"], alpha=0.92 * alpha_bg, edgecolor='#ffffff', linewidth=0.9, zorder=20)
+        ax.bar(bar_start, width=np.radians(45), bottom=0.48, height=0.20, align='edge',
+               color=y_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#ffffff', linewidth=0.8, zorder=20)
         
-        ym_label = f"Năm: {y_meta['short']}\nTháng: {m_meta['short']}"
-        ax.text(rad, 0.595, ym_label, color=y_meta["fg"], fontsize=7.4, fontweight='bold',
+        # Rút gọn dễ nhìn cho Thầy Phong thủy: Năm: 6Bạch | Th: 4Lục
+        ym_label = f"Năm: {y_meta['name']} | Th: {m_meta['name']}"
+        ax.text(rad, 0.58, ym_label, color=y_meta["fg"], fontsize=6.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
-        # Tầng 1 (r: 0.25 -> 0.49): Tinh Bàn Huyền Không (Đổ màu theo Hướng Tinh chủ quản Tài lộc)
+        # Vòng 1 (r: 0.24 -> 0.48): Tinh Bàn Huyền Không (Sơn - Hướng - Vận)
         p_info = xk_chart["palaces"].get(dir_name, {"son": 1, "huong": 1, "van": van_num})
         s_meta = STAR_META[p_info['son']]
         h_meta = STAR_META[p_info['huong']]
         v_meta = STAR_META[p_info['van']]
         
-        ax.bar(bar_start, width=np.radians(45), bottom=0.25, height=0.24, align='edge',
-               color=h_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#cbd5e1', linewidth=1.0, zorder=20)
+        ax.bar(bar_start, width=np.radians(45), bottom=0.24, height=0.24, align='edge',
+               color=h_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#cbd5e1', linewidth=0.9, zorder=20)
         
-        xk_label = f"Sơn:{s_meta['short']} | Hướng:{h_meta['short']}\n[Vận: {v_meta['short']}]"
-        ax.text(rad, 0.37, xk_label, color=h_meta["fg"], fontsize=6.9, fontweight='bold',
+        # Trình bày rõ ràng: Sơn:2Hắc | Hướng:7Xích [Vận:9Tử]
+        xk_label = f"Sơn:{s_meta['name']} | Hướng:{h_meta['name']}\n[Vận:{v_meta['name']}]"
+        ax.text(rad, 0.36, xk_label, color=h_meta["fg"], fontsize=6.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
     # --- ĐƯỜNG THẬP TỰ & TIA LASER ---
@@ -505,10 +505,10 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.plot([0, sit_rad], [0, 1.45], color='#FFD700', linestyle=':', lw=2.0, alpha=0.95, zorder=29)
                     
     # --- THIÊN TRÌ TRUNG CUNG ---
-    ax.bar(0, width=2*np.pi, bottom=0.0, height=0.25, align='edge',
+    ax.bar(0, width=2*np.pi, bottom=0.0, height=0.24, align='edge',
            color='#090d16', alpha=1.0, edgecolor='#fde047', linewidth=1.3, zorder=32)
     
-    ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str}\n({eff_year})", color='#fde047', fontsize=7.4, fontweight='bold',
+    ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str}\n({eff_year})", color='#fde047', fontsize=7.2, fontweight='bold',
             ha='center', va='center', zorder=35,
             bbox=dict(boxstyle='round,pad=0.3', facecolor='#0d1117', edgecolor='#fde047', lw=1.4))
             
@@ -517,15 +517,17 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     
-    # --- CHÚ GIẢI TIẾNG VIỆT TRỰC QUAN DƯỚI CHÂN LA KINH ---
+    # --- CHÚ GIẢI THỰC CHIẾN DƯỚI ĐÁY LA KINH ---
     legend_text = (
-        "CHÚ GIẢI ĐỌC LA KINH:  • Vòng 1 (Trong cùng): Sơn (Nhân đinh) | Hướng (Tài lộc) | Vận tinh   • Vòng 2: Sao Lưu Niên (Năm) & Lưu Nguyệt (Tháng)\n"
-        "MÀU NGŨ HÀNH SAO:  ■ Tím/Đỏ tươi: 9 Tử (Đại Cát)   ■ Xanh dương: 1 Bạch (Cát)   ■ Vàng nâu: 8 Bạch (Tài lộc)   ■ Đỏ sẫm/Cam: 2 Hắc, 3 Bích, 5 Hoàng (Hung Sát)"
+        "HƯỚNG DẪN ĐỌC LA KINH CHO THẦY PHONG THỦY:\n"
+        "• Vòng 1 (Trong): Sơn (Quản Nhân Đinh/Sức khỏe) | Hướng (Quản Tài lộc) | Vận (Vận tinh chủ quản)\n"
+        "• Vòng 2 (Ngoài): Lưu Niên (Sao năm chủ quản) & Lưu Nguyệt (Sao tháng chủ quản)\n"
+        "• MÀU SẮC NGŨ HÀNH:  ■ Hồng/Tím: Cửu Tử (Đại Cát)   ■ Xanh dương: Nhất Bạch (Cát)   ■ Vàng: Bát Bạch (Tài lộc)   ■ Đỏ sẫm/Nâu: Nhị Hắc, Ngũ Hoàng, Tam Bích (Hung sát)"
     )
-    fig.text(0.5, 0.015, legend_text, ha='center', va='bottom', fontsize=7.8, color='#e2e8f0',
+    fig.text(0.5, 0.005, legend_text, ha='center', va='bottom', fontsize=7.4, color='#e2e8f0',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='#161b22', edgecolor='#30363d', lw=1))
     
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
+    plt.tight_layout(rect=[0, 0.06, 1, 1])
     return fig
 
 # --- 4. HIỂN THỊ KẾT QUẢ ---
@@ -540,7 +542,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang lập Tinh Bàn & La Kinh 7 Tầng cho năm {survey_year} (Vận {current_van})...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang lập Tinh Bàn & La Kinh Chuyên Sâu cho năm {survey_year} (Vận {current_van})...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -570,7 +572,7 @@ if st.session_state.initialized:
         st.success(
             f"🧭 Tọa {xk_chart['sitting_son']['name']} — Hướng {son_info['name']} ({exact_deg:.1f}°):\n\n"
             f"- Bát Trạch: {survey_info['cat_hung']} ({survey_info['type']})\n"
-            f"- Tinh Bàn Hướng: Sơn {STAR_META[p_facing['son']]['full']} | Hướng {STAR_META[p_facing['huong']]['full']}\n"
+            f"- Tinh Bàn Hướng: Sơn {STAR_META[p_facing['son']]['name']} | Hướng {STAR_META[p_facing['huong']]['name']}\n"
             f"- Cách cục: {xk_chart['cuc_dien']}\n"
             f"- Phân Kim: {khong_vong_msg}"
         )
@@ -583,13 +585,13 @@ if st.session_state.initialized:
                 m_s = monthly_chart[d_key]
                 st.markdown(f"""
                 <div class="advice-box">
-                    <b>{d_key} ({info['cat_hung']} - Cát):</b> Sơn {STAR_META[p_star['son']]['short']}, Hướng {STAR_META[p_star['huong']]['short']} | Lưu niên: {STAR_META[y_s]['short']}, Tháng: {STAR_META[m_s]['short']}.<br>
+                    <b>{d_key} ({info['cat_hung']} - Cát):</b> Sơn {STAR_META[p_star['son']]['name']}, Hướng {STAR_META[p_star['huong']]['name']} | Lưu niên: {STAR_META[y_s]['name']}, Tháng: {STAR_META[m_s]['name']}.<br>
                     <i>Gợi ý: Đặt {('Cửa chính / Phòng khách' if info['cat_hung']=='Sinh Khí' else ('Phòng ngủ / Giường ngủ' if info['cat_hung']=='Thiên Y' else 'Bàn thờ / Văn phòng'))}.</i>
                 </div>
                 """, unsafe_allow_html=True)
 
     with col_right:
-        tab1, tab2 = st.tabs(["🧭 La Kinh 7 Tầng Chuyên Sâu", "🏠 Áp La Kinh Lên Mặt Bằng Nhà"])
+        tab1, tab2 = st.tabs(["🧭 La Kinh Chuyên Sâu", "🏠 Áp La Kinh Lên Mặt Bằng Nhà"])
         with tab1:
             fig_mpl = render_matplotlib_lakinh(
                 quai_num, exact_deg, show_laser, gender, eff_year,
