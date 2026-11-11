@@ -446,31 +446,31 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         if d_tick % 45 == 0:
             ax.text(rad_t, 1.58, f"{d_tick}°", color='#c9d1d9', fontsize=7.5, ha='center', va='center', zorder=3)
 
-    # 5. 2 VÒNG TRONG CÙNG (r: 0.34 -> 0.72)
+    # 5. 2 VÒNG TRONG CÙNG (ĐÃ ĐẨY BÁN KÍNH LÊN RÕ RÀNG: r: 0.42 -> 0.72)
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
         rot_angle = get_text_rotation(angle)
         
-        # Tầng 2: Lưu Niên / Nguyệt (r: 0.53 -> 0.72)
+        # Tầng 2: Lưu Niên / Nguyệt (r: 0.57 -> 0.72)
         y_star = annual_chart[dir_name]
         m_star = monthly_chart[dir_name]
-        ax.bar(bar_start, width=np.radians(45), bottom=0.53, height=0.19, align='edge',
-               color='#1c2333', alpha=0.92 * alpha_bg, edgecolor='#30363d', linewidth=1.2, zorder=10)
+        ax.bar(bar_start, width=np.radians(45), bottom=0.57, height=0.15, align='edge',
+               color='#1c2333', alpha=0.95 * alpha_bg, edgecolor='#30363d', linewidth=1.2, zorder=10)
         ym_color = '#ff7b72' if y_star in [2, 5] else ('#3fb950' if y_star in [1, 8, 9] else '#d2a8ff')
-        ax.text(rad, 0.625, f"N:{y_star} T:{m_star}", color=ym_color, fontsize=7.2, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=13)
+        ax.text(rad, 0.645, f"N:{y_star} T:{m_star}", color=ym_color, fontsize=7.5, fontweight='bold',
+                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=15)
 
-        # Tầng 1: Huyền Không 3 Sao (r: 0.34 -> 0.53)
+        # Tầng 1: Huyền Không 3 Sao (r: 0.42 -> 0.57)
         p_info = xk_chart["palaces"][dir_name]
-        ax.bar(bar_start, width=np.radians(45), bottom=0.34, height=0.19, align='edge',
-               color='#111827', alpha=0.92 * alpha_bg, edgecolor='#30363d', linewidth=1.2, zorder=10)
-        ax.text(rad, 0.435, f"S:{p_info['son']} H:{p_info['huong']} [V{p_info['van']}]", color='#38bdf8', fontsize=6.6, fontweight='bold',
-                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=13)
+        ax.bar(bar_start, width=np.radians(45), bottom=0.42, height=0.15, align='edge',
+               color='#111827', alpha=0.95 * alpha_bg, edgecolor='#30363d', linewidth=1.2, zorder=10)
+        ax.text(rad, 0.495, f"S:{p_info['son']} H:{p_info['huong']} [V{p_info['van']}]", color='#38bdf8', fontsize=7.0, fontweight='bold',
+                ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=15)
 
     # Thập tự & Tia laser (Hướng & Tọa)
-    ax.plot([0, np.pi], [1.45, 1.45], color='#ff7b72', linestyle='--', lw=1.1, alpha=0.75, zorder=15)
-    ax.plot([np.pi/2, 3*np.pi/2], [1.45, 1.45], color='#58a6ff', linestyle='--', lw=1.1, alpha=0.75, zorder=15)
+    ax.plot([0, np.pi], [1.45, 1.45], color='#ff7b72', linestyle='--', lw=1.1, alpha=0.75, zorder=16)
+    ax.plot([np.pi/2, 3*np.pi/2], [1.45, 1.45], color='#58a6ff', linestyle='--', lw=1.1, alpha=0.75, zorder=16)
     
     if show_laser_flag and exact_deg_val is not None:
         fac_rad = np.radians(exact_deg_val)
@@ -480,8 +480,8 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         ax.plot([0, sit_rad], [0, 1.45], color='#FFD700', linestyle=':', lw=1.8, alpha=0.9, zorder=17)
                     
     # Thiên Trì Trung Cung
-    ax.fill([0, 0.15, np.pi, -0.15], [0.55, 0.06, 0, 0.06], color='#FF3333', alpha=0.35, zorder=11)
-    ax.fill([np.pi, np.pi - 0.15, 0, np.pi + 0.15], [0.55, 0.06, 0, 0.06], color='#E0E0E0', alpha=0.25, zorder=11)
+    ax.fill([0, 0.15, np.pi, -0.15], [0.42, 0.05, 0, 0.05], color='#FF3333', alpha=0.35, zorder=11)
+    ax.fill([np.pi, np.pi - 0.15, 0, np.pi + 0.15], [0.42, 0.05, 0, 0.05], color='#E0E0E0', alpha=0.25, zorder=11)
     ax.scatter([0], [0], color='#FFD700', s=25, zorder=21, edgecolors='black', linewidth=0.5)
     
     ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str} ({eff_year})", color='#ff7b72', fontsize=7.0, fontweight='bold',
