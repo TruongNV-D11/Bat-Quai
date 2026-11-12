@@ -10,34 +10,35 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v27.0",
+    page_title="Professional Feng Shui Master Bagua Engine v27.2",
     layout="wide"
 )
 
 st.markdown("""
     <style>
     .main { background-color: #0b0f19; color: #f0f6fc; }
-    .stMetric { background-color: #161b22; padding: 15px; border-radius: 8px; border: 1px solid #30363d; }
+    .stMetric { background-color: #161b22; padding: 10px !important; border-radius: 8px; border: 1px solid #30363d; }
     .signature-box { 
         background-color: #161b22; 
         border: 1px solid #30363d; 
-        padding: 10px; 
+        padding: 8px; 
         border-radius: 6px; 
-        font-size: 12px; 
+        font-size: 11px; 
         color: #8b949e; 
-        margin-top: 20px;
+        margin-top: 15px;
     }
     .advice-box {
         background-color: #161b22;
-        border-left: 4px solid #58a6ff;
-        padding: 12px;
+        border-left: 3px solid #58a6ff;
+        padding: 8px 10px;
         border-radius: 4px;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
+        font-size: 12.5px;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.0 (MASTER GRADE)")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.2 (MASTER GRADE)")
 st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT & QUY TẮC MÀU NGŨ HÀNH CỬU TINH ---
@@ -411,6 +412,8 @@ with st.sidebar:
         value=DIRECTION_ANGLES[quick_dir], step=0.5, format="%.1f"
     )
     show_laser = st.checkbox("Hiển thị Tia Laser Tọa / Hướng trên La Kinh", value=True)
+    show_needle = st.checkbox("🧭 Hiển thị Kim Nam Châm Thiên Trì", value=True)
+    
     run_btn = st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True)
     if run_btn:
         st.session_state.initialized = True
@@ -448,14 +451,15 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v27.0
+        System: Master Bagua Engine v27.2
     </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH MASTER GRADE v27.0 ---
-def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
+# --- 3. HÀM VẼ LA KINH MASTER GRADE v27.2 ---
+def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_needle_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
     plt.close('all')
-    fig, ax = plt.subplots(figsize=(9.8, 10.6), subplot_kw=dict(polar=True))
+    # Tăng kích thước khung vẽ matplotlib để La Kinh hiển thị to hơn và rõ nét hơn
+    fig, ax = plt.subplots(figsize=(10.5, 11.2), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_theta_zero_location('N')
@@ -571,13 +575,20 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
                     arrowprops=dict(facecolor='#00ffcc', edgecolor='#00ffcc', lw=2.2, width=1.8, headwidth=9), zorder=30)
         ax.plot([0, sit_rad], [0, 1.45], color='#FFD700', linestyle=':', lw=2.0, alpha=0.95, zorder=29)
                     
-    # --- THIÊN TRÌ TRUNG CUNG ---
+    # --- THIÊN TRÌ TRUNG CUNG & KIM NAM CHÂM ---
     ax.bar(0, width=2*np.pi, bottom=0.0, height=0.24, align='edge',
            color='#090d16', alpha=1.0, edgecolor='#fde047', linewidth=1.3, zorder=32)
     
-    ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str}\n({eff_year})", color='#fde047', fontsize=7.2, fontweight='bold',
+    if show_needle_flag and exact_deg_val is not None:
+        mag_rad = np.radians(exact_deg_val)
+        ax.annotate('', xy=(mag_rad, 0.22), xytext=(mag_rad + np.pi, 0.22),
+                    arrowprops=dict(facecolor='#ef4444', edgecolor='#fde047', lw=1.0, width=3.2, headwidth=9), zorder=34)
+
+    ax.plot(0, 0, marker='o', markersize=6, color='#fde047', markeredgecolor='#0b0f19', zorder=36)
+    
+    ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str}\n({eff_year})", color='#fde047', fontsize=7.0, fontweight='bold',
             ha='center', va='center', zorder=35,
-            bbox=dict(boxstyle='round,pad=0.3', facecolor='#0d1117', edgecolor='#fde047', lw=1.4))
+            bbox=dict(boxstyle='round,pad=0.25', facecolor='#0d1117', edgecolor='#fde047', lw=1.2))
             
     ax.set_yticklabels([])
     ax.set_xticklabels([])
@@ -609,7 +620,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.0 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.2 cho khách hàng: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -626,9 +637,11 @@ if st.session_state.initialized:
         placeholder.empty()
         st.session_state.play_spin = False
 
-    col_left, col_right = st.columns([1.25, 1.75])
+    # ĐIỀU CHỈNH TỶ LỆ CỘT: Cột trái gọn lại ([0.95]), Cột phải chứa La Kinh phóng to chiếm không gian lớn ([2.05])
+    col_left, col_right = st.columns([0.95, 2.05])
+    
     with col_left:
-        st.subheader(f"📋 Báo cáo Khí số: {client_name}")
+        st.subheader(f"📋 Khí số: {client_name}")
         c1, c2 = st.columns(2)
         c1.metric("Niên Mệnh", f"{can} {chi} ({eff_year})")
         c2.metric("Nhóm Mệnh", group_name)
@@ -645,7 +658,7 @@ if st.session_state.initialized:
             f"- Phân Kim: {khong_vong_msg}"
         )
         
-        st.markdown("### 🏛️ Gợi ý Bố trí Công năng Thực chiến")
+        st.markdown("### 🏛️ Gợi ý Bố trí Công năng")
         for d_key, info in mapping.items():
             if info["type"] == "Cát":
                 p_star = xk_chart["palaces"][d_key]
@@ -653,7 +666,7 @@ if st.session_state.initialized:
                 m_s = monthly_chart[d_key]
                 st.markdown(f"""
                 <div class="advice-box">
-                    <b>{d_key} ({info['cat_hung']} - Cát):</b> Sơn {STAR_META[p_star['son']]['name']}, Hướng {STAR_META[p_star['huong']]['name']} | Lưu niên: {STAR_META[y_s]['name']}, Tháng: {STAR_META[m_s]['name']}.<br>
+                    <b>{d_key} ({info['cat_hung']} - Cát):</b> Sơn {STAR_META[p_star['son']]['name']}, Hướng {STAR_META[p_star['huong']]['name']} | Niên: {STAR_META[y_s]['name']}, Tháng: {STAR_META[m_s]['name']}.<br>
                     <i>Gợi ý: Đặt {('Cửa chính / Phòng khách' if info['cat_hung']=='Sinh Khí' else ('Phòng ngủ / Giường ngủ' if info['cat_hung']=='Thiên Y' else 'Bàn thờ / Văn phòng'))}.</i>
                 </div>
                 """, unsafe_allow_html=True)
@@ -663,7 +676,7 @@ if st.session_state.initialized:
         
         with tab1:
             fig_mpl = render_matplotlib_lakinh(
-                quai_num, exact_deg, show_laser, gender, eff_year,
+                quai_num, exact_deg, show_laser, show_needle, gender, eff_year,
                 current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=1.0
             )
             st.pyplot(fig_mpl)
@@ -705,7 +718,7 @@ if st.session_state.initialized:
                     plan_img = plan_img.resize((max(10, new_w), max(10, new_h)), Image.Resampling.LANCZOS)
                     
                 fig_overlay = render_matplotlib_lakinh(
-                    quai_num, exact_deg, show_laser, gender, eff_year,
+                    quai_num, exact_deg, show_laser, show_needle, gender, eff_year,
                     current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=opacity_val
                 )
                 
@@ -728,7 +741,7 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.0)")
+            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.2)")
             st.markdown("""
             Trong phong thủy thực trạch, La Kinh không chỉ là một chiếc la bàn định hướng thông thường, mà là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
             
@@ -746,7 +759,7 @@ if st.session_state.initialized:
             st.markdown("### 📖 Hướng dẫn Sử dụng Chi tiết (User Manual)")
             st.markdown("""
             * **Bước 1:** Nhập tên khách hàng, ngày tháng năm sinh, giờ sinh và giới tính của gia chủ ở thanh bên trái. Chọn năm xét và tháng âm lịch để hệ thống nhận diện vận khí.
-            * **Bước 2:** Nhập độ số hướng nhà thực địa (hoặc chọn nhanh phương vị) và bật tia laser định hướng.
+            * **Bước 2:** Nhập độ số hướng nhà thực địa (hoặc chọn nhanh phương vị), bật/tắt tia laser định hướng và **kim nam châm Thiên Trì**.
             * **Bước 3:** Bấm **"🔮 Lập Bản Đồ La Kinh Chuyên Sâu"** để hệ thống tính toán. Tra cứu báo cáo khí số và quan sát biểu đồ La Kinh ở **Tab 1**. Có thể bấm **"💾 Lưu hồ sơ hiện tại"** để lưu vết lại trong danh sách phiên làm việc.
             * **Bước 4:** Chuyển sang **Tab 2**, tải lên ảnh bản vẽ mặt bằng nhà. Sử dụng các thanh trượt *Độ trong suốt, Góc xoay, Dịch chuyển X/Y và Thu phóng (Zoom %)* để căn chỉnh tâm La Kinh trùng khít với tâm hình học của ngôi nhà. Bấm tải xuống báo cáo PNG 300 DPI khi hoàn thành.
             """)
