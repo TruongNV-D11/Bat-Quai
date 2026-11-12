@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v27.7",
+    page_title="Professional Feng Shui Master Bagua Engine v27.8",
     layout="wide"
 )
 
@@ -39,7 +39,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.7")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.8")
 st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
 
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -449,17 +449,17 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v27.7
+        System: Master Bagua Engine v27.8
     </div>
     """, unsafe_allow_html=True)
 
 def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
     plt.close('all')
-    fig = plt.figure(figsize=(10.5, 12.2))
+    fig = plt.figure(figsize=(10.5, 12.5))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     
-    # Khung vẽ La Kinh chính (chiếm 83% chiều cao phía trên)
-    ax = fig.add_axes([0.04, 0.16, 0.92, 0.82], polar=True)
+    # Khung La Kinh chính ở phía trên
+    ax = fig.add_axes([0.04, 0.17, 0.92, 0.81], polar=True)
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
@@ -582,46 +582,46 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     
-    # --- KHUNG CHÚ GIẢI ĐẶC TẢ MÀU NỀN ĐỒNG BỘ VỚI LA KINH (14.5% CHIỀU CAO PHÍA DƯỚI) ---
-    ax_leg = fig.add_axes([0.04, 0.01, 0.92, 0.135])
+    # --- KHUNG CHÚ GIẢI PHÍA DƯỚI ĐÃ ĐƯỢC CO GÃN NAY NGAY NGẮN BÊN TRONG KHỐI ---
+    ax_leg = fig.add_axes([0.04, 0.015, 0.92, 0.13])
     ax_leg.set_xlim(0, 1)
     ax_leg.set_ylim(0, 1)
     ax_leg.axis('off')
     
-    # Vẽ khung nền bao quanh toàn bộ phần chú giải
-    outer_box = mpatches.FancyBboxPatch((0.005, 0.03), 0.99, 0.94,
-                                        boxstyle="round,pad=0.015,rounding_size=0.04",
+    # Khung nền viền xanh bo góc gọn gàng
+    outer_box = mpatches.FancyBboxPatch((0.0, 0.0), 1.0, 1.0,
+                                        boxstyle="round,pad=0.01,rounding_size=0.05",
                                         facecolor='#161b22', edgecolor='#58a6ff', linewidth=1.2)
     ax_leg.add_patch(outer_box)
     
     # Dòng 1: Thông tin Dự án & Thần Sát
     line1 = f"DỰ ÁN: {client_name}   |   NIÊN HẠN {survey_yr} ({shanshen['year_chi']})   —   🚩 Thái Tuế: {shanshen['tai_sui']}   |   ⚡ Tuế Phá: {shanshen['sui_po']}   |   ⚠️ Ngũ Hoàng: {shanshen['ngu_hoang']}"
-    ax_leg.text(0.5, 0.81, line1, ha='center', va='center', fontsize=8.8, fontweight='bold', color='#f0f6fc')
+    ax_leg.text(0.5, 0.78, line1, ha='center', va='center', fontsize=8.5, fontweight='bold', color='#f0f6fc')
     
-    # Dòng 2: Giải thích ký hiệu các vòng trong cùng
+    # Dòng 2: Giải thích ký hiệu vòng 1 và vòng 2
     line2 = "• Vòng 1: S (Sơn Tinh) | H (Hướng Tinh) | [V] (Vận Tinh)      • Vòng 2: N (Lưu Niên) | T (Lưu Nguyệt)"
-    ax_leg.text(0.5, 0.56, line2, ha='center', va='center', fontsize=8.4, color='#c9d1d9')
+    ax_leg.text(0.5, 0.52, line2, ha='center', va='center', fontsize=8.1, color='#c9d1d9')
     
-    # Dòng 3: Các thẻ đặc tả đổ màu nền y hệt trên các cung La Kinh
+    # Dòng 3: Các thẻ pill màu đặc tả được thu gọn tỷ lệ để nằm hoàn toàn ngay ngắn trong khung
     badges = [
-        {"text": "9 Tử - Đại Cát (Hồng/Tím)", "bg": STAR_META[9]["bg"], "fg": STAR_META[9]["fg"], "x": 0.145, "w": 0.225},
-        {"text": "1 Bạch - Cát (Xanh dương)", "bg": STAR_META[1]["bg"], "fg": STAR_META[1]["fg"], "x": 0.385, "w": 0.225},
-        {"text": "8 Bạch - Tài (Vàng nâu)",   "bg": STAR_META[8]["bg"], "fg": STAR_META[8]["fg"], "x": 0.625, "w": 0.215},
-        {"text": "2H, 3B, 5H - Hung (Đỏ)",    "bg": STAR_META[2]["bg"], "fg": STAR_META[2]["fg"], "x": 0.860, "w": 0.225},
+        {"text": "9 Tử - Đại Cát (Hồng/Tím)", "bg": STAR_META[9]["bg"], "fg": STAR_META[9]["fg"], "x": 0.135, "w": 0.22},
+        {"text": "1 Bạch - Cát (Xanh dương)", "bg": STAR_META[1]["bg"], "fg": STAR_META[1]["fg"], "x": 0.370, "w": 0.22},
+        {"text": "8 Bạch - Tài (Vàng nâu)",   "bg": STAR_META[8]["bg"], "fg": STAR_META[8]["fg"], "x": 0.605, "w": 0.21},
+        {"text": "2H, 3B, 5H - Hung (Đỏ)",    "bg": STAR_META[2]["bg"], "fg": STAR_META[2]["fg"], "x": 0.835, "w": 0.22},
     ]
     
-    ax_leg.text(0.015, 0.24, "MÀU NỀN:", ha='left', va='center', fontsize=8.2, fontweight='bold', color='#8b949e')
+    ax_leg.text(0.018, 0.23, "MÀU NỀN:", ha='left', va='center', fontsize=8.0, fontweight='bold', color='#8b949e')
     
     for b in badges:
         bx = b["x"] - b["w"] / 2 + 0.045
-        by = 0.10
+        by = 0.09
         bh = 0.28
-        pill = mpatches.FancyBboxPatch((bx, by), b["w"] - 0.01, bh,
-                                       boxstyle="round,pad=0.008,rounding_size=0.03",
-                                       facecolor=b["bg"], edgecolor='#cbd5e1', linewidth=0.8)
+        pill = mpatches.FancyBboxPatch((bx, by), b["w"] - 0.005, bh,
+                                       boxstyle="round,pad=0.005,rounding_size=0.03",
+                                       facecolor=b["bg"], edgecolor='#cbd5e1', linewidth=0.7)
         ax_leg.add_patch(pill)
-        ax_leg.text(bx + (b["w"] - 0.01)/2, by + bh/2, b["text"],
-                    ha='center', va='center', fontsize=7.8, fontweight='bold', color=b["fg"])
+        ax_leg.text(bx + (b["w"] - 0.005)/2, by + bh/2, b["text"],
+                    ha='center', va='center', fontsize=7.5, fontweight='bold', color=b["fg"])
                     
     return fig
 
@@ -637,7 +637,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.7 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.8 cho khách hàng: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -738,7 +738,7 @@ if st.session_state.initialized:
                     current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=opacity_val
                 )
                 
-                ax_img = fig_overlay.add_axes([0.08 + (offset_x/1000.0), 0.18 + (offset_y/1000.0), 0.84, 0.78], zorder=-1)
+                ax_img = fig_overlay.add_axes([0.08 + (offset_x/1000.0), 0.19 + (offset_y/1000.0), 0.84, 0.76], zorder=-1)
                 ax_img.imshow(plan_img)
                 ax_img.axis('off')
                 st.pyplot(fig_overlay, transparent=True)
@@ -757,11 +757,11 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.7)")
+            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.8)")
             st.markdown("""
             Trong phong thủy thực trạch, La Kinh là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
             
-            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.7** hoàn thiện phần bảng chú thích màu sắc đồng bộ 100% với mã màu trên tinh bàn, giúp tra cứu trực quan và xuất bản vẽ chuẩn xác.
+            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.8** đã tối ưu hoàn hảo tọa độ hiển thị, giúp phần chú giải phía dưới nằm gọn gàng, cân đối tuyệt đối bên trong khung viền.
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo hệ thống.")
