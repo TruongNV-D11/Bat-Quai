@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 """
-Professional Feng Shui Master Bagua Engine (v29.0 - Complete Unabridged Edition)
-- Hệ thống La Kinh số hóa thực địa hoàn chỉnh không cắt xén.
-- Tích hợp đầy đủ: Vận tinh/Sơn tinh/Hướng tinh, Bát Trạch 9 cung, 24 Sơn Hướng, Thần Sát.
-- Bổ sung tùy chọn bật/tắt trực quan (Kim nam châm Thiên Trì, Tia Laser tọa hướng, Thần Sát).
+Professional Feng Shui Master Bagua Engine (v29.0 - Full Restored & Integrated Edition)
+- Khôi phục đầy đủ: Nhập liệu thông tin cá nhân, tự động tính Quái số, Áp bản vẽ mặt bằng, 
+  toàn bộ tầng học thuật (Huyền Không, Bát Trạch, 24 Sơn) và tùy chọn hiển thị trực quan.
 """
 
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 import io
+from PIL import Image
 
 # Cấu hình trang Streamlit
 st.set_page_config(
-    page_title="Master Bagua Engine v29.0 - Full Complete Edition",
+    page_title="Master Bagua Engine v29.0 - Full Integrated",
     page_icon="🧭",
     layout="wide"
 )
 
 # ==========================================
-# 1. HỆ THỐNG DỮ LIỆU & HỌC THUẬT ĐẦY ĐỦ 100%
+# 1. HỆ THỐNG DỮ LIỆU & HỌC THUẬT ĐẦY ĐỦ
 # ==========================================
 
 DIRECTION_ANGLES = {
@@ -27,7 +27,6 @@ DIRECTION_ANGLES = {
     "Nam": 180, "Tây Nam": 225, "Tây": 270, "Tây Bắc": 315
 }
 
-# Dữ liệu Bát Trạch đầy đủ cho cả 9 Quái số (Không lược bỏ bất kỳ quái số nào)
 BAT_TRACH_MAPPING = {
     1: { # Khảm (Đông Tứ Mệnh)
         "Bắc": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Khảm", "color": "#166534"},
@@ -69,7 +68,7 @@ BAT_TRACH_MAPPING = {
         "Tây": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Đoài", "color": "#991b1b"},
         "Tây Bắc": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Càn", "color": "#991b1b"}
     },
-    5: { # Trung Cung (Nam quy Khôn, Nữ quy Cấn)
+    5: { # Trung Cung (Nam Khôn, Nữ Cấn)
         "Bắc": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Khảm", "color": "#7f1d1d"},
         "Đông Bắc": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Cấn", "color": "#14532d"},
         "Đông": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Chấn", "color": "#991b1b"},
@@ -128,6 +127,25 @@ def get_annual_shanshen(year):
         "ngu_hoang": "Trung Cung"
     }
 
+def calculate_quai_number(birth_year, gender):
+    # Thuật toán tính Quái số theo năm sinh âm lịch và giới tính
+    y_sum = sum(int(digit) for digit in str(birth_year))
+    while y_sum > 9:
+        y_sum = sum(int(digit) for digit in str(y_sum))
+    
+    if gender == "Nam":
+        q = 11 - y_sum
+        if q > 9: q = q % 9
+        if q == 0: q = 9
+    else:
+        q = 4 + y_sum
+        if q > 9: q = q % 9
+        if q == 0: q = 9
+    
+    if q == 5:
+        q = 2 if gender == "Nam" else 8
+    return q
+
 
 # ==========================================
 # 2. HÀM RENDER BIỂU ĐỒ LA KINH ĐA TẦNG (FULL)
@@ -135,10 +153,10 @@ def get_annual_shanshen(year):
 
 def render_matplotlib_lakinh(
     quai_num, exact_deg_val, show_laser_flag, show_needle_flag, 
-    show_shanshen_flag, gender_str, eff_year, van_num, survey_yr, alpha_bg=1.0
+    show_shanshen_flag, gender_str, eff_year, van_num, survey_yr, floor_img=None, floor_alpha=0.4, alpha_bg=1.0
 ):
     plt.close('all')
-    fig, ax = plt.subplots(figsize=(10.2, 11.0), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(10.5, 11.2), subplot_kw=dict(polar=True))
     
     bg_color = '#0b0f19' if alpha_bg == 1.0 else 'none'
     fig.patch.set_facecolor(bg_color)
@@ -148,7 +166,16 @@ def render_matplotlib_lakinh(
     ax.set_theta_direction(-1)
     ax.set_ylim(0, 1.66)
     ax.axis('off')
-    
+
+    # --- TÍCH HỢP ẢNH BẢN VẼ MẶT BẰNG (FLOOR PLAN OVERLAY) ---
+    if floor_img is not None:
+        try:
+            # Chèn ảnh mặt bằng vào tâm biểu đồ polar (hệ tọa độ Cartesian bên dưới polar)
+            extent = [-1.45, 1.45, -1.45, 1.45]
+            ax.imshow(floor_img, extent=extent, alpha=floor_alpha, zorder=1)
+        except Exception:
+            pass
+
     mapping = BAT_TRACH_MAPPING.get(quai_num, BAT_TRACH_MAPPING[1])
     shanshen = get_annual_shanshen(survey_yr)
     
@@ -247,18 +274,29 @@ def render_matplotlib_lakinh(
 # ==========================================
 
 def main():
-    st.title("🧭 Master Bagua Engine (v29.0 - Complete Full Layers)")
-    st.markdown("Hệ thống La Kinh số hóa đa tầng đầy đủ kèm bộ tùy chọn hiển thị điều khiển trực tiếp.")
+    st.title("🧭 Master Bagua Engine (v29.0 - Full Restored & Integrated)")
+    st.markdown("Hệ thống La Kinh số hóa đa tầng đầy đủ tích hợp thông tin cá nhân và áp bản vẽ mặt bằng trực quan.")
 
     with st.sidebar:
-        st.header("⚙️ Thiết lập Thông số & Tùy chọn")
-        
-        survey_year = st.number_input("Năm Khảo Sát / Xem", min_value=2024, max_value=2035, value=2026)
-        van_number = st.selectbox("Vận Khí Chủ Quản", [8, 9], index=1)
-        quai = st.selectbox("Cung Mệnh Gia Chủ (Quái số)", list(range(1, 10)), index=0)
+        st.header("👤 Thông tin Gia chủ & Khảo sát")
+        client_name = st.text_input("Họ và tên gia chủ", "Nguyễn Văn A")
+        birth_year = st.number_input("Năm sinh (Âm lịch)", min_value=1900, max_value=2026, value=1985)
         gender = st.radio("Giới tính", ["Nam", "Nữ"])
         
+        # Tự động tính Quái số từ thông tin nhập vào
+        auto_quai = calculate_quai_number(birth_year, gender)
+        st.info(f"📌 Gia chủ: **{client_name}** | Quái số: **{auto_quai}** (Mệnh: {'Đông Tứ Mệnh' if auto_quai in [1,3,4,9] else 'Tây Tứ Mệnh'})")
+
+        st.markdown("---")
+        st.header("⚙️ Thiết lập Kỹ thuật & Hướng")
+        survey_year = st.number_input("Năm Khảo Sát / Xem", min_value=2024, max_value=2035, value=2026)
+        van_number = st.selectbox("Vận Khí Chủ Quản", [8, 9], index=1)
         exact_deg = st.slider("Góc Độ Hướng Nhà Thực Tế (Độ)", 0.0, 360.0, 180.0, step=0.5)
+
+        st.markdown("---")
+        st.header("📐 Tải lên Bản vẽ Mặt bằng Nhà")
+        uploaded_file = st.file_uploader("Chọn file ảnh mặt bằng (PNG, JPG)", type=["png", "jpg", "jpeg"])
+        floor_alpha = st.slider("Độ trong suốt bản vẽ áp nền", 0.0, 1.0, 0.35, step=0.05)
 
         st.markdown("---")
         st.subheader("👁️ Tùy Chọn Lớp Hiển Thị")
@@ -266,8 +304,14 @@ def main():
         show_laser = st.checkbox("🎯 Hiển thị Tia Tọa / Hướng (Laser)", value=True)
         show_shanshen = st.checkbox("🚩 Hiển thị Thần Sát (Thái Tuế, Ngũ Hoàng)", value=True)
 
+    # Đọc ảnh bản vẽ nếu có người dùng tải lên
+    floor_image = None
+    if uploaded_file is not None:
+        floor_image = Image.open(uploaded_file)
+
+    # Thực thi render biểu đồ La Kinh
     fig = render_matplotlib_lakinh(
-        quai_num=quai,
+        quai_num=auto_quai,
         exact_deg_val=exact_deg,
         show_laser_flag=show_laser,
         show_needle_flag=show_needle,
@@ -275,7 +319,9 @@ def main():
         gender_str=gender,
         eff_year=survey_year,
         van_num=van_number,
-        survey_yr=survey_year
+        survey_yr=survey_year,
+        floor_img=floor_image,
+        floor_alpha=floor_alpha
     )
 
     st.pyplot(fig, use_container_width=True)
@@ -286,7 +332,7 @@ def main():
     st.download_button(
         label="📥 Tải xuống Bản vẽ La Kinh chất lượng cao (PNG 300 DPI)",
         data=buf,
-        file_name=f"LaKinh_v29_Complete_{exact_deg}.png",
+        file_name=f"LaKinh_{client_name.replace(' ', '_')}_Do_{exact_deg}.png",
         mime="image/png"
     )
 
