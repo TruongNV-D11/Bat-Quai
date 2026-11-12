@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v27.6",
+    page_title="Professional Feng Shui Master Bagua Engine v27.7",
     layout="wide"
 )
 
@@ -39,7 +39,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.6")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.7")
 st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
 
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -449,14 +449,17 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v27.6
+        System: Master Bagua Engine v27.7
     </div>
     """, unsafe_allow_html=True)
 
 def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
     plt.close('all')
-    fig, ax = plt.subplots(figsize=(10.5, 11.8), subplot_kw=dict(polar=True))
+    fig = plt.figure(figsize=(10.5, 12.2))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
+    
+    # Khung vẽ La Kinh chính (chiếm 83% chiều cao phía trên)
+    ax = fig.add_axes([0.04, 0.16, 0.92, 0.82], polar=True)
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
@@ -579,24 +582,47 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     
-    # SỬ DỤNG MATPLOTLIB LEGEND VỚI CÁC PATCHES MÀU CHUẨN XÁC TRÙNG KHỚP VỚI LAKINH
-    legend_title = f"DỰ ÁN: {client_name}  |  NIÊN HẠN {survey_yr} ({shanshen['year_chi']})   —   🚩 Thái Tuế: {shanshen['tai_sui']} | ⚡ Tuế Phá: {shanshen['sui_po']} | ⚠️ Ngũ Hoàng: {shanshen['ngu_hoang']}"
+    # --- KHUNG CHÚ GIẢI ĐẶC TẢ MÀU NỀN ĐỒNG BỘ VỚI LA KINH (14.5% CHIỀU CAO PHÍA DƯỚI) ---
+    ax_leg = fig.add_axes([0.04, 0.01, 0.92, 0.135])
+    ax_leg.set_xlim(0, 1)
+    ax_leg.set_ylim(0, 1)
+    ax_leg.axis('off')
     
-    # Định nghĩa các khối màu đặc tả đúng như trên La Kinh
-    patch_dai_cat = mpatches.Patch(color='#831843', label='Hồng/Tím (9 Tử - Đại Cát)')
-    patch_cat = mpatches.Patch(color='#1e3a8a', label='Xanh dương (1 Bạch - Cát)')
-    patch_tai = mpatches.Patch(color='#713f12', label='Vàng (8 Bạch - Tài)')
-    patch_hung = mpatches.Patch(color='#7f1d1d', label='Đỏ/Nâu (2H, 3B, 5H - Hung sát)')
+    # Vẽ khung nền bao quanh toàn bộ phần chú giải
+    outer_box = mpatches.FancyBboxPatch((0.005, 0.03), 0.99, 0.94,
+                                        boxstyle="round,pad=0.015,rounding_size=0.04",
+                                        facecolor='#161b22', edgecolor='#58a6ff', linewidth=1.2)
+    ax_leg.add_patch(outer_box)
     
-    fig.text(0.5, 0.052, legend_title, ha='center', va='bottom', fontsize=8.8, fontweight='bold', color='#f0f6fc')
+    # Dòng 1: Thông tin Dự án & Thần Sát
+    line1 = f"DỰ ÁN: {client_name}   |   NIÊN HẠN {survey_yr} ({shanshen['year_chi']})   —   🚩 Thái Tuế: {shanshen['tai_sui']}   |   ⚡ Tuế Phá: {shanshen['sui_po']}   |   ⚠️ Ngũ Hoàng: {shanshen['ngu_hoang']}"
+    ax_leg.text(0.5, 0.81, line1, ha='center', va='center', fontsize=8.8, fontweight='bold', color='#f0f6fc')
     
-    # Tạo legend box chứa các ô màu chuẩn
-    leg = ax.legend(handles=[patch_dai_cat, patch_cat, patch_tai, patch_hung],
-                    loc='lower center', bbox_to_anchor=(0.5, -0.21), ncol=4,
-                    facecolor='#161b22', edgecolor='#58a6ff', labelcolor='#f0f6fc', fontsize=8.0)
-    leg.get_frame().set_linewidth(1.2)
+    # Dòng 2: Giải thích ký hiệu các vòng trong cùng
+    line2 = "• Vòng 1: S (Sơn Tinh) | H (Hướng Tinh) | [V] (Vận Tinh)      • Vòng 2: N (Lưu Niên) | T (Lưu Nguyệt)"
+    ax_leg.text(0.5, 0.56, line2, ha='center', va='center', fontsize=8.4, color='#c9d1d9')
     
-    plt.tight_layout(rect=[0, 0.10, 1, 1])
+    # Dòng 3: Các thẻ đặc tả đổ màu nền y hệt trên các cung La Kinh
+    badges = [
+        {"text": "9 Tử - Đại Cát (Hồng/Tím)", "bg": STAR_META[9]["bg"], "fg": STAR_META[9]["fg"], "x": 0.145, "w": 0.225},
+        {"text": "1 Bạch - Cát (Xanh dương)", "bg": STAR_META[1]["bg"], "fg": STAR_META[1]["fg"], "x": 0.385, "w": 0.225},
+        {"text": "8 Bạch - Tài (Vàng nâu)",   "bg": STAR_META[8]["bg"], "fg": STAR_META[8]["fg"], "x": 0.625, "w": 0.215},
+        {"text": "2H, 3B, 5H - Hung (Đỏ)",    "bg": STAR_META[2]["bg"], "fg": STAR_META[2]["fg"], "x": 0.860, "w": 0.225},
+    ]
+    
+    ax_leg.text(0.015, 0.24, "MÀU NỀN:", ha='left', va='center', fontsize=8.2, fontweight='bold', color='#8b949e')
+    
+    for b in badges:
+        bx = b["x"] - b["w"] / 2 + 0.045
+        by = 0.10
+        bh = 0.28
+        pill = mpatches.FancyBboxPatch((bx, by), b["w"] - 0.01, bh,
+                                       boxstyle="round,pad=0.008,rounding_size=0.03",
+                                       facecolor=b["bg"], edgecolor='#cbd5e1', linewidth=0.8)
+        ax_leg.add_patch(pill)
+        ax_leg.text(bx + (b["w"] - 0.01)/2, by + bh/2, b["text"],
+                    ha='center', va='center', fontsize=7.8, fontweight='bold', color=b["fg"])
+                    
     return fig
 
 if st.session_state.initialized:
@@ -611,7 +637,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.6 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.7 cho khách hàng: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -712,7 +738,7 @@ if st.session_state.initialized:
                     current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=opacity_val
                 )
                 
-                ax_img = fig_overlay.add_axes([0.08 + (offset_x/1000.0), 0.08 + (offset_y/1000.0), 0.84, 0.84], zorder=-1)
+                ax_img = fig_overlay.add_axes([0.08 + (offset_x/1000.0), 0.18 + (offset_y/1000.0), 0.84, 0.78], zorder=-1)
                 ax_img.imshow(plan_img)
                 ax_img.axis('off')
                 st.pyplot(fig_overlay, transparent=True)
@@ -731,11 +757,11 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.6)")
+            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.7)")
             st.markdown("""
             Trong phong thủy thực trạch, La Kinh là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
             
-            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.6** đã hoàn thiện toàn diện phần chú thích với các khối màu nền đặc tả trực quan, sắc nét và chuyên nghiệp nhất.
+            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.7** hoàn thiện phần bảng chú thích màu sắc đồng bộ 100% với mã màu trên tinh bàn, giúp tra cứu trực quan và xuất bản vẽ chuẩn xác.
             """)
 else:
-    st.info("👈 Vူ lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo hệ thống.")
+    st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo hệ thống.")
