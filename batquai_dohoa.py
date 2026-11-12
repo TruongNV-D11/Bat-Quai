@@ -10,7 +10,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v27.3",
+    page_title="Professional Feng Shui Master Bagua Engine v27.4",
     layout="wide"
 )
 
@@ -38,10 +38,9 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.3 (MASTER GRADE)")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.4")
 st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
 
-# --- 1. DỮ LIỆU HỌC THUẬT & QUY TẮC MÀU NGŨ HÀNH CỬU TINH ---
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
 
@@ -371,7 +370,6 @@ def compute_master_cung_phi(solar_date, solar_time, has_time, sex):
     group = "Đông Tứ Mệnh" if quai_num in [1, 3, 4, 9] else "Tây Tứ Mệnh"
     return can, chi, eff_year, quai_num, group
 
-# --- KHỞI TẠO SESSION STATE CHO QUẢN LÝ HỒ SƠ ---
 if "initialized" not in st.session_state:
     st.session_state.initialized = False
 if "play_spin" not in st.session_state:
@@ -412,7 +410,6 @@ with st.sidebar:
         value=DIRECTION_ANGLES[quick_dir], step=0.5, format="%.1f"
     )
     show_laser = st.checkbox("Hiển thị Tia Laser Tọa / Hướng trên La Kinh", value=True)
-    show_needle = st.checkbox("🧭 Hiển thị Kim Nam Châm Thiên Trì (Chỉ Bắc)", value=True)
     
     run_btn = st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True)
     if run_btn:
@@ -451,12 +448,11 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v27.3
+        System: Master Bagua Engine v27.4
     </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH MASTER GRADE v27.3 (CHUẨN LÝ THUYẾT KIM CHỈ BẮC) ---
-def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_needle_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
+def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
     plt.close('all')
     fig, ax = plt.subplots(figsize=(10.5, 11.2), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
@@ -474,7 +470,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
             rot += 180
         return rot
 
-    # --- TẦNG 3 & 4: BÁT TRẠCH & HẬU THIÊN BÁT QUÁI (r: 0.68 -> 1.04) ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         info = mapping[dir_name]
         rad = np.radians(angle)
@@ -500,7 +495,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
                 fontsize=7.5 if "\n" in palace_label else 8.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
 
-    # --- TẦNG 5 & 6: 24 SƠN HƯỚNG & NGŨ HÀNH (r: 1.04 -> 1.38) ---
     elem_colors = {"Thủy": "#38bdf8", "Mộc": "#4ade80", "Hỏa": "#f87171", "Thổ": "#facc15", "Kim": "#e2e8f0"}
     for son in SON_HUONG_24:
         mid_deg = ((son["deg_start"] + son["deg_end"]) / 2) % 360
@@ -519,7 +513,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
         ax.text(rad_son, 1.305, son['elem'], color=elem_colors.get(son['elem'], '#c9d1d9'), fontsize=7.4, fontweight='bold',
                 ha='center', va='center', rotation=rot_son, rotation_mode='anchor', zorder=4)
 
-    # --- TẦNG 7: 120 PHÂN KIM & VÒNG CHIA ĐỘ (r: 1.38 -> 1.58) ---
     for son in SON_HUONG_24:
         for slot in range(5):
             slot_start = (son["deg_start"] + slot * 3.0) % 360.0
@@ -535,7 +528,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
         if d_tick % 45 == 0:
             ax.text(rad_t, 1.58, f"{d_tick}°", color='#f0f6fc', fontsize=8.0, fontweight='bold', ha='center', va='center', zorder=4)
 
-    # --- TẦNG 1 & 2 (2 VÒNG TRONG CÙNG) ---
     for dir_name, angle in DIRECTION_ANGLES.items():
         rad = np.radians(angle)
         bar_start = np.radians(angle - 22.5)
@@ -563,7 +555,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
         ax.text(rad, 0.36, xk_label, color=h_meta["fg"], fontsize=7.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
-    # --- ĐƯỜNG THẬP TỰ & TIA LASER CHỈ HƯỚNG NHÀ ---
     ax.plot([0, np.pi], [1.45, 1.45], color='#ff7b72', linestyle='--', lw=0.9, alpha=0.45, zorder=15)
     ax.plot([np.pi/2, 3*np.pi/2], [1.45, 1.45], color='#58a6ff', linestyle='--', lw=0.9, alpha=0.45, zorder=15)
     
@@ -574,16 +565,9 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
                     arrowprops=dict(facecolor='#00ffcc', edgecolor='#00ffcc', lw=2.2, width=1.8, headwidth=9), zorder=30)
         ax.plot([0, sit_rad], [0, 1.45], color='#FFD700', linestyle=':', lw=2.0, alpha=0.95, zorder=29)
                     
-    # --- THIÊN TRÌ TRUNG CUNG & KIM NAM CHÂM LUÔN CHỈ BẮC (0 ĐỘ) ---
+    # Thiên Trì trung cung tinh gọn
     ax.bar(0, width=2*np.pi, bottom=0.0, height=0.24, align='edge',
            color='#090d16', alpha=1.0, edgecolor='#fde047', linewidth=1.3, zorder=32)
-    
-    if show_needle_flag:
-        # Kim nam châm vật lý: Luôn cố định hướng về phương Bắc chuẩn (0 độ / 2pi) để làm mốc từ trường
-        north_rad = 0.0
-        ax.annotate('', xy=(north_rad, 0.22), xytext=(north_rad + np.pi, 0.22),
-                    arrowprops=dict(facecolor='#ef4444', edgecolor='#fde047', lw=1.0, width=3.2, headwidth=9), zorder=34)
-
     ax.plot(0, 0, marker='o', markersize=6, color='#fde047', markeredgecolor='#0b0f19', zorder=36)
     
     ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str}\n({eff_year})", color='#fde047', fontsize=7.0, fontweight='bold',
@@ -595,7 +579,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
     ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     
-    # --- BẢNG CHÚ GIẢI THẦN SÁT & KÝ HIỆU ---
     legend_text = (
         f"DỰ ÁN: {client_name} | NIÊN HẠN {survey_yr} ({shanshen['year_chi']}): 🚩 Thái Tuế: {shanshen['tai_sui']} | ⚡ Tuế Phá: {shanshen['sui_po']} | ⚠️ Ngũ Hoàng: {shanshen['ngu_hoang']}\n"
         "• Vòng 1: S (Sơn Tinh) | H (Hướng Tinh) | [V] (Vận Tinh)  • Vòng 2: N (Lưu Niên) | T (Lưu Nguyệt)\n"
@@ -607,7 +590,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
     plt.tight_layout(rect=[0, 0.075, 1, 1])
     return fig
 
-# --- 4. HIỂN THỊ KẾT QUẢ & CÔNG CỤ NÂNG CAO ---
 if st.session_state.initialized:
     can, chi, eff_year, quai_num, group_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
     mapping = BAT_TRACH_MAPPING[quai_num]
@@ -620,7 +602,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.3 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.4 cho khách hàng: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -675,7 +657,7 @@ if st.session_state.initialized:
         
         with tab1:
             fig_mpl = render_matplotlib_lakinh(
-                quai_num, exact_deg, show_laser, show_needle, gender, eff_year,
+                quai_num, exact_deg, show_laser, gender, eff_year,
                 current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=1.0
             )
             st.pyplot(fig_mpl)
@@ -717,7 +699,7 @@ if st.session_state.initialized:
                     plan_img = plan_img.resize((max(10, new_w), max(10, new_h)), Image.Resampling.LANCZOS)
                     
                 fig_overlay = render_matplotlib_lakinh(
-                    quai_num, exact_deg, show_laser, show_needle, gender, eff_year,
+                    quai_num, exact_deg, show_laser, gender, eff_year,
                     current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=opacity_val
                 )
                 
@@ -740,27 +722,11 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.3)")
+            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.4)")
             st.markdown("""
-            Trong phong thủy thực trạch, La Kinh không chỉ là một chiếc la bàn định hướng thông thường, mà là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
+            Trong phong thủy thực trạch, La Kinh là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
             
-            Ứng dụng **Professional Feng Shui Master Bagua Engine** được phát triển nhằm số hóa toàn bộ tinh hoa của các trường phái phong thủy chính thống (Tam Nguyên Cửu Vận, Huyền Không Phi Tinh, Bát Trạch Minh Cảnh và 120 Phân Kim), mang lại độ chính xác tuyệt đối và góc nhìn trực quan sắc sảo.
-            
-            #### 🌟 Các tính năng & Tác dụng nổi bật:
-            1. **La Kinh 7 Tầng Chuyên Sâu:** Tích hợp đầy đủ các lớp học thuật từ vạch chia độ 360°, 120 Phân Kim, 24 Sơn Hướng Ngũ Hành, Hậu Thiên Bát Quái, Bát Trạch Du Niên cho đến Tinh Bàn Huyền Không và Lưu Niên/Lưu Nguyệt.
-            2. **Tự động Cảnh báo Thần Sát Niên Hạn:** Hệ thống tự động tính toán và gắn cờ trực quan các sát tinh hàng năm như *Thái Tuế, Tuế Phá, Ngũ Hoàng Đại Sát*, giúp tuyệt đối tránh động thổ nhầm cung xấu.
-            3. **Áp La Kinh Lên Mặt Bằng Kiến Trúc (Tab 2):** Cho phép tải sơ đồ mặt bằng nhà, căn chỉnh tâm (X, Y), xoay góc độ và thu phóng (Zoom %) để lồng khít La Kinh trong suốt lên mặt bằng, giúp nhìn thấu khí số từng phòng.
-            4. **Quản lý Hồ sơ Khách hàng Cục bộ:** Cho phép lưu trữ và theo dõi nhanh danh sách các quẻ đã lập trực tiếp trong phiên làm việc.
-            5. **Xuất bản vẽ Chất lượng cao (300 DPI):** Cho phép tải về toàn bộ sơ đồ La Kinh hoặc mặt bằng áp La Kinh sắc nét để lưu trữ làm hồ sơ bàn giao chuyên nghiệp.
-            """)
-            
-            st.markdown("---")
-            st.markdown("### 📖 Hướng dẫn Sử dụng Chi tiết (User Manual)")
-            st.markdown("""
-            * **Bước 1:** Nhập tên khách hàng, ngày tháng năm sinh, giờ sinh và giới tính của gia chủ ở thanh bên trái. Chọn năm xét và tháng âm lịch để hệ thống nhận diện vận khí.
-            * **Bước 2:** Nhập độ số hướng nhà thực địa (hoặc chọn nhanh phương vị), bật/tắt tia laser định hướng và **kim nam châm Thiên Trì (luôn chỉ Bắc chuẩn vật lý)**.
-            * **Bước 3:** Bấm **"🔮 Lập Bản Đồ La Kinh Chuyên Sâu"** để hệ thống tính toán. Tra cứu báo cáo khí số và quan sát biểu đồ La Kinh ở **Tab 1**. Có thể bấm **"💾 Lưu hồ sơ hiện tại"** để lưu vết lại trong danh sách phiên làm việc.
-            * **Bước 4:** Chuyển sang **Tab 2**, tải lên ảnh bản vẽ mặt bằng nhà. Sử dụng các thanh trượt *Độ trong suốt, Góc xoay, Dịch chuyển X/Y và Thu phóng (Zoom %)* để căn chỉnh tâm La Kinh trùng khít với tâm hình học của ngôi nhà. Bấm tải xuống báo cáo PNG 300 DPI khi hoàn thành.
+            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.4** được tối ưu hóa gọn nhẹ, sắc nét và chuyên nghiệp, chuyên phục vụ việc phân tích tinh bàn, lập quẻ Bát Trạch, Huyền Không và áp mặt bằng kiến trúc xuất bản vẽ 300 DPI.
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo hệ thống.")
