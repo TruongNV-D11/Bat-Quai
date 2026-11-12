@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v27.11",
+    page_title="Professional Feng Shui Master Bagua Engine v27.13",
     layout="wide"
 )
 
@@ -39,7 +39,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.11")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.13")
 st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
 
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -449,7 +449,7 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v27.11
+        System: Master Bagua Engine v27.13
     </div>
     """, unsafe_allow_html=True)
 
@@ -458,25 +458,28 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     fig = plt.figure(figsize=(10.5, 12.5))
     fig.patch.set_facecolor('#0b0f19')
     
-    # TRỤC NỀN 1: Ảnh mặt bằng (nếu có ở tab Áp Mặt Bằng) được vẽ độc lập chuẩn xác
-    if plan_img is not None:
-        scale_f = zoom_val / 100.0
-        ax_img = fig.add_axes([0.04 + (off_x/1000.0), 0.17 + (off_y/1000.0), 0.92 * scale_f, 0.81 * scale_f])
-        ax_img.set_facecolor('#0b0f19')
-        if rot_val != 0:
-            p_img = plan_img.rotate(rot_val, expand=True)
-        else:
-            p_img = plan_img
-        ax_img.imshow(p_img, alpha=alpha_bg)
-        ax_img.axis('off')
-
-    # TRỤC 2: La Kinh Polar vẽ chồng khít ở trên với độ trong suốt tối ưu
+    # 🌟 GIẢI PHÁP ĐỒNG TÂM TUYỆT ĐỐI: Dùng chung 1 trục tọa độ cực (polar=True) chuẩn xác 100% cho cả La Kinh và Ảnh mặt bằng
     ax = fig.add_axes([0.04, 0.17, 0.92, 0.81], polar=True)
-    ax.set_facecolor('none')
+    ax.set_facecolor('#0b0f19')
     ax.set_theta_zero_location('N')
     ax.set_theta_direction(-1)
     ax.set_ylim(0, 1.66)
     
+    # Nếu có ảnh mặt bằng, đặt ảnh nằm đúng tâm (0,0) ở lớp dưới cùng (zorder=0)
+    if plan_img is not None:
+        scale_f = zoom_val / 100.0
+        if rot_val != 0:
+            p_img = plan_img.rotate(rot_val, expand=True)
+        else:
+            p_img = plan_img
+        img_arr = np.array(p_img)
+        h, w = img_arr.shape[:2]
+        extent_val = 1.66 * scale_f
+        # Dịch chuyển tâm theo offset X, Y
+        dx = off_x / 300.0
+        dy = off_y / 300.0
+        ax.imshow(img_arr, extent=[-extent_val + dx, extent_val + dx, -extent_val + dy, extent_val + dy], alpha=1.0, zorder=0)
+
     mapping = BAT_TRACH_MAPPING[quai_num]
     shanshen = get_annual_shanshen(survey_yr)
     
@@ -493,7 +496,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         rot_angle = get_text_rotation(angle)
         
         ax.bar(bar_start, width=np.radians(45), bottom=0.68, height=0.18, align='edge',
-               color=info["color"], alpha=0.88, edgecolor='#ffffff', linewidth=1.0, zorder=2)
+               color=info["color"], alpha=0.88 * alpha_bg, edgecolor='#ffffff', linewidth=1.0, zorder=2)
         ax.text(rad, 0.77, info['cat_hung'], color='#ffffff', fontsize=8.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
                 
@@ -506,7 +509,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             palace_label += "\n⚠️[Ngũ Hoàng]"
             
         ax.bar(bar_start, width=np.radians(45), bottom=0.86, height=0.18, align='edge',
-               color='#1f242c', alpha=0.92, edgecolor='#30363d', linewidth=1.0, zorder=2)
+               color='#1f242c', alpha=0.92 * alpha_bg, edgecolor='#30363d', linewidth=1.0, zorder=2)
         ax.text(rad, 0.95, palace_label, color='#fde047' if "Phá" in palace_label or "Hoàng" in palace_label or "Tuế" in palace_label else '#f0f6fc', 
                 fontsize=7.5 if "\n" in palace_label else 8.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=4)
@@ -520,12 +523,12 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         rot_son = get_text_rotation(mid_deg)
         
         ax.bar(np.radians(son["deg_start"]), width=np.radians(15), bottom=1.04, height=0.19, align='edge',
-               color='#161b22', alpha=0.88, edgecolor='#30363d', linewidth=0.8, zorder=2)
+               color='#161b22', alpha=0.88 * alpha_bg, edgecolor='#30363d', linewidth=0.8, zorder=2)
         ax.text(rad_son, 1.135, son['name'], color='#58a6ff', fontsize=8.6, fontweight='bold',
                 ha='center', va='center', rotation=rot_son, rotation_mode='anchor', zorder=4)
                 
         ax.bar(np.radians(son["deg_start"]), width=np.radians(15), bottom=1.23, height=0.15, align='edge',
-               color='#0d1117', alpha=0.88, edgecolor='#30363d', linewidth=0.6, zorder=2)
+               color='#0d1117', alpha=0.88 * alpha_bg, edgecolor='#30363d', linewidth=0.6, zorder=2)
         ax.text(rad_son, 1.305, son['elem'], color=elem_colors.get(son['elem'], '#c9d1d9'), fontsize=7.4, fontweight='bold',
                 ha='center', va='center', rotation=rot_son, rotation_mode='anchor', zorder=4)
 
@@ -534,7 +537,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             slot_start = (son["deg_start"] + slot * 3.0) % 360.0
             pk_color = '#2ea043' if slot == 2 else ('#1f6feb' if slot in [1, 3] else '#30363d')
             ax.bar(np.radians(slot_start), width=np.radians(3.0), bottom=1.38, height=0.07, align='edge',
-                   color=pk_color, alpha=0.88, edgecolor='#0b0f19', linewidth=0.4, zorder=2)
+                   color=pk_color, alpha=0.88 * alpha_bg, edgecolor='#0b0f19', linewidth=0.4, zorder=2)
 
     for d_tick in range(360):
         rad_t = np.radians(d_tick)
@@ -554,7 +557,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         y_meta = STAR_META[y_star]
         
         ax.bar(bar_start, width=np.radians(45), bottom=0.48, height=0.20, align='edge',
-               color=y_meta["bg"], alpha=0.95, edgecolor='#ffffff', linewidth=0.8, zorder=20)
+               color=y_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#ffffff', linewidth=0.8, zorder=20)
         ym_label = f"N:{y_star} | T:{m_star}"
         ax.text(rad, 0.58, ym_label, color=y_meta["fg"], fontsize=8.2, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
@@ -566,7 +569,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         h_meta = STAR_META[h_star]
         
         ax.bar(bar_start, width=np.radians(45), bottom=0.24, height=0.24, align='edge',
-               color=h_meta["bg"], alpha=0.95, edgecolor='#cbd5e1', linewidth=0.9, zorder=20)
+               color=h_meta["bg"], alpha=0.95 * alpha_bg, edgecolor='#cbd5e1', linewidth=0.9, zorder=20)
         xk_label = f"S:{s_star} H:{h_star}\n[V:{v_star}]"
         ax.text(rad, 0.36, xk_label, color=h_meta["fg"], fontsize=7.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
@@ -645,7 +648,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.11 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.13 cho khách hàng: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -733,7 +736,7 @@ if st.session_state.initialized:
                     
                 plan_img = Image.open(uploaded_plan)
                 
-                # Gọi trực tiếp qua hàm gộp tích hợp chung một Figure, loại bỏ hoàn toàn việc chồng lấn 2 lệnh streamlit st.pyplot riêng biệt
+                # Vẽ chung trên cùng một hệ trục toạ độ đồng tâm tuyệt đối
                 fig_overlay = render_matplotlib_lakinh(
                     quai_num, exact_deg, show_laser, gender, eff_year,
                     current_van, xk_chart, annual_chart, monthly_chart, survey_year,
@@ -757,11 +760,11 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.11)")
+            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.13)")
             st.markdown("""
             Trong phong thủy thực trạch, La Kinh là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
             
-            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.11** quản lý đồng bộ ảnh mặt bằng và La Kinh trong cùng một hàm vẽ duy nhất, triệt tiêu hoàn toàn hiện tượng bóng mờ chồng lấn.
+            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.13** đã hợp nhất mặt bằng nền và hệ thống vòng La Kinh vào chung một hệ tọa độ đồng tâm, giải quyết hoàn toàn lỗi lệch tâm.
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo hệ thống.")
