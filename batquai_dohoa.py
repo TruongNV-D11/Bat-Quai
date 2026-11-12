@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v27.8",
+    page_title="Professional Feng Shui Master Bagua Engine v27.10",
     layout="wide"
 )
 
@@ -39,7 +39,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.8")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.10")
 st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
 
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -169,7 +169,7 @@ def compute_xuan_kong_chart(van_num, facing_deg):
     s_dir = sitting_son["dir"]
     if palaces[f_dir]["huong"] == van_num and palaces[s_dir]["son"] == van_num:
         cuc_dien = "Vượng Sơn Vượng Hướng (Đại Cát - Đinh Tài lưỡng vượng)"
-    elif palaces[f_dir]["huong"] == van_num and palaces[f_dir]["son"] == van_num:
+    elif palaces[f_dir]["huong"] == van_num and palaces[f_dir]["huong"] == van_num:
         cuc_dien = "Song Tinh Đáo Hướng (Vượng Tài - Cần có Thủy ở hướng trước)"
     elif palaces[s_dir]["huong"] == van_num and palaces[s_dir]["son"] == van_num:
         cuc_dien = "Song Tinh Đáo Tọa (Vượng Đinh - Cần có Sơn/Tọa vững sau nhà)"
@@ -449,7 +449,7 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v27.8
+        System: Master Bagua Engine v27.10
     </div>
     """, unsafe_allow_html=True)
 
@@ -458,7 +458,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     fig = plt.figure(figsize=(10.5, 12.5))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     
-    # Khung La Kinh chính ở phía trên
+    # Trục La Kinh Polar chuẩn
     ax = fig.add_axes([0.04, 0.17, 0.92, 0.81], polar=True)
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_theta_zero_location('N')
@@ -582,27 +582,23 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     
-    # --- KHUNG CHÚ GIẢI PHÍA DƯỚI ĐÃ ĐƯỢC CO GÃN NAY NGAY NGẮN BÊN TRONG KHỐI ---
+    # --- KHUNG CHÚ GIẢI PHÍA DƯỚI ---
     ax_leg = fig.add_axes([0.04, 0.015, 0.92, 0.13])
     ax_leg.set_xlim(0, 1)
     ax_leg.set_ylim(0, 1)
     ax_leg.axis('off')
     
-    # Khung nền viền xanh bo góc gọn gàng
     outer_box = mpatches.FancyBboxPatch((0.0, 0.0), 1.0, 1.0,
                                         boxstyle="round,pad=0.01,rounding_size=0.05",
                                         facecolor='#161b22', edgecolor='#58a6ff', linewidth=1.2)
     ax_leg.add_patch(outer_box)
     
-    # Dòng 1: Thông tin Dự án & Thần Sát
     line1 = f"DỰ ÁN: {client_name}   |   NIÊN HẠN {survey_yr} ({shanshen['year_chi']})   —   🚩 Thái Tuế: {shanshen['tai_sui']}   |   ⚡ Tuế Phá: {shanshen['sui_po']}   |   ⚠️ Ngũ Hoàng: {shanshen['ngu_hoang']}"
     ax_leg.text(0.5, 0.78, line1, ha='center', va='center', fontsize=8.5, fontweight='bold', color='#f0f6fc')
     
-    # Dòng 2: Giải thích ký hiệu vòng 1 và vòng 2
     line2 = "• Vòng 1: S (Sơn Tinh) | H (Hướng Tinh) | [V] (Vận Tinh)      • Vòng 2: N (Lưu Niên) | T (Lưu Nguyệt)"
     ax_leg.text(0.5, 0.52, line2, ha='center', va='center', fontsize=8.1, color='#c9d1d9')
     
-    # Dòng 3: Các thẻ pill màu đặc tả được thu gọn tỷ lệ để nằm hoàn toàn ngay ngắn trong khung
     badges = [
         {"text": "9 Tử - Đại Cát (Hồng/Tím)", "bg": STAR_META[9]["bg"], "fg": STAR_META[9]["fg"], "x": 0.135, "w": 0.22},
         {"text": "1 Bạch - Cát (Xanh dương)", "bg": STAR_META[1]["bg"], "fg": STAR_META[1]["fg"], "x": 0.370, "w": 0.22},
@@ -637,7 +633,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.8 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.10 cho khách hàng: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -732,15 +728,17 @@ if st.session_state.initialized:
                     new_w = int(orig_w * (zoom_scale / 100.0))
                     new_h = int(orig_h * (zoom_scale / 100.0))
                     plan_img = plan_img.resize((max(10, new_w), max(10, new_h)), Image.Resampling.LANCZOS)
-                    
+                
+                # Khôi phục cơ chế 2 lớp tách biệt sạch sẽ như bản đầu tiên: vẽ La Kinh trước, sau đó chèn ax_img ở tầng zorder=-1
                 fig_overlay = render_matplotlib_lakinh(
                     quai_num, exact_deg, show_laser, gender, eff_year,
                     current_van, xk_chart, annual_chart, monthly_chart, survey_year, alpha_bg=opacity_val
                 )
                 
-                ax_img = fig_overlay.add_axes([0.08 + (offset_x/1000.0), 0.19 + (offset_y/1000.0), 0.84, 0.76], zorder=-1)
+                ax_img = fig_overlay.add_axes([0.06 + (offset_x/1000.0), 0.18 + (offset_y/1000.0), 0.88, 0.78], zorder=-1)
                 ax_img.imshow(plan_img)
                 ax_img.axis('off')
+                
                 st.pyplot(fig_overlay, transparent=True)
                 
                 buf_overlay = io.BytesIO()
@@ -757,11 +755,11 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.8)")
+            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.10)")
             st.markdown("""
             Trong phong thủy thực trạch, La Kinh là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
             
-            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.8** đã tối ưu hoàn hảo tọa độ hiển thị, giúp phần chú giải phía dưới nằm gọn gàng, cân đối tuyệt đối bên trong khung viền.
+            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.10** đã tách bạch tầng hiển thị ảnh nền mặt bằng và khung La Kinh cực, loại bỏ hoàn toàn hiện tượng bóng chồng lấn 2 lớp.
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo hệ thống.")
