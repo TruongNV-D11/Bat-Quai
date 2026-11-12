@@ -10,7 +10,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v27.2",
+    page_title="Professional Feng Shui Master Bagua Engine v27.3",
     layout="wide"
 )
 
@@ -38,7 +38,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.2 (MASTER GRADE)")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.3 (MASTER GRADE)")
 st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
 
 # --- 1. DỮ LIỆU HỌC THUẬT & QUY TẮC MÀU NGŨ HÀNH CỬU TINH ---
@@ -412,7 +412,7 @@ with st.sidebar:
         value=DIRECTION_ANGLES[quick_dir], step=0.5, format="%.1f"
     )
     show_laser = st.checkbox("Hiển thị Tia Laser Tọa / Hướng trên La Kinh", value=True)
-    show_needle = st.checkbox("🧭 Hiển thị Kim Nam Châm Thiên Trì", value=True)
+    show_needle = st.checkbox("🧭 Hiển thị Kim Nam Châm Thiên Trì (Chỉ Bắc)", value=True)
     
     run_btn = st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True)
     if run_btn:
@@ -451,14 +451,13 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v27.2
+        System: Master Bagua Engine v27.3
     </div>
     """, unsafe_allow_html=True)
 
-# --- 3. HÀM VẼ LA KINH MASTER GRADE v27.2 ---
+# --- 3. HÀM VẼ LA KINH MASTER GRADE v27.3 (CHUẨN LÝ THUYẾT KIM CHỈ BẮC) ---
 def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_needle_flag, gender_str, eff_year, van_num, xk_chart, annual_chart, monthly_chart, survey_yr, alpha_bg=1.0):
     plt.close('all')
-    # Tăng kích thước khung vẽ matplotlib để La Kinh hiển thị to hơn và rõ nét hơn
     fig, ax = plt.subplots(figsize=(10.5, 11.2), subplot_kw=dict(polar=True))
     fig.patch.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
     ax.set_facecolor('#0b0f19' if alpha_bg == 1.0 else 'none')
@@ -564,7 +563,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
         ax.text(rad, 0.36, xk_label, color=h_meta["fg"], fontsize=7.8, fontweight='bold',
                 ha='center', va='center', rotation=rot_angle, rotation_mode='anchor', zorder=25)
 
-    # --- ĐƯỜNG THẬP TỰ & TIA LASER ---
+    # --- ĐƯỜNG THẬP TỰ & TIA LASER CHỈ HƯỚNG NHÀ ---
     ax.plot([0, np.pi], [1.45, 1.45], color='#ff7b72', linestyle='--', lw=0.9, alpha=0.45, zorder=15)
     ax.plot([np.pi/2, 3*np.pi/2], [1.45, 1.45], color='#58a6ff', linestyle='--', lw=0.9, alpha=0.45, zorder=15)
     
@@ -575,13 +574,14 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, show_need
                     arrowprops=dict(facecolor='#00ffcc', edgecolor='#00ffcc', lw=2.2, width=1.8, headwidth=9), zorder=30)
         ax.plot([0, sit_rad], [0, 1.45], color='#FFD700', linestyle=':', lw=2.0, alpha=0.95, zorder=29)
                     
-    # --- THIÊN TRÌ TRUNG CUNG & KIM NAM CHÂM ---
+    # --- THIÊN TRÌ TRUNG CUNG & KIM NAM CHÂM LUÔN CHỈ BẮC (0 ĐỘ) ---
     ax.bar(0, width=2*np.pi, bottom=0.0, height=0.24, align='edge',
            color='#090d16', alpha=1.0, edgecolor='#fde047', linewidth=1.3, zorder=32)
     
-    if show_needle_flag and exact_deg_val is not None:
-        mag_rad = np.radians(exact_deg_val)
-        ax.annotate('', xy=(mag_rad, 0.22), xytext=(mag_rad + np.pi, 0.22),
+    if show_needle_flag:
+        # Kim nam châm vật lý: Luôn cố định hướng về phương Bắc chuẩn (0 độ / 2pi) để làm mốc từ trường
+        north_rad = 0.0
+        ax.annotate('', xy=(north_rad, 0.22), xytext=(north_rad + np.pi, 0.22),
                     arrowprops=dict(facecolor='#ef4444', edgecolor='#fde047', lw=1.0, width=3.2, headwidth=9), zorder=34)
 
     ax.plot(0, 0, marker='o', markersize=6, color='#fde047', markeredgecolor='#0b0f19', zorder=36)
@@ -620,7 +620,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.2 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.3 cho khách hàng: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -637,7 +637,6 @@ if st.session_state.initialized:
         placeholder.empty()
         st.session_state.play_spin = False
 
-    # ĐIỀU CHỈNH TỶ LỆ CỘT: Cột trái gọn lại ([0.95]), Cột phải chứa La Kinh phóng to chiếm không gian lớn ([2.05])
     col_left, col_right = st.columns([0.95, 2.05])
     
     with col_left:
@@ -741,7 +740,7 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.2)")
+            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.3)")
             st.markdown("""
             Trong phong thủy thực trạch, La Kinh không chỉ là một chiếc la bàn định hướng thông thường, mà là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
             
@@ -759,7 +758,7 @@ if st.session_state.initialized:
             st.markdown("### 📖 Hướng dẫn Sử dụng Chi tiết (User Manual)")
             st.markdown("""
             * **Bước 1:** Nhập tên khách hàng, ngày tháng năm sinh, giờ sinh và giới tính của gia chủ ở thanh bên trái. Chọn năm xét và tháng âm lịch để hệ thống nhận diện vận khí.
-            * **Bước 2:** Nhập độ số hướng nhà thực địa (hoặc chọn nhanh phương vị), bật/tắt tia laser định hướng và **kim nam châm Thiên Trì**.
+            * **Bước 2:** Nhập độ số hướng nhà thực địa (hoặc chọn nhanh phương vị), bật/tắt tia laser định hướng và **kim nam châm Thiên Trì (luôn chỉ Bắc chuẩn vật lý)**.
             * **Bước 3:** Bấm **"🔮 Lập Bản Đồ La Kinh Chuyên Sâu"** để hệ thống tính toán. Tra cứu báo cáo khí số và quan sát biểu đồ La Kinh ở **Tab 1**. Có thể bấm **"💾 Lưu hồ sơ hiện tại"** để lưu vết lại trong danh sách phiên làm việc.
             * **Bước 4:** Chuyển sang **Tab 2**, tải lên ảnh bản vẽ mặt bằng nhà. Sử dụng các thanh trượt *Độ trong suốt, Góc xoay, Dịch chuyển X/Y và Thu phóng (Zoom %)* để căn chỉnh tâm La Kinh trùng khít với tâm hình học của ngôi nhà. Bấm tải xuống báo cáo PNG 300 DPI khi hoàn thành.
             """)
