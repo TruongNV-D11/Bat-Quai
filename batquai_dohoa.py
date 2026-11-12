@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v27.13",
+    page_title="Professional Feng Shui Master Bagua Engine v27.14",
     layout="wide"
 )
 
@@ -39,7 +39,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.13")
+st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v27.14")
 st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
 
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
@@ -449,7 +449,7 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v27.13
+        System: Master Bagua Engine v27.14
     </div>
     """, unsafe_allow_html=True)
 
@@ -458,28 +458,42 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     fig = plt.figure(figsize=(10.5, 12.5))
     fig.patch.set_facecolor('#0b0f19')
     
-    # 🌟 GIẢI PHÁP ĐỒNG TÂM TUYỆT ĐỐI: Dùng chung 1 trục tọa độ cực (polar=True) chuẩn xác 100% cho cả La Kinh và Ảnh mặt bằng
-    ax = fig.add_axes([0.04, 0.17, 0.92, 0.81], polar=True)
-    ax.set_facecolor('#0b0f19')
-    ax.set_theta_zero_location('N')
-    ax.set_theta_direction(-1)
-    ax.set_ylim(0, 1.66)
+    # 🌟 CẤU TRÚC 2 LỚP CHUẨN XÁC: 
+    # Lớp dưới: Trục Descartes chứa ảnh mặt bằng (hiển thị hoàn hảo, điều chỉnh zoom/dịch chuyển/xoay mượt mà)
+    # Lớp trên: Trục cực (polar=True) chứa vòng tròn La Kinh chồng khít đồng tâm tuyệt đối
     
-    # Nếu có ảnh mặt bằng, đặt ảnh nằm đúng tâm (0,0) ở lớp dưới cùng (zorder=0)
     if plan_img is not None:
         scale_f = zoom_val / 100.0
+        ax_img = fig.add_axes([0.04, 0.17, 0.92, 0.81])
+        ax_img.set_facecolor('#0b0f19')
+        ax_img.set_xlim(-1.66, 1.66)
+        ax_img.set_ylim(-1.66, 1.66)
+        
         if rot_val != 0:
             p_img = plan_img.rotate(rot_val, expand=True)
         else:
             p_img = plan_img
+            
         img_arr = np.array(p_img)
-        h, w = img_arr.shape[:2]
-        extent_val = 1.66 * scale_f
-        # Dịch chuyển tâm theo offset X, Y
-        dx = off_x / 300.0
-        dy = off_y / 300.0
-        ax.imshow(img_arr, extent=[-extent_val + dx, extent_val + dx, -extent_val + dy, extent_val + dy], alpha=1.0, zorder=0)
+        # Tính toán kích thước hiển thị theo hệ tọa độ chuẩn Descartes [-1.66, 1.66]
+        span = 3.32 * scale_f
+        dx = off_x / 100.0
+        dy = off_y / 100.0
+        xmin = -span / 2.0 + dx
+        xmax = span / 2.0 + dx
+        ymin = -span / 2.0 + dy
+        ymax = span / 2.0 + dy
+        
+        ax_img.imshow(img_arr, extent=[xmin, xmax, ymin, ymax], alpha=1.0, zorder=1)
+        ax_img.axis('off')
 
+    # Trục La Kinh Polar đè phía trên
+    ax = fig.add_axes([0.04, 0.17, 0.92, 0.81], polar=True)
+    ax.set_facecolor('none')
+    ax.set_theta_zero_location('N')
+    ax.set_theta_direction(-1)
+    ax.set_ylim(0, 1.66)
+    
     mapping = BAT_TRACH_MAPPING[quai_num]
     shanshen = get_annual_shanshen(survey_yr)
     
@@ -648,7 +662,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.13 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v27.14 cho khách hàng: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -736,7 +750,7 @@ if st.session_state.initialized:
                     
                 plan_img = Image.open(uploaded_plan)
                 
-                # Vẽ chung trên cùng một hệ trục toạ độ đồng tâm tuyệt đối
+                # Render với hệ 2 trục song song đồng tâm chuẩn xác
                 fig_overlay = render_matplotlib_lakinh(
                     quai_num, exact_deg, show_laser, gender, eff_year,
                     current_van, xk_chart, annual_chart, monthly_chart, survey_year,
@@ -760,11 +774,11 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.13)")
+            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v27.14)")
             st.markdown("""
             Trong phong thủy thực trạch, La Kinh là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
             
-            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.13** đã hợp nhất mặt bằng nền và hệ thống vòng La Kinh vào chung một hệ tọa độ đồng tâm, giải quyết hoàn toàn lỗi lệch tâm.
+            Ứng dụng **Professional Feng Shui Master Bagua Engine v27.14** sử dụng cấu trúc 2 lớp độc lập (Mặt bằng Descartes phía dưới + La Kinh cực phía trên), giúp hình ảnh mặt bằng hiển thị rõ nét ngay lập tức và các thanh trượt điều chỉnh hoạt động mượt mà, đồng tâm hoàn hảo.
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo hệ thống.")
