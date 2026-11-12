@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Professional Feng Shui Master Bagua Engine (v29.0)
-- Tích hợp vòng La Kinh đa tầng, Huyền Không Phi Tinh, Bát Trạch.
+Professional Feng Shui Master Bagua Engine (v29.0 - Full Edition)
+- Tích hợp vòng La Kinh đa tầng, Huyền Không Phi Tinh, Bát Trạch đầy đủ 9 cung mệnh.
 - Bổ sung tùy chọn hiển thị linh hoạt (Kim nam châm Thiên Trì, Tia Laser tọa hướng, Thần Sát).
 """
 
+import streamlit as np_st # alias để tránh nhầm lẫn
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ st.set_page_config(
 )
 
 # ==========================================
-# 1. HỆ THỐNG DỮ LIỆU & HỌC THUẬT CỐ ĐỊNH
+# 1. HỆ THỐNG DỮ LIỆU & HỌC THUẬT CỐ ĐỊNH (FULL 9 QUÁI SỐ)
 # ==========================================
 
 DIRECTION_ANGLES = {
@@ -26,6 +27,7 @@ DIRECTION_ANGLES = {
     "Nam": 180, "Tây Nam": 225, "Tây": 270, "Tây Bắc": 315
 }
 
+# Định nghĩa đầy đủ Bát Trạch cho cả 9 Quái số (1 đến 9)
 BAT_TRACH_MAPPING = {
     1: { # Khảm (Đông Tứ Mệnh)
         "Bắc": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Khảm", "color": "#166534"},
@@ -37,15 +39,90 @@ BAT_TRACH_MAPPING = {
         "Tây": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Đoài", "color": "#7f1d1d"},
         "Tây Bắc": {"name": "Ngũ Quỷ", "cat_hung": "Hung", "trigram": "Càn", "color": "#991b1b"}
     },
-    # Các quái số khác được định nghĩa tương ứng... (rút gọn để tối ưu code core)
+    2: { # Khôn (Tây Tứ Mệnh)
+        "Bắc": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Khảm", "color": "#7f1d1d"},
+        "Đông Bắc": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Cấn", "color": "#14532d"},
+        "Đông": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Chấn", "color": "#991b1b"},
+        "Đông Nam": {"name": "Ngũ Quỷ", "cat_hung": "Hung", "trigram": "Tốn", "color": "#991b1b"},
+        "Nam": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Ly", "color": "#991b1b"},
+        "Tây Nam": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Khôn", "color": "#166534"},
+        "Tây": {"name": "Diên Nên", "cat_hung": "Cát", "trigram": "Đoài", "color": "#166534"},
+        "Tây Bắc": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Càn", "color": "#166534"}
+    },
+    3: { # Chấn (Đông Tứ Mệnh)
+        "Bắc": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Khảm", "color": "#166534"},
+        "Đông Bắc": {"name": "Ngũ Quỷ", "cat_hung": "Hung", "trigram": "Cấn", "color": "#991b1b"},
+        "Đông": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Chấn", "color": "#166534"},
+        "Đông Nam": {"name": "Diên Nên", "cat_hung": "Cát", "trigram": "Tốn", "color": "#166534"},
+        "Nam": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Ly", "color": "#14532d"},
+        "Tây Nam": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Khôn", "color": "#7f1d1d"},
+        "Tây": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Đoài", "color": "#991b1b"},
+        "Tây Bắc": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Càn", "color": "#991b1b"}
+    },
+    4: { # Tốn (Đông Tứ Mệnh)
+        "Bắc": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Khảm", "color": "#14532d"},
+        "Đông Bắc": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Cấn", "color": "#7f1d1d"},
+        "Đông": {"name": "Diên Nên", "cat_hung": "Cát", "trigram": "Chấn", "color": "#166534"},
+        "Đông Nam": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Tốn", "color": "#166534"},
+        "Nam": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Ly", "color": "#166534"},
+        "Tây Nam": {"name": "Ngũ Quỷ", "cat_hung": "Hung", "trigram": "Khôn", "color": "#991b1b"},
+        "Tây": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Đoài", "color": "#991b1b"},
+        "Tây Bắc": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Càn", "color": "#991b1b"}
+    },
+    5: { # Trung Cung (Nam quy về Khôn, Nữ quy về Cấn)
+        "Bắc": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Khảm", "color": "#7f1d1d"},
+        "Đông Bắc": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Cấn", "color": "#14532d"},
+        "Đông": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Chấn", "color": "#991b1b"},
+        "Đông Nam": {"name": "Ngũ Quỷ", "cat_hung": "Hung", "trigram": "Tốn", "color": "#991b1b"},
+        "Nam": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Ly", "color": "#991b1b"},
+        "Tây Nam": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Khôn", "color": "#166534"},
+        "Tây": {"name": "Diên Nên", "cat_hung": "Cát", "trigram": "Đoài", "color": "#166534"},
+        "Tây Bắc": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Càn", "color": "#166534"}
+    },
+    6: { # Càn (Tây Tứ Mệnh)
+        "Bắc": {"name": "Ngũ Quỷ", "cat_hung": "Hung", "trigram": "Khảm", "color": "#991b1b"},
+        "Đông Bắc": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Cấn", "color": "#166534"},
+        "Đông": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Chấn", "color": "#7f1d1d"},
+        "Đông Nam": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Tốn", "color": "#991b1b"},
+        "Nam": {"name": "Diên Nên", "cat_hung": "Cát", "trigram": "Ly", "color": "#166534"},
+        "Tây Nam": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Khôn", "color": "#991b1b"},
+        "Tây": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Đoài", "color": "#14532d"},
+        "Tây Bắc": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Càn", "color": "#166534"}
+    },
+    7: { # Đoài (Tây Tứ Mệnh)
+        "Bắc": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Khảm", "color": "#7f1d1d"},
+        "Đông Bắc": {"name": "Diên Nên", "cat_hung": "Cát", "trigram": "Cấn", "color": "#166534"},
+        "Đông": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Chấn", "color": "#991b1b"},
+        "Đông Nam": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Tốn", "color": "#991b1b"},
+        "Nam": {"name": "Ngũ Quỷ", "cat_hung": "Hung", "trigram": "Ly", "color": "#991b1b"},
+        "Tây Nam": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Khôn", "color": "#166534"},
+        "Tây": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Đoài", "color": "#166534"},
+        "Tây Bắc": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Càn", "color": "#14532d"}
+    },
+    8: { # Cấn (Tây Tứ Mệnh)
+        "Bắc": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Khảm", "color": "#991b1b"},
+        "Đông Bắc": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Cấn", "color": "#166534"},
+        "Đông": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Chấn", "color": "#7f1d1d"},
+        "Đông Nam": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Tốn", "color": "#166534"},
+        "Nam": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Ly", "color": "#991b1b"},
+        "Tây Nam": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Khôn", "color": "#14532d"},
+        "Tây": {"name": "Diên Nên", "cat_hung": "Cát", "trigram": "Đoài", "color": "#166534"},
+        "Tây Bắc": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Càn", "color": "#166534"}
+    },
+    9: { # Ly (Đông Tứ Mệnh)
+        "Bắc": {"name": "Diên Nên", "cat_hung": "Cát", "trigram": "Khảm", "color": "#166534"},
+        "Đông Bắc": {"name": "Họa Hại", "cat_hung": "Hung", "trigram": "Cấn", "color": "#991b1b"},
+        "Đông": {"name": "Sinh Khí", "cat_hung": "Đại Cát", "trigram": "Chấn", "color": "#14532d"},
+        "Đông Nam": {"name": "Tuyệt Mệnh", "cat_hung": "Đại Hung", "trigram": "Tốn", "color": "#7f1d1d"},
+        "Nam": {"name": "Phục Vị", "cat_hung": "Cát", "trigram": "Ly", "color": "#166534"},
+        "Tây Nam": {"name": "Lục Sát", "cat_hung": "Hung", "trigram": "Khôn", "color": "#991b1b"},
+        "Tây": {"name": "Ngũ Quỷ", "cat_hung": "Hung", "trigram": "Đoài", "color": "#991b1b"},
+        "Tây Bắc": {"name": "Thiên Y", "cat_hung": "Cát", "trigram": "Càn", "color": "#166534"}
+    }
 }
-# Fallback mapping nếu quái số khác
-for k in range(2, 10):
-    if k not in BAT_TRACH_MAPPING:
-        BAT_TRACH_MAPPING[k] = BAT_TRACH_MAPPING[1]
 
 def get_annual_shanshen(year):
-    # Tính toán Thần Sát lưu niên cơ bản dựa trên Chi năm
+    # Tính toán Thần Sát lưu niên cơ bản dựa trên Địa Chi năm
     return {
         "tai_sui": "Đông Bắc",
         "sui_po": "Tây Nam",
@@ -73,7 +150,7 @@ def render_matplotlib_lakinh(
     ax.set_ylim(0, 1.66)
     ax.axis('off')
     
-    mapping = BAT_TRACH_MAPPING[quai_num]
+    mapping = BAT_TRACH_MAPPING.get(quai_num, BAT_TRACH_MAPPING[1])
     shanshen = get_annual_shanshen(survey_yr)
     
     def get_text_rotation(angle_deg):
@@ -156,7 +233,7 @@ def render_matplotlib_lakinh(
 # ==========================================
 
 def main():
-    st.title("🧭 Master Bagua Engine (v29.0)")
+    st.title("🧭 Master Bagua Engine (v29.0 - Full Edition)")
     st.markdown("Hệ thống La Kinh số hóa chuyên sâu tích hợp cảm biến thực địa và tùy chọn hiển thị trực quan.")
 
     with st.sidebar:
@@ -188,21 +265,18 @@ def main():
         survey_yr=survey_year
     )
 
-    col1, col2 = st.column(2, gap="large") if hasattr(st, "column") else (st, st)
-    
-    with st.container():
-        st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, use_container_width=True)
         
-        # Nút xuất ảnh tải về 300 DPI
-        buf = io.BytesIO()
-        fig.savefig(buf, format="png", dpi=300, bbox_inches='tight', facecolor=fig.get_facecolor())
-        buf.seek(0)
-        st.download_button(
-            label="📥 Tải xuống Bản vẽ La Kinh chất lượng cao (PNG 300 DPI)",
-            data=buf,
-            file_name=f"LaKinh_v29_Do_{exact_deg}.png",
-            mime="image/png"
-        )
+    # Nút xuất ảnh tải về 300 DPI
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=300, bbox_inches='tight', facecolor=fig.get_facecolor())
+    buf.seek(0)
+    st.download_button(
+        label="📥 Tải xuống Bản vẽ La Kinh chất lượng cao (PNG 300 DPI)",
+        data=buf,
+        file_name=f"LaKinh_v29_Do_{exact_deg}.png",
+        mime="image/png"
+    )
 
 if __name__ == '__main__':
     main()
