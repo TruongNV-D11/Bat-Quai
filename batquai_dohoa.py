@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.3",
+    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.4",
     layout="wide"
 )
 
@@ -35,6 +35,10 @@ st.markdown("""
         border-radius: 4px;
         margin-bottom: 8px;
         font-size: 12.5px;
+    }
+    @media print {
+        body { background-color: #ffffff !important; color: #000000 !important; }
+        .stSidebar, button, header { display: none !important; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -449,7 +453,7 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        Bản Đồ Phong Thủy v28.3
+        Bản Đồ Phong Thủy v28.4
     </div>
     """, unsafe_allow_html=True)
 
@@ -474,7 +478,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             p_img = plan_img
         img_arr = np.array(p_img)
         
-        # 🌟 CẬP NHẬT: TÍNH TỶ LỆ EXTENT ĐÚNG THEO KÍCH THƯỚC THỰC TẾ CỦA ẢNH SAU KHI XOAY (CHỐNG MÉO HÌNH)
         img_h, img_w = img_arr.shape[:2]
         base_span = 1.8 * scale_f
         if img_w >= img_h:
@@ -728,16 +731,33 @@ if st.session_state.initialized:
             )
             st.pyplot(fig_mpl)
             
-            buf = io.BytesIO()
-            fig_mpl.savefig(buf, format="png", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none')
-            buf.seek(0)
-            st.download_button(
-                label=f"📥 Tải xuống Bản Đồ Phong Thủy - {client_name} (PNG 300 DPI)",
-                data=buf,
-                file_name=f"BanDoPhongThuy_{client_name.replace(' ', '_')}_{survey_year}.png",
-                mime="image/png",
-                use_container_width=True
-            )
+            # --- KHU VỰC TẢI XUỐNG & IN ẤN CHO TAB 1 ---
+            col_b1, col_b2, col_b3 = st.columns(3)
+            with col_b1:
+                buf_png = io.BytesIO()
+                fig_mpl.savefig(buf_png, format="png", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none')
+                buf_png.seek(0)
+                st.download_button(
+                    label=f"📥 Tải PNG (300 DPI)",
+                    data=buf_png,
+                    file_name=f"BanDoPhongThuy_{client_name.replace(' ', '_')}_{survey_year}.png",
+                    mime="image/png",
+                    use_container_width=True
+                )
+            with col_b2:
+                buf_jpg = io.BytesIO()
+                fig_mpl.savefig(buf_jpg, format="jpeg", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none', quality=95)
+                buf_jpg.seek(0)
+                st.download_button(
+                    label=f"📥 Tải JPEG (300 DPI)",
+                    data=buf_jpg,
+                    file_name=f"BanDoPhongThuy_{client_name.replace(' ', '_')}_{survey_year}.jpg",
+                    mime="image/jpeg",
+                    use_container_width=True
+                )
+            with col_b3:
+                if st.button("🖨️ In Hồ Sơ Trực Tiếp", use_container_width=True):
+                    components.html("<script>window.print();</script>", height=0)
             
         with tab2:
             st.markdown("### 🎛️ Căn chỉnh Tâm, Góc Xoay & Thu Phóng (Độ chính xác cao)")
@@ -765,27 +785,44 @@ if st.session_state.initialized:
                 
                 st.pyplot(fig_overlay)
                 
-                buf_overlay = io.BytesIO()
-                fig_overlay.savefig(buf_overlay, format="png", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none')
-                buf_overlay.seek(0)
-                st.download_button(
-                    label=f"📥 Tải xuống Bản Đồ Phong Thủy & Mặt Bằng - {client_name} (PNG 300 DPI)",
-                    data=buf_overlay,
-                    file_name=f"BanDoPhongThuy_MatBang_{client_name.replace(' ', '_')}_{survey_year}.png",
-                    mime="image/png",
-                    use_container_width=True
-                )
+                # --- KHU VỰC TẢI XUỐNG & IN ẤN CHO TAB 2 ---
+                col_o1, col_o2, col_o3 = st.columns(3)
+                with col_o1:
+                    buf_overlay_png = io.BytesIO()
+                    fig_overlay.savefig(buf_overlay_png, format="png", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none')
+                    buf_overlay_png.seek(0)
+                    st.download_button(
+                        label=f"📥 Tải PNG Mặt Bằng",
+                        data=buf_overlay_png,
+                        file_name=f"BanDoPhongThuy_MatBang_{client_name.replace(' ', '_')}_{survey_year}.png",
+                        mime="image/png",
+                        use_container_width=True
+                    )
+                with col_o2:
+                    buf_overlay_jpg = io.BytesIO()
+                    fig_overlay.savefig(buf_overlay_jpg, format="jpeg", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none', quality=95)
+                    buf_overlay_jpg.seek(0)
+                    st.download_button(
+                        label=f"📥 Tải JPEG Mặt Bằng",
+                        data=buf_overlay_jpg,
+                        file_name=f"BanDoPhongThuy_MatBang_{client_name.replace(' ', '_')}_{survey_year}.jpg",
+                        mime="image/jpeg",
+                        use_container_width=True
+                    )
+                with col_o3:
+                    if st.button("🖨️ In Bản Vẽ Trực Tiếp", key="print_overlay", use_container_width=True):
+                        components.html("<script>window.print();</script>", height=0)
             else:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng (sơ đồ sạch, không dính la bàn cũ) để kích hoạt các ô nhập liệu tinh chỉnh và xuất hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.3)")
+            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.4)")
             st.markdown("""
             **Bản Đồ Phong Thủy & Bố Trí Không Gian** *(Ứng dụng Tinh Bàn Huyền Không & Bát Trạch Không Gian)* là công cụ kỹ thuật số giúp quy chiếu trực quan các trường khí số lên bản vẽ mặt bằng kiến trúc thực tế:
             
             * **Xác định nhanh cung vị Cát / Hung:** Phân định rõ từng khu vực phòng khách, phòng ngủ, bếp, cửa chính dựa trên Cung Phi gia chủ (Bát Trạch) và Tinh Bàn Huyền Không (Sơn Tinh, Hướng Tinh, Vận Tinh).
             * **Theo dõi biến động thời gian:** Cập nhật trực tiếp sao Lưu Niên, Lưu Nguyệt và vị trí các Thần Sát (Thái Tuế, Tuế Phá, Ngũ Hoàng) theo từng năm khảo sát.
-            * **Căn chỉnh chính xác tuyệt đối:** Sử dụng các ô nhập liệu số trực tiếp kết hợp khóa tỷ lệ hình học động theo kích thước ảnh xoay, giúp xoay góc không bị méo hình để xuất file hồ sơ chất lượng cao (300 DPI).
+            * **Xuất hồ sơ & In ấn linh hoạt:** Hỗ trợ tải xuống tệp PNG/JPEG chất lượng cao (300 DPI) hoặc kết nối trực tiếp với máy in qua lệnh In Hồ Sơ của trình duyệt.
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Xuất Bản Đồ Phong Thủy' để khởi tạo hệ thống.")
