@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.2",
+    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.3",
     layout="wide"
 )
 
@@ -449,7 +449,7 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        Bản Đồ Phong Thủy v28.2
+        Bản Đồ Phong Thủy v28.3
     </div>
     """, unsafe_allow_html=True)
 
@@ -474,13 +474,22 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             p_img = plan_img
         img_arr = np.array(p_img)
         
-        span = 1.8 * scale_f
+        # 🌟 CẬP NHẬT: TÍNH TỶ LỆ EXTENT ĐÚNG THEO KÍCH THƯỚC THỰC TẾ CỦA ẢNH SAU KHI XOAY (CHỐNG MÉO HÌNH)
+        img_h, img_w = img_arr.shape[:2]
+        base_span = 1.8 * scale_f
+        if img_w >= img_h:
+            w_ext = base_span
+            h_ext = base_span * (img_h / img_w)
+        else:
+            h_ext = base_span
+            w_ext = base_span * (img_w / img_h)
+            
         dx = off_x / 250.0
         dy = off_y / 250.0
-        xmin = -span / 2.0 + dx
-        xmax = span / 2.0 + dx
-        ymin = -span / 2.0 + dy
-        ymax = span / 2.0 + dy
+        xmin = -w_ext / 2.0 + dx
+        xmax = w_ext / 2.0 + dx
+        ymin = -h_ext / 2.0 + dy
+        ymax = h_ext / 2.0 + dy
         
         ax_base.imshow(img_arr, extent=[xmin, xmax, ymin, ymax], alpha=1.0, zorder=1)
 
@@ -735,7 +744,6 @@ if st.session_state.initialized:
             uploaded_plan = st.file_uploader("Chọn ảnh mặt bằng nhà (PNG/JPG)", type=["png", "jpg", "jpeg"])
             
             if uploaded_plan is not None:
-                # 🌟 KẾT HỢP THANH KÉO VÀ Ô NHẬP LIỆU (NUMBER INPUT) ĐỂ GÕ CHÍNH XÁC TUYỆT ĐỐI
                 col_s1, col_s2, col_s3 = st.columns(3)
                 with col_s1:
                     opacity_val = st.number_input("Độ trong suốt La Kinh", 0.05, 1.0, 0.45, 0.05, format="%.2f")
@@ -771,13 +779,13 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng (sơ đồ sạch, không dính la bàn cũ) để kích hoạt các ô nhập liệu tinh chỉnh và xuất hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.2)")
+            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.3)")
             st.markdown("""
             **Bản Đồ Phong Thủy & Bố Trí Không Gian** *(Ứng dụng Tinh Bàn Huyền Không & Bát Trạch Không Gian)* là công cụ kỹ thuật số giúp quy chiếu trực quan các trường khí số lên bản vẽ mặt bằng kiến trúc thực tế:
             
             * **Xác định nhanh cung vị Cát / Hung:** Phân định rõ từng khu vực phòng khách, phòng ngủ, bếp, cửa chính dựa trên Cung Phi gia chủ (Bát Trạch) và Tinh Bàn Huyền Không (Sơn Tinh, Hướng Tinh, Vận Tinh).
             * **Theo dõi biến động thời gian:** Cập nhật trực tiếp sao Lưu Niên, Lưu Nguyệt và vị trí các Thần Sát (Thái Tuế, Tuế Phá, Ngũ Hoàng) theo từng năm khảo sát.
-            * **Căn chỉnh chính xác tuyệt đối:** Sử dụng các ô nhập liệu số trực tiếp kết hợp khóa tỷ lệ hình học 1:1, giúp xoay, thu phóng và định tâm ngôi nhà không bị méo hình để xuất file hồ sơ chất lượng cao (300 DPI).
+            * **Căn chỉnh chính xác tuyệt đối:** Sử dụng các ô nhập liệu số trực tiếp kết hợp khóa tỷ lệ hình học động theo kích thước ảnh xoay, giúp xoay góc không bị méo hình để xuất file hồ sơ chất lượng cao (300 DPI).
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Xuất Bản Đồ Phong Thủy' để khởi tạo hệ thống.")
