@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Professional Feng Shui Master Bagua Engine v28.0",
+    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.1",
     layout="wide"
 )
 
@@ -39,8 +39,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("☸️ PROFESSIONAL FENG SUI MASTER BAGUA ENGINE v28.0")
-st.markdown("Hệ thống lập bản đồ Khí số chuẩn Thầy Phong thủy: Tam Nguyên Cửu Vận, Tinh Bàn Huyền Không, Thần Sát Hàng Năm, Áp Mặt Bằng & Quản Lý Hồ Sơ Cục Bộ.")
+st.title("☸️ BẢN ĐỒ PHONG THỦY & BỐ TRÍ KHÔNG GIAN")
+st.markdown("*(Ứng dụng Tinh Bàn Huyền Không & Bát Trạch Không Gian — Tích hợp Tam Nguyên Cửu Vận, Thần Sát Hàng Năm & Áp Mặt Bằng Thực Tế)*")
 
 CAN = ["Giáp", "Ất", "Bính", "Đinh", "Mậu", "Kỷ", "Canh", "Tân", "Nhâm", "Quý"]
 CHI = ["Tý", "Sửu", "Dần", "Mão", "Thìn", "Tỵ", "Ngọ", "Mùi", "Thân", "Dậu", "Tuất", "Hợi"]
@@ -379,7 +379,7 @@ if "saved_profiles" not in st.session_state:
     st.session_state.saved_profiles = []
 
 with st.sidebar:
-    st.header("🛠️ THAM SỐ LẬP QUẺ (MASTER)")
+    st.header("🛠️ THAM SỐ LẬP BẢN ĐỒ")
     
     client_name = st.text_input("Tên Khách hàng / Dự án", value="Nguyễn Văn A")
     
@@ -410,15 +410,15 @@ with st.sidebar:
         min_value=0.0, max_value=360.0,
         value=DIRECTION_ANGLES[quick_dir], step=0.5, format="%.1f"
     )
-    show_laser = st.checkbox("Hiển thị Tia Laser Tọa / Hướng trên La Kinh", value=True)
+    show_laser = st.checkbox("Hiển thị Tia Laser Tọa / Hướng trên Bản đồ", value=True)
     
-    run_btn = st.button("🔮 Lập Bản Đồ La Kinh Chuyên Sâu", type="primary", use_container_width=True)
+    run_btn = st.button("🔮 Xuất Bản Đồ Phong Thủy", type="primary", use_container_width=True)
     if run_btn:
         st.session_state.initialized = True
         st.session_state.play_spin = True
         
     st.markdown("---")
-    st.subheader("🗂️ Quản lý Hồ sơ Quẻ")
+    st.subheader("🗂️ Quản lý Hồ sơ Khách hàng")
     if st.button("💾 Lưu hồ sơ hiện tại vào danh sách", use_container_width=True):
         if st.session_state.initialized:
             can_p, chi_p, eff_y, q_num, g_name = compute_master_cung_phi(d_input, t_input, enable_time, gender)
@@ -445,11 +445,11 @@ with st.sidebar:
 
     st.markdown("""
     <div class="signature-box">
-        <b>DIGITAL SIGNATURE</b><br>
+        <b>BẢN QUYỀN KỸ THUẬT</b><br>
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        System: Master Bagua Engine v28.0
+        Bản Đồ Phong Thủy v28.1
     </div>
     """, unsafe_allow_html=True)
 
@@ -458,8 +458,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     fig = plt.figure(figsize=(10.5, 12.5))
     fig.patch.set_facecolor('#0b0f19')
     
-    # 🌟 MỘT TRỤC DUY NHẤT ĐỒNG TÂM TUYỆT ĐỐI (DESCARTES KẾT HỢP POLAR OVERLAY)
-    # Dùng hệ trục Descartes [0, 1] cho toàn bộ khung vẽ để dễ dàng đặt ảnh nền mặt bằng căn chỉnh chính xác 100% tại tâm
+    # Lớp nền Descartes cho ảnh mặt bằng nhà (đồng tâm tuyệt đối tại (0,0))
     ax_base = fig.add_axes([0.04, 0.17, 0.92, 0.81])
     ax_base.set_facecolor('#0b0f19')
     ax_base.set_xlim(-1.0, 1.0)
@@ -474,7 +473,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
             p_img = plan_img
         img_arr = np.array(p_img)
         
-        # Tính toán tọa độ hiển thị ảnh nền đúng ngay tâm (0,0) với offset X, Y và Zoom mượt mà
         span = 1.8 * scale_f
         dx = off_x / 250.0
         dy = off_y / 250.0
@@ -485,7 +483,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         
         ax_base.imshow(img_arr, extent=[xmin, xmax, ymin, ymax], alpha=1.0, zorder=1)
 
-    # Đặt trục cực (polar=True) đè khít hoàn hảo lên trên trục nền với cùng tỷ lệ khung
+    # Lớp Polar La Kinh đè khít lên trên trục nền
     ax = fig.add_axes([0.04, 0.17, 0.92, 0.81], polar=True)
     ax.set_facecolor('none')
     ax.set_theta_zero_location('N')
@@ -600,7 +598,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
            color='#090d16', alpha=1.0, edgecolor='#fde047', linewidth=1.3, zorder=32)
     ax.plot(0, 0, marker='o', markersize=6, color='#fde047', markeredgecolor='#0b0f19', zorder=36)
     
-    ax.text(0, 0, f"🧭 THIÊN TRÌ\nVận {van_num} | {gender_str}\n({eff_year})", color='#fde047', fontsize=7.0, fontweight='bold',
+    ax.text(0, 0, f"🧭 TÂM NHÀ\nVận {van_num} | {gender_str}\n({eff_year})", color='#fde047', fontsize=7.0, fontweight='bold',
             ha='center', va='center', zorder=35,
             bbox=dict(boxstyle='round,pad=0.25', facecolor='#0d1117', edgecolor='#fde047', lw=1.2))
             
@@ -620,8 +618,8 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
                                         facecolor='#161b22', edgecolor='#58a6ff', linewidth=1.2)
     ax_leg.add_patch(outer_box)
     
-    line1 = f"DỰ ÁN: {client_name}   |   NIÊN HẠN {survey_yr} ({shanshen['year_chi']})   —   🚩 Thái Tuế: {shanshen['tai_sui']}   |   ⚡ Tuế Phá: {shanshen['sui_po']}   |   ⚠️ Ngũ Hoàng: {shanshen['ngu_hoang']}"
-    ax_leg.text(0.5, 0.78, line1, ha='center', va='center', fontsize=8.5, fontweight='bold', color='#f0f6fc')
+    line1 = f"BẢN ĐỒ PHONG THỦY: {client_name}   |   NĂM {survey_yr} ({shanshen['year_chi']})   —   🚩 Thái Tuế: {shanshen['tai_sui']}   |   ⚡ Tuế Phá: {shanshen['sui_po']}   |   ⚠️ Ngũ Hoàng: {shanshen['ngu_hoang']}"
+    ax_leg.text(0.5, 0.78, line1, ha='center', va='center', fontsize=8.3, fontweight='bold', color='#f0f6fc')
     
     line2 = "• Vòng 1: S (Sơn Tinh) | H (Hướng Tinh) | [V] (Vận Tinh)      • Vòng 2: N (Lưu Niên) | T (Lưu Nguyệt)"
     ax_leg.text(0.5, 0.52, line2, ha='center', va='center', fontsize=8.1, color='#c9d1d9')
@@ -660,7 +658,7 @@ if st.session_state.initialized:
         spin_html = f"""
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; background-color: #0b0f19; color: #f0f6fc; font-family: sans-serif;">
             <div style="font-size: 60px; animation: spinCompass 2s infinite linear; margin-bottom: 20px;">☸️</div>
-            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang khởi tạo Master Engine v28.0 cho khách hàng: {client_name}...</div>
+            <div style="font-size: 18px; font-weight: bold; color: #58a6ff;">Đang thiết lập Bản Đồ Phong Thủy & Bố Trí Không Gian cho: {client_name}...</div>
         </div>
         <style>
         @keyframes spinCompass {{
@@ -680,7 +678,7 @@ if st.session_state.initialized:
     col_left, col_right = st.columns([0.95, 2.05])
     
     with col_left:
-        st.subheader(f"📋 Khí số: {client_name}")
+        st.subheader(f"📋 Thông số: {client_name}")
         c1, c2 = st.columns(2)
         c1.metric("Niên Mệnh", f"{can} {chi} ({eff_year})")
         c2.metric("Nhóm Mệnh", group_name)
@@ -711,7 +709,7 @@ if st.session_state.initialized:
                 """, unsafe_allow_html=True)
 
     with col_right:
-        tab1, tab2, tab3 = st.tabs(["🧭 La Kinh Chuyên Sâu", "🏠 Áp Mặt Bằng Nhà", "📖 Hướng dẫn & Giới thiệu"])
+        tab1, tab2, tab3 = st.tabs(["🧭 La Bàn Phong Thủy", "🏠 Áp Mặt Bằng Nhà", "📖 Hướng dẫn & Giới thiệu"])
         
         with tab1:
             fig_mpl = render_matplotlib_lakinh(
@@ -724,9 +722,9 @@ if st.session_state.initialized:
             fig_mpl.savefig(buf, format="png", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none')
             buf.seek(0)
             st.download_button(
-                label=f"📥 Tải xuống Bản vẽ La Kinh - {client_name} (PNG 300 DPI)",
+                label=f"📥 Tải xuống Bản Đồ Phong Thủy - {client_name} (PNG 300 DPI)",
                 data=buf,
-                file_name=f"LaKinh_{client_name.replace(' ', '_')}_{survey_year}.png",
+                file_name=f"BanDoPhongThuy_{client_name.replace(' ', '_')}_{survey_year}.png",
                 mime="image/png",
                 use_container_width=True
             )
@@ -748,7 +746,6 @@ if st.session_state.initialized:
                     
                 plan_img = Image.open(uploaded_plan)
                 
-                # Render đồng tâm tuyệt đối trong một hệ quy chiếu chung duy nhất
                 fig_overlay = render_matplotlib_lakinh(
                     quai_num, exact_deg, show_laser, gender, eff_year,
                     current_van, xk_chart, annual_chart, monthly_chart, survey_year,
@@ -762,21 +759,23 @@ if st.session_state.initialized:
                 fig_overlay.savefig(buf_overlay, format="png", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none')
                 buf_overlay.seek(0)
                 st.download_button(
-                    label=f"📥 Tải xuống Mặt bằng áp La Kinh - {client_name} (PNG 300 DPI)",
+                    label=f"📥 Tải xuống Bản Đồ Phong Thủy & Mặt Bằng - {client_name} (PNG 300 DPI)",
                     data=buf_overlay,
-                    file_name=f"MatBang_LaKinh_{client_name.replace(' ', '_')}_{survey_year}.png",
+                    file_name=f"BanDoPhongThuy_MatBang_{client_name.replace(' ', '_')}_{survey_year}.png",
                     mime="image/png",
                     use_container_width=True
                 )
             else:
-                st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng để kích hoạt các thanh trượt căn chỉnh, thu phóng và tải hồ sơ.")
+                st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng (sơ đồ sạch, không dính la bàn cũ) để căn chỉnh, thu phóng và xuất hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Hệ thống La Kinh Kỹ Thuật Số (Master Grade v28.0)")
+            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.1)")
             st.markdown("""
-            Trong phong thủy thực trạch, La Kinh là **bản đồ năng lượng không gian đa chiều**, là công cụ cốt lõi của các chuyên gia và thầy phong thủy. 
+            **Bản Đồ Phong Thủy & Bố Trí Không Gian** *(Ứng dụng Tinh Bàn Huyền Không & Bát Trạch Không Gian)* là công cụ kỹ thuật số giúp quy chiếu trực quan các trường khí số lên bản vẽ mặt bằng kiến trúc thực tế:
             
-            Ứng dụng **Professional Feng Shui Master Bagua Engine v28.0** đã hợp nhất tuyệt đối tâm hiển thị của ảnh mặt bằng nền và vòng tròn La Kinh trên cùng một hệ quy chiếu, giải quyết triệt để 100% hiện tượng lệch tâm hoặc nhân đôi bóng.
+            * **Xác định nhanh cung vị Cát / Hung:** Phân định rõ từng khu vực phòng khách, phòng ngủ, bếp, cửa chính dựa trên Cung Phi gia chủ (Bát Trạch) và Tinh Bàn Huyền Không (Sơn Tinh, Hướng Tinh, Vận Tinh).
+            * **Theo dõi biến động thời gian:** Cập nhật trực tiếp sao Lưu Niên, Lưu Nguyệt và vị trí các Thần Sát (Thái Tuế, Tuế Phá, Ngũ Hoàng) theo từng năm khảo sát.
+            * **Căn chỉnh trực quan trên bản vẽ:** Tách biệt lớp mặt bằng và lớp La Kinh giúp dễ dàng xoay góc, thu phóng, định tâm ngôi nhà để xuất file hồ sơ chất lượng cao (300 DPI).
             """)
 else:
-    st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Lập Bản Đồ La Kinh Chuyên Sâu' để khởi tạo hệ thống.")
+    st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Xuất Bản Đồ Phong Thủy' để khởi tạo hệ thống.")
