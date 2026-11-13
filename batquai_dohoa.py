@@ -448,7 +448,7 @@ with st.sidebar:
         <b>BẢN QUYỀN KỸ THUẬT</b><br>
         Engineer: TrườngNV<br>
         Email: truongnv.d11@gmail.com<br>
-        Hotline: 09198559xx<br>
+        Hotline: 0919855966<br>
         Bản Đồ Phong Thủy v1.0
     </div>
     """, unsafe_allow_html=True)
@@ -614,7 +614,7 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     ax.grid(False)
     ax.spines['polar'].set_color('#8b949e')
     
-    # --- KHUNG CHÚ GIẢI PHÍA DƯỚI ---
+    # --- KHUNG CHÚ GIẢI PHÍA DƯỚI (Đã dịch chuyển và thu hẹp các ô màu để tránh che chữ MÀU NỀN) ---
     ax_leg = fig.add_axes([0.04, 0.015, 0.92, 0.13])
     ax_leg.set_xlim(0, 1)
     ax_leg.set_ylim(0, 1)
@@ -631,25 +631,26 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     line2 = "• Vòng 1: S (Sơn Tinh) | H (Hướng Tinh) | [V] (Vận Tinh)      • Vòng 2: N (Lưu Niên) | T (Lưu Nguyệt)"
     ax_leg.text(0.5, 0.52, line2, ha='center', va='center', fontsize=8.1, color='#c9d1d9')
     
+    # Thu hẹp chiều rộng (w) và dịch sang phải để nhường khoảng trống cho chữ MÀU NỀN
     badges = [
-        {"text": "9 Tử - Đại Cát (Hồng/Tím)", "bg": STAR_META[9]["bg"], "fg": STAR_META[9]["fg"], "x": 0.135, "w": 0.22},
-        {"text": "1 Bạch - Cát (Xanh dương)", "bg": STAR_META[1]["bg"], "fg": STAR_META[1]["fg"], "x": 0.370, "w": 0.22},
-        {"text": "8 Bạch - Tài (Vàng nâu)",   "bg": STAR_META[8]["bg"], "fg": STAR_META[8]["fg"], "x": 0.605, "w": 0.21},
-        {"text": "2H, 3B, 5H - Hung (Đỏ)",    "bg": STAR_META[2]["bg"], "fg": STAR_META[2]["fg"], "x": 0.835, "w": 0.22},
+        {"text": "9 Tử - Đại Cát (Hồng/Tím)", "bg": STAR_META[9]["bg"], "fg": STAR_META[9]["fg"], "x": 0.225, "w": 0.17},
+        {"text": "1 Bạch - Cát (Xanh dương)", "bg": STAR_META[1]["bg"], "fg": STAR_META[1]["fg"], "x": 0.405, "w": 0.17},
+        {"text": "8 Bạch - Tài (Vàng nâu)",   "bg": STAR_META[8]["bg"], "fg": STAR_META[8]["fg"], "x": 0.585, "w": 0.17},
+        {"text": "2H, 3B, 5H - Hung (Đỏ)",    "bg": STAR_META[2]["bg"], "fg": STAR_META[2]["fg"], "x": 0.765, "w": 0.17},
     ]
     
-    ax_leg.text(0.018, 0.23, "MÀU NỀN:", ha='left', va='center', fontsize=8.0, fontweight='bold', color='#8b949e')
+    ax_leg.text(0.022, 0.23, "MÀU NỀN:", ha='left', va='center', fontsize=8.0, fontweight='bold', color='#8b949e')
     
     for b in badges:
-        bx = b["x"] - b["w"] / 2 + 0.045
+        bx = b["x"] - b["w"] / 2
         by = 0.09
         bh = 0.28
-        pill = mpatches.FancyBboxPatch((bx, by), b["w"] - 0.005, bh,
+        pill = mpatches.FancyBboxPatch((bx, by), b["w"], bh,
                                        boxstyle="round,pad=0.005,rounding_size=0.03",
                                        facecolor=b["bg"], edgecolor='#cbd5e1', linewidth=0.7)
         ax_leg.add_patch(pill)
-        ax_leg.text(bx + (b["w"] - 0.005)/2, by + bh/2, b["text"],
-                    ha='center', va='center', fontsize=7.5, fontweight='bold', color=b["fg"])
+        ax_leg.text(bx + b["w"]/2, by + bh/2, b["text"],
+                    ha='center', va='center', fontsize=7.2, fontweight='bold', color=b["fg"])
                     
     return fig
 
@@ -725,7 +726,6 @@ if st.session_state.initialized:
             )
             st.pyplot(fig_mpl)
             
-            # --- 2 NÚT TẢI XUỐNG (PNG & JPEG) ---
             col_b1, col_b2 = st.columns(2)
             with col_b1:
                 buf_png = io.BytesIO()
@@ -776,7 +776,6 @@ if st.session_state.initialized:
                 
                 st.pyplot(fig_overlay)
                 
-                # --- 2 NÚT TẢI XUỐNG MẶT BẰNG (PNG & JPEG) ---
                 col_o1, col_o2 = st.columns(2)
                 with col_o1:
                     buf_overlay_png = io.BytesIO()
@@ -804,7 +803,7 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng (sơ đồ sạch, không dính la bàn cũ) để kích hoạt các ô nhập liệu tinh chỉnh và xuất hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.6)")
+            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (Ver 1.0)")
             st.markdown("""
             **Bản Đồ Phong Thủy & Bố Trí Không Gian** *(Ứng dụng Tinh Bàn Huyền Không & Bát Trạch Không Gian)* là công cụ kỹ thuật số giúp quy chiếu trực quan các trường khí số lên bản vẽ mặt bằng kiến trúc thực tế:
             
