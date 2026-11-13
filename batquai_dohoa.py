@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.6",
+    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v1.0",
     layout="wide"
 )
 
@@ -446,10 +446,10 @@ with st.sidebar:
     st.markdown("""
     <div class="signature-box">
         <b>BẢN QUYỀN KỸ THUẬT</b><br>
-        Engineer: TruongfNV<br>
+        Engineer: TrườngNV<br>
         Email: truongnv.d11@gmail.com<br>
-        Hotline: 0919855966<br>
-        Bản Đồ Phong Thủy v28.6
+        Hotline: 09198559xx<br>
+        Bản Đồ Phong Thủy v1.0
     </div>
     """, unsafe_allow_html=True)
 
