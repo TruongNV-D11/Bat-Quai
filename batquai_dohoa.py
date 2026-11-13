@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.5",
+    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.6",
     layout="wide"
 )
 
@@ -35,10 +35,6 @@ st.markdown("""
         border-radius: 4px;
         margin-bottom: 8px;
         font-size: 12.5px;
-    }
-    @media print {
-        body { background-color: #ffffff !important; color: #000000 !important; }
-        .stSidebar, button, header { display: none !important; }
     }
     </style>
 """, unsafe_allow_html=True)
@@ -453,7 +449,7 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        Bản Đồ Phong Thủy v28.5
+        Bản Đồ Phong Thủy v28.6
     </div>
     """, unsafe_allow_html=True)
 
@@ -729,13 +725,14 @@ if st.session_state.initialized:
             )
             st.pyplot(fig_mpl)
             
-            col_b1, col_b2, col_b3 = st.columns(3)
+            # --- 2 NÚT TẢI XUỐNG (PNG & JPEG) ---
+            col_b1, col_b2 = st.columns(2)
             with col_b1:
                 buf_png = io.BytesIO()
                 fig_mpl.savefig(buf_png, format="png", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none')
                 buf_png.seek(0)
                 st.download_button(
-                    label=f"📥 Tải PNG (300 DPI)",
+                    label=f"📥 Tải xuống PNG (300 DPI)",
                     data=buf_png,
                     file_name=f"BanDoPhongThuy_{client_name.replace(' ', '_')}_{survey_year}.png",
                     mime="image/png",
@@ -743,19 +740,15 @@ if st.session_state.initialized:
                 )
             with col_b2:
                 buf_jpg = io.BytesIO()
-                # 🌟 SỬA LỖI: Truyền quality vào pil_kwargs thay vì trực tiếp trong savefig
                 fig_mpl.savefig(buf_jpg, format="jpeg", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none', pil_kwargs={'quality': 95})
                 buf_jpg.seek(0)
                 st.download_button(
-                    label=f"📥 Tải JPEG (300 DPI)",
+                    label=f"📥 Tải xuống JPEG (300 DPI)",
                     data=buf_jpg,
                     file_name=f"BanDoPhongThuy_{client_name.replace(' ', '_')}_{survey_year}.jpg",
                     mime="image/jpeg",
                     use_container_width=True
                 )
-            with col_b3:
-                if st.button("🖨️ In Hồ Sơ Trực Tiếp", use_container_width=True):
-                    components.html("<script>window.print();</script>", height=0)
             
         with tab2:
             st.markdown("### 🎛️ Căn chỉnh Tâm, Góc Xoay & Thu Phóng (Độ chính xác cao)")
@@ -783,7 +776,8 @@ if st.session_state.initialized:
                 
                 st.pyplot(fig_overlay)
                 
-                col_o1, col_o2, col_o3 = st.columns(3)
+                # --- 2 NÚT TẢI XUỐNG MẶT BẰNG (PNG & JPEG) ---
+                col_o1, col_o2 = st.columns(2)
                 with col_o1:
                     buf_overlay_png = io.BytesIO()
                     fig_overlay.savefig(buf_overlay_png, format="png", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none')
@@ -797,7 +791,6 @@ if st.session_state.initialized:
                     )
                 with col_o2:
                     buf_overlay_jpg = io.BytesIO()
-                    # 🌟 SỬA LỖI: Truyền quality vào pil_kwargs thay vì trực tiếp trong savefig
                     fig_overlay.savefig(buf_overlay_jpg, format="jpeg", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none', pil_kwargs={'quality': 95})
                     buf_overlay_jpg.seek(0)
                     st.download_button(
@@ -807,20 +800,17 @@ if st.session_state.initialized:
                         mime="image/jpeg",
                         use_container_width=True
                     )
-                with col_o3:
-                    if st.button("🖨️ In Bản Vẽ Trực Tiếp", key="print_overlay", use_container_width=True):
-                        components.html("<script>window.print();</script>", height=0)
             else:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng (sơ đồ sạch, không dính la bàn cũ) để kích hoạt các ô nhập liệu tinh chỉnh và xuất hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.5)")
+            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.6)")
             st.markdown("""
             **Bản Đồ Phong Thủy & Bố Trí Không Gian** *(Ứng dụng Tinh Bàn Huyền Không & Bát Trạch Không Gian)* là công cụ kỹ thuật số giúp quy chiếu trực quan các trường khí số lên bản vẽ mặt bằng kiến trúc thực tế:
             
             * **Xác định nhanh cung vị Cát / Hung:** Phân định rõ từng khu vực phòng khách, phòng ngủ, bếp, cửa chính dựa trên Cung Phi gia chủ (Bát Trạch) và Tinh Bàn Huyền Không (Sơn Tinh, Hướng Tinh, Vận Tinh).
             * **Theo dõi biến động thời gian:** Cập nhật trực tiếp sao Lưu Niên, Lưu Nguyệt và vị trí các Thần Sát (Thái Tuế, Tuế Phá, Ngũ Hoàng) theo từng năm khảo sát.
-            * **Xuất hồ sơ & In ấn linh hoạt:** Hỗ trợ tải xuống tệp PNG/JPEG chất lượng cao (300 DPI) hoặc kết nối trực tiếp với máy in qua lệnh In Hồ Sơ của trình duyệt.
+            * **Xuất hồ sơ chất lượng cao:** Hỗ trợ tải xuống tệp PNG/JPEG định dạng chuyên nghiệp (300 DPI) để lưu trữ và in ấn dễ dàng trên mọi thiết bị.
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Xuất Bản Đồ Phong Thủy' để khởi tạo hệ thống.")
