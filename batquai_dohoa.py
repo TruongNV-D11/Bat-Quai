@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.1",
+    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.2",
     layout="wide"
 )
 
@@ -449,7 +449,7 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        Bản Đồ Phong Thủy v28.1
+        Bản Đồ Phong Thủy v28.2
     </div>
     """, unsafe_allow_html=True)
 
@@ -458,11 +458,12 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     fig = plt.figure(figsize=(10.5, 12.5))
     fig.patch.set_facecolor('#0b0f19')
     
-    # Lớp nền Descartes cho ảnh mặt bằng nhà (đồng tâm tuyệt đối tại (0,0))
+    # Lớp nền Descartes cho ảnh mặt bằng nhà (Khóa chặt tỷ lệ 1:1 chống méo hình tuyệt đối)
     ax_base = fig.add_axes([0.04, 0.17, 0.92, 0.81])
     ax_base.set_facecolor('#0b0f19')
     ax_base.set_xlim(-1.0, 1.0)
     ax_base.set_ylim(-1.0, 1.0)
+    ax_base.set_aspect('equal')
     ax_base.axis('off')
     
     if plan_img is not None:
@@ -730,19 +731,20 @@ if st.session_state.initialized:
             )
             
         with tab2:
-            st.markdown("### 🎛️ Căn chỉnh Tâm, Góc Xoay & Thu Phóng Bản vẽ Mặt bằng")
+            st.markdown("### 🎛️ Căn chỉnh Tâm, Góc Xoay & Thu Phóng (Độ chính xác cao)")
             uploaded_plan = st.file_uploader("Chọn ảnh mặt bằng nhà (PNG/JPG)", type=["png", "jpg", "jpeg"])
             
             if uploaded_plan is not None:
+                # 🌟 KẾT HỢP THANH KÉO VÀ Ô NHẬP LIỆU (NUMBER INPUT) ĐỂ GÕ CHÍNH XÁC TUYỆT ĐỐI
                 col_s1, col_s2, col_s3 = st.columns(3)
                 with col_s1:
-                    opacity_val = st.slider("Độ trong suốt La Kinh", 0.15, 0.90, 0.45, 0.05)
-                    rotate_plan = st.slider("Góc xoay mặt bằng (°)", -180, 180, 0, 1)
+                    opacity_val = st.number_input("Độ trong suốt La Kinh", 0.05, 1.0, 0.45, 0.05, format="%.2f")
+                    rotate_plan = st.number_input("Góc xoay mặt bằng (°)", -180.0, 180.0, 0.0, 0.5, format="%.1f")
                 with col_s2:
-                    offset_x = st.slider("Dịch ngang (X)", -200, 200, 0, 5)
-                    offset_y = st.slider("Dịch dọc (Y)", -200, 200, 0, 5)
+                    offset_x = st.number_input("Dịch ngang (X)", -500, 500, 0, 1)
+                    offset_y = st.number_input("Dịch dọc (Y)", -500, 500, 0, 1)
                 with col_s3:
-                    zoom_scale = st.slider("Thu phóng bản vẽ (Zoom %)", 40, 200, 100, 5)
+                    zoom_scale = st.number_input("Thu phóng (Zoom %)", 10, 500, 100, 1)
                     
                 plan_img = Image.open(uploaded_plan)
                 
@@ -766,16 +768,16 @@ if st.session_state.initialized:
                     use_container_width=True
                 )
             else:
-                st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng (sơ đồ sạch, không dính la bàn cũ) để căn chỉnh, thu phóng và xuất hồ sơ.")
+                st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng (sơ đồ sạch, không dính la bàn cũ) để kích hoạt các ô nhập liệu tinh chỉnh và xuất hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.1)")
+            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.2)")
             st.markdown("""
             **Bản Đồ Phong Thủy & Bố Trí Không Gian** *(Ứng dụng Tinh Bàn Huyền Không & Bát Trạch Không Gian)* là công cụ kỹ thuật số giúp quy chiếu trực quan các trường khí số lên bản vẽ mặt bằng kiến trúc thực tế:
             
             * **Xác định nhanh cung vị Cát / Hung:** Phân định rõ từng khu vực phòng khách, phòng ngủ, bếp, cửa chính dựa trên Cung Phi gia chủ (Bát Trạch) và Tinh Bàn Huyền Không (Sơn Tinh, Hướng Tinh, Vận Tinh).
             * **Theo dõi biến động thời gian:** Cập nhật trực tiếp sao Lưu Niên, Lưu Nguyệt và vị trí các Thần Sát (Thái Tuế, Tuế Phá, Ngũ Hoàng) theo từng năm khảo sát.
-            * **Căn chỉnh trực quan trên bản vẽ:** Tách biệt lớp mặt bằng và lớp La Kinh giúp dễ dàng xoay góc, thu phóng, định tâm ngôi nhà để xuất file hồ sơ chất lượng cao (300 DPI).
+            * **Căn chỉnh chính xác tuyệt đối:** Sử dụng các ô nhập liệu số trực tiếp kết hợp khóa tỷ lệ hình học 1:1, giúp xoay, thu phóng và định tâm ngôi nhà không bị méo hình để xuất file hồ sơ chất lượng cao (300 DPI).
             """)
 else:
     st.info("👈 Vui lòng nhập thông tin khách hàng và thông số ở thanh bên trái, sau đó bấm nút '🔮 Xuất Bản Đồ Phong Thủy' để khởi tạo hệ thống.")
