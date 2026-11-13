@@ -11,7 +11,7 @@ from datetime import datetime, time as dt_time
 from PIL import Image
 
 st.set_page_config(
-    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.4",
+    page_title="Bản Đồ Phong Thủy & Bố Trí Không Gian v28.5",
     layout="wide"
 )
 
@@ -453,7 +453,7 @@ with st.sidebar:
         Engineer: TruongfNV<br>
         Email: truongnv.d11@gmail.com<br>
         Hotline: 0919855966<br>
-        Bản Đồ Phong Thủy v28.4
+        Bản Đồ Phong Thủy v28.5
     </div>
     """, unsafe_allow_html=True)
 
@@ -462,7 +462,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
     fig = plt.figure(figsize=(10.5, 12.5))
     fig.patch.set_facecolor('#0b0f19')
     
-    # Lớp nền Descartes cho ảnh mặt bằng nhà (Khóa chặt tỷ lệ 1:1 chống méo hình tuyệt đối)
     ax_base = fig.add_axes([0.04, 0.17, 0.92, 0.81])
     ax_base.set_facecolor('#0b0f19')
     ax_base.set_xlim(-1.0, 1.0)
@@ -496,7 +495,6 @@ def render_matplotlib_lakinh(quai_num, exact_deg_val, show_laser_flag, gender_st
         
         ax_base.imshow(img_arr, extent=[xmin, xmax, ymin, ymax], alpha=1.0, zorder=1)
 
-    # Lớp Polar La Kinh đè khít lên trên trục nền
     ax = fig.add_axes([0.04, 0.17, 0.92, 0.81], polar=True)
     ax.set_facecolor('none')
     ax.set_theta_zero_location('N')
@@ -731,7 +729,6 @@ if st.session_state.initialized:
             )
             st.pyplot(fig_mpl)
             
-            # --- KHU VỰC TẢI XUỐNG & IN ẤN CHO TAB 1 ---
             col_b1, col_b2, col_b3 = st.columns(3)
             with col_b1:
                 buf_png = io.BytesIO()
@@ -746,7 +743,8 @@ if st.session_state.initialized:
                 )
             with col_b2:
                 buf_jpg = io.BytesIO()
-                fig_mpl.savefig(buf_jpg, format="jpeg", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none', quality=95)
+                # 🌟 SỬA LỖI: Truyền quality vào pil_kwargs thay vì trực tiếp trong savefig
+                fig_mpl.savefig(buf_jpg, format="jpeg", dpi=300, bbox_inches='tight', facecolor=fig_mpl.get_facecolor(), edgecolor='none', pil_kwargs={'quality': 95})
                 buf_jpg.seek(0)
                 st.download_button(
                     label=f"📥 Tải JPEG (300 DPI)",
@@ -785,7 +783,6 @@ if st.session_state.initialized:
                 
                 st.pyplot(fig_overlay)
                 
-                # --- KHU VỰC TẢI XUỐNG & IN ẤN CHO TAB 2 ---
                 col_o1, col_o2, col_o3 = st.columns(3)
                 with col_o1:
                     buf_overlay_png = io.BytesIO()
@@ -800,7 +797,8 @@ if st.session_state.initialized:
                     )
                 with col_o2:
                     buf_overlay_jpg = io.BytesIO()
-                    fig_overlay.savefig(buf_overlay_jpg, format="jpeg", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none', quality=95)
+                    # 🌟 SỬA LỖI: Truyền quality vào pil_kwargs thay vì trực tiếp trong savefig
+                    fig_overlay.savefig(buf_overlay_jpg, format="jpeg", dpi=300, bbox_inches='tight', facecolor=fig_overlay.get_facecolor(), edgecolor='none', pil_kwargs={'quality': 95})
                     buf_overlay_jpg.seek(0)
                     st.download_button(
                         label=f"📥 Tải JPEG Mặt Bằng",
@@ -816,7 +814,7 @@ if st.session_state.initialized:
                 st.info("⬆️ Vui lòng tải lên tệp hình ảnh bản vẽ mặt bằng (sơ đồ sạch, không dính la bàn cũ) để kích hoạt các ô nhập liệu tinh chỉnh và xuất hồ sơ.")
 
         with tab3:
-            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.4)")
+            st.markdown("### ☸️ Giới thiệu Về Bản Đồ Phong Thủy & Bố Trí Không Gian (v28.5)")
             st.markdown("""
             **Bản Đồ Phong Thủy & Bố Trí Không Gian** *(Ứng dụng Tinh Bàn Huyền Không & Bát Trạch Không Gian)* là công cụ kỹ thuật số giúp quy chiếu trực quan các trường khí số lên bản vẽ mặt bằng kiến trúc thực tế:
             
